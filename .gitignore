@@ -1,4 +1,6 @@
 ### IntelliJ IDEA ###
+checkstyle.xml
+suppressions.xml
 .idea/
 .run/
 **/.idea/
