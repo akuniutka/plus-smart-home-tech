@@ -1,0 +1,4 @@
+spring:
+  main.banner-mode: OFF
+logging.level:
+  ru.yandex.practicum.kafka.telemetry: DEBUG
