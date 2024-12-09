@@ -8,6 +8,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+import java.time.Duration;
 import java.util.Properties;
 
 @Slf4j
@@ -25,6 +26,13 @@ public class KafkaSenderImpl implements KafkaSender {
     public void send(final String topic, final SpecificRecordBase message) {
         final ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, message);
         producer.send(record);
+    }
+
+    public void close() {
+        log.info("Closing Kafka producer...");
+        producer.flush();
+        producer.close(Duration.ofMillis(100L));
+        log.info("Kafka producer closed");
     }
 
     private Producer<String, SpecificRecordBase> createProducer(final String bootstrapServers) {
