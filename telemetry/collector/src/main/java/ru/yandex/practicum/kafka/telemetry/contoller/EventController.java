@@ -23,13 +23,13 @@ public class EventController {
     public void collectSensorEvent(@Valid @RequestBody SensorEvent event) {
         log.debug("Received request with sensor event: {}", event);
         service.collectSensorEvent(event);
-        log.debug("Responded OK to sensor event request");
+        log.debug("Responded 200 OK to sensor event request");
     }
 
     @PostMapping("/hubs")
     public void collectHubEvent(@Valid @RequestBody HubEvent event) {
         log.debug("Received request with hub event: {}", event);
         service.collectHubEvent(event);
-        log.debug("Responded OK to hub event request");
+        log.debug("Responded 200 OK to hub event request");
     }
 }
