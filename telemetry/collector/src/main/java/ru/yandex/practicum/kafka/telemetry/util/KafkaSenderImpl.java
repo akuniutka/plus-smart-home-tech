@@ -23,8 +23,9 @@ public class KafkaSenderImpl implements KafkaSender {
     }
 
     @Override
-    public void send(final String topic, final SpecificRecordBase message) {
-        final ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, message);
+    public void send(final String topic, final String key, final Long timestamp, final SpecificRecordBase message) {
+        final ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, null, timestamp, key,
+                message);
         producer.send(record);
     }
 

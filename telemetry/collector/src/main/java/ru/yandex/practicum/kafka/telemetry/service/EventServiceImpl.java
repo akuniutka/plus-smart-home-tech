@@ -1,8 +1,8 @@
 package ru.yandex.practicum.kafka.telemetry.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.kafka.telemetry.dto.hub.DeviceAddedEvent;
 import ru.yandex.practicum.kafka.telemetry.dto.hub.DeviceRemovedEvent;
 import ru.yandex.practicum.kafka.telemetry.dto.hub.HubEvent;
@@ -24,18 +24,23 @@ import java.time.Clock;
 import java.time.Instant;
 
 @Service
-@Validated
 @Slf4j
 public class EventServiceImpl implements EventService {
 
-    private static final String SENSOR_TOPIC = "telemetry.sensors.v1";
-    private static final String HUB_TOPIC = "telemetry.hubs.v1";
-
+    private final String sensorKafkaTopic;
+    private final String hubKafkaTopic;
     private final EventMapper mapper;
     private final KafkaSender sender;
     private final Clock clock;
 
-    public EventServiceImpl(final EventMapper mapper, final KafkaClient client, final Clock clock) {
+    public EventServiceImpl(
+            @Value("${kafka.topics.sensor}") final String sensorKafkaTopic,
+            @Value("${kafka.topics.hub}") final String hubKafkaTopic,
+            final EventMapper mapper,
+            final KafkaClient client,
+            final Clock clock) {
+        this.hubKafkaTopic = hubKafkaTopic;
+        this.sensorKafkaTopic = sensorKafkaTopic;
         this.mapper = mapper;
         this.sender = client.getSender();
         this.clock = clock;
@@ -55,8 +60,10 @@ public class EventServiceImpl implements EventService {
                     case TemperatureSensorEvent temperatureSensorEvent -> mapper.mapToAvro(temperatureSensorEvent);
                     case null, default -> throw new AssertionError();
                 };
-        sender.send(SENSOR_TOPIC, sensorEventAvro);
-        log.debug("Sent sensor event to topic [{}]: {}", SENSOR_TOPIC, sensorEventAvro);
+        final String key = sensorEventAvro.getHubId();
+        final long timestamp = sensorEventAvro.getTimestamp().toEpochMilli();
+        sender.send(sensorKafkaTopic, key, timestamp, sensorEventAvro);
+        log.debug("Sent sensor event to topic [{}]: {}", sensorKafkaTopic, sensorEventAvro);
     }
 
     @Override
@@ -72,7 +79,9 @@ public class EventServiceImpl implements EventService {
                     case ScenarioRemovedEvent scenarioRemovedEvent -> mapper.mapToAvro(scenarioRemovedEvent);
                     case null, default -> throw new AssertionError();
                 };
-        sender.send(HUB_TOPIC, hubEventAvro);
-        log.debug("Sent hub event to topic [{}]: {}", HUB_TOPIC, hubEventAvro);
+        final String key = hubEventAvro.getHubId();
+        final long timestamp = hubEventAvro.getTimestamp().toEpochMilli();
+        sender.send(hubKafkaTopic, key, timestamp, hubEventAvro);
+        log.debug("Sent hub event to topic [{}]: {}", hubKafkaTopic, hubEventAvro);
     }
 }
