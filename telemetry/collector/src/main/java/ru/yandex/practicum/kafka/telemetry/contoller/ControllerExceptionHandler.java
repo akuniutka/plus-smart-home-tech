@@ -25,7 +25,7 @@ public class ControllerExceptionHandler {
     private final Clock clock;
 
     @ExceptionHandler
-    public ResponseEntity<Object> handleWrongValuesInRequestBody(final MethodArgumentNotValidException exception) {
+    public ResponseEntity<ApiError> handleWrongValuesInRequestBody(final MethodArgumentNotValidException exception) {
         log.warn(exception.getMessage());
         final List<FieldErrorData> errors = extractValidationErrors(exception);
         final Set<String> fields = errors.stream()
@@ -43,7 +43,7 @@ public class ControllerExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<Object> handleException(final Exception exception) {
+    public ResponseEntity<ApiError> handleException(final Exception exception) {
         log.error(exception.getMessage(), exception);
         final ApiError apiError = ApiError.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

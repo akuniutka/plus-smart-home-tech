@@ -4,5 +4,5 @@ import org.apache.avro.specific.SpecificRecordBase;
 
 public interface KafkaSender {
 
-    void send(String topic, SpecificRecordBase message);
+    void send(String topic, String Key, Long timestamp, SpecificRecordBase message);
 }
