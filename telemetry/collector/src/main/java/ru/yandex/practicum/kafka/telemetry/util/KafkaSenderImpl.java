@@ -9,6 +9,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Properties;
 
 @Slf4j
@@ -23,9 +24,10 @@ public class KafkaSenderImpl implements KafkaSender {
     }
 
     @Override
-    public void send(final String topic, final String key, final Long timestamp, final SpecificRecordBase message) {
-        final ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, null, timestamp, key,
-                message);
+    public void send(final String topic, final String key, final Instant timestamp, final SpecificRecordBase message) {
+        final Long timestampInMillis = timestamp != null ? timestamp.toEpochMilli() : null;
+        final ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(topic, null, timestampInMillis,
+                key, message);
         producer.send(record);
     }
 
