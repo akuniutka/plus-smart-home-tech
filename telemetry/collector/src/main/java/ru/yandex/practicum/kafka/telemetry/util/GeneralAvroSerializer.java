@@ -14,6 +14,7 @@ import java.io.IOException;
 public class GeneralAvroSerializer implements Serializer<SpecificRecordBase> {
 
     private final EncoderFactory encoderFactory = EncoderFactory.get();
+    private BinaryEncoder encoder;
 
     @Override
     public byte[] serialize(final String topic, final SpecificRecordBase datum) {
@@ -21,7 +22,7 @@ public class GeneralAvroSerializer implements Serializer<SpecificRecordBase> {
             return null;
         }
         try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            final BinaryEncoder encoder = encoderFactory.binaryEncoder(out, null);
+            encoder = encoderFactory.binaryEncoder(out, encoder);
             final DatumWriter<SpecificRecordBase> writer = new SpecificDatumWriter<>(datum.getSchema());
             writer.write(datum, encoder);
             encoder.flush();
