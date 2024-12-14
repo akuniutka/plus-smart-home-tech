@@ -2,7 +2,6 @@ package ru.yandex.practicum.kafka.telemetry.service.handler.hub;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.telemetry.dto.hub.DeviceAddedEvent;
-import ru.yandex.practicum.kafka.telemetry.dto.hub.DeviceType;
 import ru.yandex.practicum.kafka.telemetry.dto.hub.HubEvent;
 import ru.yandex.practicum.kafka.telemetry.dto.hub.HubEventType;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro;
@@ -30,7 +29,7 @@ public class DeviceAddedEventHandler extends BaseHubEventHandler<DeviceAddedEven
                 .build();
     }
 
-    protected DeviceTypeAvro mapToAvro(final DeviceType deviceType) {
+    protected DeviceTypeAvro mapToAvro(final DeviceAddedEvent.DeviceType deviceType) {
         return switch (deviceType) {
             case CLIMATE_SENSOR -> DeviceTypeAvro.CLIMATE_SENSOR;
             case LIGHT_SENSOR -> DeviceTypeAvro.LIGHT_SENSOR;

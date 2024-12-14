@@ -22,4 +22,19 @@ public class ScenarioCondition {
 
     @NotNull
     private Integer value;
+
+    public enum ConditionType {
+        CO2LEVEL,
+        HUMIDITY,
+        LUMINOSITY,
+        MOTION,
+        SWITCH,
+        TEMPERATURE
+    }
+
+    public enum ConditionOperation {
+        EQUALS,
+        GREATER_THAN,
+        LOWER_THAN
+    }
 }

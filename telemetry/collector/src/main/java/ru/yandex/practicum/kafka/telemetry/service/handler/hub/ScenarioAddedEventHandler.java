@@ -1,9 +1,6 @@
 package ru.yandex.practicum.kafka.telemetry.service.handler.hub;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.kafka.telemetry.dto.hub.ActionType;
-import ru.yandex.practicum.kafka.telemetry.dto.hub.ConditionOperation;
-import ru.yandex.practicum.kafka.telemetry.dto.hub.ConditionType;
 import ru.yandex.practicum.kafka.telemetry.dto.hub.DeviceAction;
 import ru.yandex.practicum.kafka.telemetry.dto.hub.HubEvent;
 import ru.yandex.practicum.kafka.telemetry.dto.hub.HubEventType;
@@ -56,7 +53,7 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
                 .build();
     }
 
-    protected ConditionTypeAvro mapToAvro(final ConditionType conditionType) {
+    protected ConditionTypeAvro mapToAvro(final ScenarioCondition.ConditionType conditionType) {
         return switch (conditionType) {
             case CO2LEVEL -> ConditionTypeAvro.CO2LEVEL;
             case HUMIDITY -> ConditionTypeAvro.HUMIDITY;
@@ -67,7 +64,7 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
         };
     }
 
-    protected ConditionOperationAvro mapToAvro(final ConditionOperation operation) {
+    protected ConditionOperationAvro mapToAvro(final ScenarioCondition.ConditionOperation operation) {
         return switch (operation) {
             case EQUALS -> ConditionOperationAvro.EQUALS;
             case GREATER_THAN -> ConditionOperationAvro.GREATER_THAN;
@@ -83,7 +80,7 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
                 .build();
     }
 
-    protected ActionTypeAvro mapToAvro(final ActionType actionType) {
+    protected ActionTypeAvro mapToAvro(final DeviceAction.ActionType actionType) {
         return switch (actionType) {
             case ACTIVATE -> ActionTypeAvro.ACTIVATE;
             case DEACTIVATE -> ActionTypeAvro.DEACTIVATE;

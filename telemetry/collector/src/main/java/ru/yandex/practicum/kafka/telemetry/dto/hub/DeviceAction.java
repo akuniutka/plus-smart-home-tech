@@ -18,4 +18,11 @@ public class DeviceAction {
     private ActionType type;
 
     private Integer value;
+
+    public enum ActionType {
+        ACTIVATE,
+        DEACTIVATE,
+        INVERSE,
+        SET_VALUE
+    }
 }
