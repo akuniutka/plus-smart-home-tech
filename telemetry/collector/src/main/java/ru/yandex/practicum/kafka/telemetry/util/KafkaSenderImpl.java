@@ -1,5 +1,6 @@
 package ru.yandex.practicum.kafka.telemetry.util;
 
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -7,17 +8,22 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Properties;
 
+@Component
+@Lazy
 @Slf4j
 public class KafkaSenderImpl implements KafkaSender {
 
     private final Producer<String, SpecificRecordBase> producer;
 
-    public KafkaSenderImpl(final String bootstrapServers) {
+    public KafkaSenderImpl(@Value("${kafka.bootstrap-servers:localhost:9092}") final String bootstrapServers) {
         log.info("Creating Kafka producer...");
         this.producer = createProducer(bootstrapServers);
         log.info("Kafka producer created for {}", bootstrapServers);
@@ -31,6 +37,7 @@ public class KafkaSenderImpl implements KafkaSender {
         producer.send(record);
     }
 
+    @PreDestroy
     public void close() {
         log.info("Closing Kafka producer...");
         producer.flush();

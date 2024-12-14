@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.service.sender.SensorEventSender;
-import ru.yandex.practicum.kafka.telemetry.util.KafkaClient;
 import ru.yandex.practicum.kafka.telemetry.util.KafkaSender;
 
 @Component
@@ -15,9 +14,9 @@ public class SensorEventSenderImpl implements SensorEventSender {
     private final String topic;
     private final KafkaSender kafkaSender;
 
-    public SensorEventSenderImpl(@Value("${kafka.topics.sensor}") final String topic, final KafkaClient client) {
+    public SensorEventSenderImpl(@Value("${kafka.topics.sensor}") final String topic, final KafkaSender kafkaSender) {
         this.topic = topic;
-        this.kafkaSender = client.getSender();
+        this.kafkaSender = kafkaSender;
     }
 
     @Override
