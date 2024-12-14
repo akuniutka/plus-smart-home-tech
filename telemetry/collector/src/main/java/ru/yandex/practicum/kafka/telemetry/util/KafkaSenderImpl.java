@@ -23,7 +23,7 @@ public class KafkaSenderImpl implements KafkaSender {
 
     private final Producer<String, SpecificRecordBase> producer;
 
-    public KafkaSenderImpl(@Value("${kafka.bootstrap-servers:localhost:9092}") final String bootstrapServers) {
+    public KafkaSenderImpl(@Value("${kafka.bootstrap-servers}") final String bootstrapServers) {
         log.info("Creating Kafka producer...");
         this.producer = createProducer(bootstrapServers);
         log.info("Kafka producer created for {}", bootstrapServers);
