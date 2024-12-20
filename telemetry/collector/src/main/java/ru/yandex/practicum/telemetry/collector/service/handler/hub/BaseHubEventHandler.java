@@ -1,30 +1,34 @@
 package ru.yandex.practicum.telemetry.collector.service.handler.hub;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.avro.specific.SpecificRecordBase;
-import ru.yandex.practicum.telemetry.collector.dto.hub.HubEvent;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.telemetry.collector.service.handler.HubEventHandler;
 import ru.yandex.practicum.telemetry.collector.service.sender.HubEventSender;
 
-@RequiredArgsConstructor
+import static ru.yandex.practicum.telemetry.collector.util.Convertors.timestampToInstant;
+
 public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implements HubEventHandler {
 
     protected final HubEventSender sender;
 
-    protected abstract T mapToAvro(HubEvent event);
+    protected BaseHubEventHandler(final HubEventSender sender) {
+        this.sender = sender;
+    }
+
+    protected abstract T mapPayload(HubEventProto event);
 
     @Override
-    public void handle(final HubEvent event) {
-        if (!event.getType().equals(getMessageType())) {
-            throw new IllegalArgumentException("Unknown hub event type: " + event.getType());
+    public void handle(final HubEventProto eventProto) {
+        if (!eventProto.getPayloadCase().equals(getPayloadType())) {
+            throw new IllegalArgumentException("Unknown payload type: " + eventProto.getPayloadCase());
         }
 
-        final T payload = mapToAvro(event);
+        final T payload = mapPayload(eventProto);
 
         final HubEventAvro eventAvro = HubEventAvro.newBuilder()
-                .setHubId(event.getHubId())
-                .setTimestamp(event.getTimestamp())
+                .setHubId(eventProto.getHubId())
+                .setTimestamp(timestampToInstant(eventProto.getTimestamp()))
                 .setPayload(payload)
                 .build();
 
