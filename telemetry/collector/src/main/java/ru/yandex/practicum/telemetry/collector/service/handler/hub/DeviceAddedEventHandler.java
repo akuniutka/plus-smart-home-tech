@@ -1,9 +1,9 @@
 package ru.yandex.practicum.telemetry.collector.service.handler.hub;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.telemetry.collector.dto.hub.DeviceAddedEvent;
-import ru.yandex.practicum.telemetry.collector.dto.hub.HubEvent;
-import ru.yandex.practicum.telemetry.collector.dto.hub.HubEventType;
+import ru.yandex.practicum.grpc.telemetry.event.DeviceAddedEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.DeviceTypeProto;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceTypeAvro;
 import ru.yandex.practicum.telemetry.collector.service.sender.HubEventSender;
@@ -16,26 +16,27 @@ public class DeviceAddedEventHandler extends BaseHubEventHandler<DeviceAddedEven
     }
 
     @Override
-    public HubEventType getMessageType() {
-        return HubEventType.DEVICE_ADDED;
+    public HubEventProto.PayloadCase getPayloadType() {
+        return HubEventProto.PayloadCase.DEVICE_ADDED;
     }
 
     @Override
-    protected DeviceAddedEventAvro mapToAvro(final HubEvent event) {
-        final DeviceAddedEvent _event = (DeviceAddedEvent) event;
+    protected DeviceAddedEventAvro mapPayload(final HubEventProto event) {
+        final DeviceAddedEventProto payload = event.getDeviceAdded();
         return DeviceAddedEventAvro.newBuilder()
-                .setId(_event.getId())
-                .setType(mapToAvro(_event.getDeviceType()))
+                .setId(payload.getId())
+                .setType(mapToAvro(payload.getType()))
                 .build();
     }
 
-    protected DeviceTypeAvro mapToAvro(final DeviceAddedEvent.DeviceType deviceType) {
+    protected DeviceTypeAvro mapToAvro(final DeviceTypeProto deviceType) {
         return switch (deviceType) {
             case CLIMATE_SENSOR -> DeviceTypeAvro.CLIMATE_SENSOR;
             case LIGHT_SENSOR -> DeviceTypeAvro.LIGHT_SENSOR;
             case MOTION_SENSOR -> DeviceTypeAvro.MOTION_SENSOR;
             case SWITCH_SENSOR -> DeviceTypeAvro.SWITCH_SENSOR;
             case TEMPERATURE_SENSOR -> DeviceTypeAvro.TEMPERATURE_SENSOR;
+            default -> throw new IllegalArgumentException("Unknown device type " + deviceType);
         };
     }
 }
