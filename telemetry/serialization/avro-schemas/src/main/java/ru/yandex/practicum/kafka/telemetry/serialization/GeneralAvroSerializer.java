@@ -1,4 +1,4 @@
-package ru.yandex.practicum.telemetry.collector.util;
+package ru.yandex.practicum.kafka.telemetry.serialization;
 
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumWriter;
@@ -6,7 +6,7 @@ import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.common.serialization.Serializer;
-import ru.yandex.practicum.telemetry.collector.exception.KafkaSerializationException;
+import ru.yandex.practicum.kafka.telemetry.exception.KafkaSerializationException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,8 +27,8 @@ public class GeneralAvroSerializer implements Serializer<SpecificRecordBase> {
             writer.write(datum, encoder);
             encoder.flush();
             return out.toByteArray();
-        } catch (IOException exception) {
-            throw new KafkaSerializationException("Message serialization error", exception);
+        } catch (IOException e) {
+            throw new KafkaSerializationException("Message serialization error", e);
         }
     }
 }
