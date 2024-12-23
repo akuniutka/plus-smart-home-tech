@@ -1,0 +1,18 @@
+kafka:
+  topics:
+    snapshots: telemetry.snapshots.v1
+  listener:
+    topics:
+      - telemetry.sensors.v1
+    poll-timeout: 100000
+    commit-batch-size: 10
+    properties:
+      bootstrap.servers: localhost:9092
+      group.id: telemetry.aggregators
+      auto.offset.reset: earliest
+      enable.auto.commit: false
+  sender:
+    properties:
+      bootstrap.servers: localhost:9092
+logging.level:
+  org.apache.kafka: WARN
