@@ -1,21 +1,22 @@
 package ru.yandex.practicum.telemetry.collector.service.sender.hub;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.kafka.telemetry.client.KafkaSender;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
+import ru.yandex.practicum.telemetry.collector.configuration.KafkaTopics;
 import ru.yandex.practicum.telemetry.collector.service.sender.HubEventSender;
-import ru.yandex.practicum.telemetry.collector.util.KafkaSender;
 
 @Component
-@Slf4j
 public class HubEventSenderImpl implements HubEventSender {
 
+    private static final Logger log = LoggerFactory.getLogger(HubEventSenderImpl.class);
     private final String topic;
     private final KafkaSender kafkaSender;
 
-    public HubEventSenderImpl(@Value("${kafka.topics.hub}") final String topic, final KafkaSender kafkaSender) {
-        this.topic = topic;
+    public HubEventSenderImpl(final KafkaTopics kafkaTopics, final KafkaSender kafkaSender) {
+        this.topic = kafkaTopics.hubs();
         this.kafkaSender = kafkaSender;
     }
 

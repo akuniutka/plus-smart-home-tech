@@ -1,4 +1,4 @@
-package ru.yandex.practicum.telemetry.collector.exception;
+package ru.yandex.practicum.kafka.telemetry.exception;
 
 public class KafkaSerializationException extends RuntimeException {
 

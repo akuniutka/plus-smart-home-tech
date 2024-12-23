@@ -1,21 +1,22 @@
 package ru.yandex.practicum.telemetry.collector.service.sender.sensor;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.kafka.telemetry.client.KafkaSender;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
+import ru.yandex.practicum.telemetry.collector.configuration.KafkaTopics;
 import ru.yandex.practicum.telemetry.collector.service.sender.SensorEventSender;
-import ru.yandex.practicum.telemetry.collector.util.KafkaSender;
 
 @Component
-@Slf4j
 public class SensorEventSenderImpl implements SensorEventSender {
 
+    private static final Logger log = LoggerFactory.getLogger(SensorEventSenderImpl.class);
     private final String topic;
     private final KafkaSender kafkaSender;
 
-    public SensorEventSenderImpl(@Value("${kafka.topics.sensor}") final String topic, final KafkaSender kafkaSender) {
-        this.topic = topic;
+    public SensorEventSenderImpl(final KafkaTopics kafkaTopics, final KafkaSender kafkaSender) {
+        this.topic = kafkaTopics.sensors();
         this.kafkaSender = kafkaSender;
     }
 

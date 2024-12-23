@@ -1,10 +1,12 @@
-logging.level:
-  org.apache.kafka: WARN
-kafka:
-  bootstrap-servers: localhost:9092
-  topics:
-    hub: telemetry.hubs.v1
-    sensor: telemetry.sensors.v1
 grpc:
   server:
     port: 9090
+kafka:
+  topics:
+    hubs: telemetry.hubs.v1
+    sensors: telemetry.sensors.v1
+  sender:
+    properties:
+      bootstrap.servers: localhost:9092
+logging.level:
+  org.apache.kafka: WARN
