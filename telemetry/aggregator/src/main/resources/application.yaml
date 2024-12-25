@@ -1,7 +1,7 @@
 kafka:
   topics:
     snapshots: telemetry.snapshots.v1
-  listener:
+  event-listener:
     topics:
       - telemetry.sensors.v1
     poll-timeout: 100000
