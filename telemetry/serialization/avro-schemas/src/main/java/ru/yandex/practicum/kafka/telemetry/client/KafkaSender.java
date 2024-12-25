@@ -18,7 +18,6 @@ public class KafkaSender {
     private final Producer<String, SpecificRecordBase> producer;
 
     public KafkaSender(final KafkaSenderConfig config) {
-        log.debug("{}", config.properties());
         this.producer = createProducer(config.properties());
     }
 
