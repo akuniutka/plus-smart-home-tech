@@ -9,7 +9,8 @@ public class KafkaListenerProperties {
     private List<String> topics;
     private Map<String, String> properties;
     private Duration pollTimeout = Duration.ofMillis(10_000L);
-    private int commitBatchSize = 10;
+    private KafkaListener.Strategy strategy = KafkaListener.Strategy.AT_LEAST_ONCE;
+    private int commitBatchSize;
 
     public List<String> getTopics() {
         return topics;
@@ -33,6 +34,14 @@ public class KafkaListenerProperties {
 
     public void setPollTimeout(final long pollTimeout) {
         this.pollTimeout = Duration.ofMillis(pollTimeout);
+    }
+
+    public KafkaListener.Strategy getStrategy() {
+        return strategy;
+    }
+
+    public void setStrategy(final KafkaListener.Strategy strategy) {
+        this.strategy = strategy;
     }
 
     public int getCommitBatchSize() {

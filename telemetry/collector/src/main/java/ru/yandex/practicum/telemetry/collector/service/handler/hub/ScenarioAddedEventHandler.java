@@ -88,7 +88,7 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
         return DeviceActionAvro.newBuilder()
                 .setSensorId(deviceAction.getSensorId())
                 .setType(mapToAvro(deviceAction.getType()))
-                .setValue(deviceAction.getValue())
+                .setValue(deviceAction.hasValue() ? deviceAction.getValue() : null)
                 .build();
     }
 
