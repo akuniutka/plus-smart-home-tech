@@ -39,6 +39,11 @@ public class KafkaListener<T extends SpecificRecordBase> {
         this.messageHandler = messageHandler;
     }
 
+    public enum Strategy {
+        AT_MOST_ONCE,
+        AT_LEAST_ONCE
+    }
+
     public void start() {
         synchronized (lock) {
             if (status != Status.NEW && status != Status.STOPPED) {
@@ -71,7 +76,11 @@ public class KafkaListener<T extends SpecificRecordBase> {
         try {
             createConsumer(schema, new HashMap<>(config.getProperties()));
             subscribe(config.getTopics());
-            pollMessages();
+            if (config.getStrategy() == Strategy.AT_MOST_ONCE) {
+                startAtMostOnceLoop();
+            } else {
+                startAtLeastOnceLoop();
+            }
         } catch (WakeupException ignored) {
             // Nothing to do here, close consumer in finally block
         } finally {
@@ -95,31 +104,51 @@ public class KafkaListener<T extends SpecificRecordBase> {
         log.info("Kafka consumer subscribed to topics {}", config.getTopics());
     }
 
-    private void pollMessages() {
+    private void startAtMostOnceLoop() {
         while (status == Status.RUNNING) {
-            ConsumerRecords<String, T> records = consumer.poll(config.getPollTimeout());
-            log.debug("Received {} record(s) from Kafka broker", records.count());
-            int recordProcessed = 0;
+            ConsumerRecords<String, T> records = pollRecords();
+            consumer.commitSync();
             for (ConsumerRecord<String, T> record : records) {
-                if (status != Status.RUNNING) {
-                    return;
-                }
                 messageHandler.accept(record.value());
-                // TODO special case: if processed records == total records
-                updateCurrentOffsets(record, ++recordProcessed);
             }
-            consumer.commitAsync(offsetCommitCallback(recordProcessed));
         }
     }
 
-    private void updateCurrentOffsets(final ConsumerRecord<String, T> record, final int recordProcessed) {
-        currentOffsets.put(
-                new TopicPartition(record.topic(), record.partition()),
-                new OffsetAndMetadata(record.offset() + 1)
-        );
-        if (config.getCommitBatchSize() > 0 && recordProcessed % config.getCommitBatchSize() == 0) {
-            consumer.commitAsync(currentOffsets, offsetCommitCallback(recordProcessed));
+    private void startAtLeastOnceLoop() {
+        while (status == Status.RUNNING) {
+            ConsumerRecords<String, T> records = pollRecords();
+            final int recordsTotal = records.count();
+            int recordsProcessed = 0;
+            for (ConsumerRecord<String, T> record : records) {
+                messageHandler.accept(record.value());
+                updateCurrentOffsets(record);
+                recordsProcessed++;
+                if (isCommitBatchProcessed(recordsProcessed) && recordsProcessed != recordsTotal) {
+                    consumer.commitAsync(currentOffsets, offsetCommitCallback(recordsProcessed));
+                    if (status != Status.RUNNING) {
+                        return;
+                    }
+                }
+            }
+            consumer.commitAsync(offsetCommitCallback(recordsProcessed));
         }
+    }
+
+    private ConsumerRecords<String, T> pollRecords() {
+        final ConsumerRecords<String, T> records = consumer.poll(config.getPollTimeout());
+        log.debug("Received {} record(s) from Kafka broker", records.count());
+        return records;
+    }
+
+    private void updateCurrentOffsets(final ConsumerRecord<String, T> record) {
+            currentOffsets.put(
+                    new TopicPartition(record.topic(), record.partition()),
+                    new OffsetAndMetadata(record.offset() + 1)
+            );
+    }
+
+    private boolean isCommitBatchProcessed(final int recordsProcessed) {
+        return config.getCommitBatchSize() > 0 && recordsProcessed % config.getCommitBatchSize() == 0;
     }
 
     private OffsetCommitCallback offsetCommitCallback(final int recordProcessed) {

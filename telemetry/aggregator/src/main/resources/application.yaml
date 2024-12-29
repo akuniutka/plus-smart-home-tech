@@ -4,8 +4,6 @@ kafka:
   event-listener:
     topics:
       - telemetry.sensors.v1
-    poll-timeout: 100000
-    commit-batch-size: 10
     properties:
       bootstrap.servers: localhost:9092
       group.id: telemetry.aggregators
