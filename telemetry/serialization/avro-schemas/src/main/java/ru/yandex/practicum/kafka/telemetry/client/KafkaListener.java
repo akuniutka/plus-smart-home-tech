@@ -27,7 +27,6 @@ public class KafkaListener<T extends SpecificRecordBase> {
     private final KafkaListenerProperties config;
     private final java.util.function.Consumer<T> messageHandler;
     private final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
-    private final Object lock = new Object();
     private volatile Consumer<String, T> consumer;
     private volatile Thread thread;
     private volatile Status status = Status.NEW;
@@ -39,35 +38,24 @@ public class KafkaListener<T extends SpecificRecordBase> {
         this.messageHandler = messageHandler;
     }
 
-    public enum Strategy {
-        AT_MOST_ONCE,
-        AT_LEAST_ONCE
-    }
-
-    public void start() {
-        synchronized (lock) {
-            if (status != Status.NEW && status != Status.STOPPED) {
-                throw new IllegalThreadStateException();
-            }
-            thread = new Thread(this::run);
-            thread.setName("kafka-listener-" + (++listenerCount));
-            status = Status.READY;
-            thread.start();
+    public synchronized void start() {
+        if (status != Status.NEW) {
+            throw new IllegalThreadStateException();
         }
+        thread = new Thread(this::run);
+        thread.setName("kafka-listener-" + (++listenerCount));
+        status = Status.READY;
+        thread.start();
     }
 
     public void stop() {
-        synchronized (lock) {
-            if (status == Status.RUNNING) {
-                status = Status.STOPPING;
-                consumer.wakeup();
-                try {
-                    thread.join();
-                    status = Status.STOPPED;
-                } catch (InterruptedException e) {
-                    status = Status.UNDEFINED;
-                    throw new RuntimeException("Kafka listener shutdown interrupted", e);
-                }
+        if (status == Status.RUNNING) {
+            status = Status.INTERRUPTED;
+            consumer.wakeup();
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Kafka listener shutdown interrupted", e);
             }
         }
     }
@@ -81,22 +69,24 @@ public class KafkaListener<T extends SpecificRecordBase> {
             } else {
                 startAtLeastOnceLoop();
             }
+            // Listener quits loop when status becomes not RUNNING
+            // (i.e. status equals INTERRUPTED).
         } catch (WakeupException ignored) {
-            // Nothing to do here, close consumer in finally block
+            // Nothing to do here, close consumer in finally block.
+            // Also, status equals becomes INTERRUPTED here.
+        } catch (Exception e) {
+            status = Status.INTERRUPTED;
+            log.error(e.getMessage(), e);
         } finally {
             closeConsumer();
         }
     }
 
     private void createConsumer(final Schema schema, final Map<String, Object> properties) {
-        synchronized (lock) {
-            status = Status.STARTING;
-            log.info("Creating Kafka consumer...");
-            consumer = new KafkaConsumer<>(properties, new StringDeserializer(),
-                    new BaseAvroDeserializer<>(schema));
-            log.info("Kafka consumer created");
-            status = Status.RUNNING;
-        }
+        log.info("Creating Kafka consumer...");
+        consumer = new KafkaConsumer<>(properties, new StringDeserializer(), new BaseAvroDeserializer<>(schema));
+        log.info("Kafka consumer created");
+        status = Status.RUNNING;
     }
 
     private void subscribe(final List<String> topics) {
@@ -141,10 +131,10 @@ public class KafkaListener<T extends SpecificRecordBase> {
     }
 
     private void updateCurrentOffsets(final ConsumerRecord<String, T> record) {
-            currentOffsets.put(
-                    new TopicPartition(record.topic(), record.partition()),
-                    new OffsetAndMetadata(record.offset() + 1)
-            );
+        currentOffsets.put(
+                new TopicPartition(record.topic(), record.partition()),
+                new OffsetAndMetadata(record.offset() + 1)
+        );
     }
 
     private boolean isCommitBatchProcessed(final int recordsProcessed) {
@@ -162,27 +152,29 @@ public class KafkaListener<T extends SpecificRecordBase> {
     }
 
     private void closeConsumer() {
-        if (status == Status.STOPPING || status == Status.RUNNING) {
+        if (consumer != null) {
             log.info("Closing Kafka consumer...");
             try {
-                log.debug("Commiting processed message offsets...");
-                consumer.commitSync(currentOffsets);
+                if (config.getStrategy() != Strategy.AT_MOST_ONCE) {
+                    log.debug("Commiting processed message offsets...");
+                    consumer.commitSync(currentOffsets);
+                }
             } finally {
                 consumer.close();
                 log.info("Kafka consumer closed");
             }
-        } else if (status == Status.STARTING) {
-            status = Status.UNDEFINED;
         }
+    }
+
+    public enum Strategy {
+        AT_MOST_ONCE,
+        AT_LEAST_ONCE
     }
 
     private enum Status {
         NEW,
         READY,
-        STARTING,
         RUNNING,
-        STOPPING,
-        STOPPED,
-        UNDEFINED
+        INTERRUPTED
     }
 }
