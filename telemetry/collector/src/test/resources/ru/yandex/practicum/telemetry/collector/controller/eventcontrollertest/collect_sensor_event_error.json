@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received sensor event: hubId = test.hub.1, sensorId = test.light.sensor.1, timestamp = 2000-01-31T13:30:55.123Z"
+  },
+  {
+    "level": "ERROR",
+    "message": "Sensor event processing error: Test exception, event: id: \"test.light.sensor.1\"\ntimestamp {\n  seconds: 949325455\n  nanos: 123000000\n}\nhubId: \"test.hub.1\"\nlight_sensor_event {\n  link_quality: 95\n  luminosity: 60\n}\n"
+  }
+]

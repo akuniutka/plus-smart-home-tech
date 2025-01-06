@@ -10,44 +10,51 @@ import org.slf4j.LoggerFactory;
 import ru.yandex.practicum.grpc.telemetry.collector.CollectorControllerGrpc;
 import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
-import ru.yandex.practicum.telemetry.collector.service.handler.HubEventHandler;
-import ru.yandex.practicum.telemetry.collector.service.handler.SensorEventHandler;
+import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
+import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
+import ru.yandex.practicum.telemetry.collector.mapper.HubEventMapper;
+import ru.yandex.practicum.telemetry.collector.mapper.HubEventMapperFactory;
+import ru.yandex.practicum.telemetry.collector.mapper.SensorEventMapper;
+import ru.yandex.practicum.telemetry.collector.mapper.SensorEventMapperFactory;
+import ru.yandex.practicum.telemetry.collector.service.HubEventService;
+import ru.yandex.practicum.telemetry.collector.service.SensorEventService;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import static ru.yandex.practicum.telemetry.collector.util.Convertors.timestampToInstant;
 
 @GrpcService
 public class EventController extends CollectorControllerGrpc.CollectorControllerImplBase {
 
     private static final Logger log = LoggerFactory.getLogger(EventController.class);
-    private final Map<HubEventProto.PayloadCase, HubEventHandler> hubEventHandlers;
-    private final Map<SensorEventProto.PayloadCase, SensorEventHandler> sensorEventHandlers;
+    private final HubEventService hubEventService;
+    private final SensorEventService sensorEventService;
+    private final HubEventMapperFactory hubEventMapperFactory;
+    private final SensorEventMapperFactory sensorEventMapperFactory;
 
     public EventController(
-            final Set<HubEventHandler> hubEventHandlers,
-            final Set<SensorEventHandler> sensorEventHandlers
+            final HubEventService hubEventService,
+            final SensorEventService sensorEventService,
+            final HubEventMapperFactory hubEventMapperFactory,
+            final SensorEventMapperFactory sensorEventMapperFactory
     ) {
-        this.hubEventHandlers = hubEventHandlers.stream()
-                .collect(Collectors.toMap(HubEventHandler::getPayloadType, Function.identity()));
-        this.sensorEventHandlers = sensorEventHandlers.stream()
-                .collect(Collectors.toMap(SensorEventHandler::getPayloadType, Function.identity()));
+        this.hubEventService = hubEventService;
+        this.sensorEventService = sensorEventService;
+        this.hubEventMapperFactory = hubEventMapperFactory;
+        this.sensorEventMapperFactory = sensorEventMapperFactory;
     }
 
     @Override
-    public void collectSensorEvent(final SensorEventProto event, final StreamObserver<Empty> responseObserver) {
+    public void collectHubEvent(final HubEventProto eventProto, final StreamObserver<Empty> responseObserver) {
         try {
-            log.debug("Sensor event received: {}", event);
-            if (!sensorEventHandlers.containsKey(event.getPayloadCase())) {
-                throw new IllegalArgumentException("No handler found for payload type " + event.getPayloadCase());
-            }
-            sensorEventHandlers.get(event.getPayloadCase()).handle(event);
+            log.info("Received hub event: hubId = {}, timestamp = {}, payload type = {}",
+                    eventProto.getHubId(), timestampToInstant(eventProto.getTimestamp()), eventProto.getPayloadCase());
+            log.debug("Hub event = {}", eventProto);
+            final HubEventMapper mapper = hubEventMapperFactory.getMapper(eventProto.getPayloadCase());
+            final HubEventAvro eventAvro = mapper.mapToAvro(eventProto);
+            hubEventService.addToProcessingQueue(eventAvro);
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
-            log.debug("Sensor event processed: {}", event);
         } catch (Exception e) {
-            log.error("Sensor event processing error: {}, event: {}", e.getMessage(), event, e);
+            log.error("Hub event processing error: {}, event: {}", e.getMessage(), eventProto, e);
             responseObserver.onError(new StatusRuntimeException(
                     Status.INTERNAL
                             .withDescription(e.getLocalizedMessage())
@@ -57,18 +64,18 @@ public class EventController extends CollectorControllerGrpc.CollectorController
     }
 
     @Override
-    public void collectHubEvent(final HubEventProto event, final StreamObserver<Empty> responseObserver) {
+    public void collectSensorEvent(final SensorEventProto eventProto, final StreamObserver<Empty> responseObserver) {
         try {
-            log.debug("Hub event received: {}", event);
-            if (!hubEventHandlers.containsKey(event.getPayloadCase())) {
-                throw new IllegalArgumentException("No handler found for payload type " + event.getPayloadCase());
-            }
-            hubEventHandlers.get(event.getPayloadCase()).handle(event);
+            log.info("Received sensor event: hubId = {}, sensorId = {}, timestamp = {}",
+                    eventProto.getHubId(), eventProto.getId(), timestampToInstant(eventProto.getTimestamp()));
+            log.debug("Sensor event = {}", eventProto);
+            final SensorEventMapper mapper = sensorEventMapperFactory.getMapper(eventProto.getPayloadCase());
+            final SensorEventAvro eventAvro = mapper.mapToAvro(eventProto);
+            sensorEventService.addToProcessingQueue(eventAvro);
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
-            log.debug("Hub event processed: {}", event);
         } catch (Exception e) {
-            log.error("Hub event processing error: {}, event: {}", e.getMessage(), event, e);
+            log.error("Sensor event processing error: {}, event: {}", e.getMessage(), eventProto, e);
             responseObserver.onError(new StatusRuntimeException(
                     Status.INTERNAL
                             .withDescription(e.getLocalizedMessage())
