@@ -8,8 +8,15 @@ import ru.yandex.practicum.kafka.telemetry.client.KafkaSenderConfig;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.telemetry.aggregator.service.SnapshotAggregator;
 
+import java.time.Clock;
+
 @Configuration
 public class AggregatorConfiguration {
+
+    @Bean
+    public Clock clock() {
+        return Clock.systemDefaultZone();
+    }
 
     @Bean(destroyMethod = "stop")
     public KafkaListener<SensorEventAvro> sensorEventListener(final EventListenerProperties config,

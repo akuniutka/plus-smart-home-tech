@@ -23,6 +23,7 @@ public class SnapshotSenderImpl implements SnapshotSender {
     @Override
     public void send(final SensorSnapshotAvro snapshot) {
         kafkaSender.send(topic, snapshot.getHubId(), snapshot.getTimestamp(), snapshot);
-        log.debug("Sent sensor snapshot to topic [{}]: {}", topic, snapshot);
+        log.info("Sent snapshot to Kafka: hubId = {}, timestamp = {}", snapshot.getHubId(), snapshot.getTimestamp());
+        log.debug("Snapshot = {}", snapshot);
     }
 }

@@ -1,0 +1,6 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received event: hubId = test.hub.1, sensorId = test.temperature.sensor.1, timestamp = 2000-01-31T13:30:55.123Z"
+  }
+]
