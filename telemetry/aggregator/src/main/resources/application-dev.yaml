@@ -1,4 +1,4 @@
 spring:
   main.banner-mode: OFF
 logging.level:
-  ru.yandex.practicum: DEBUG
+  ru.yandex.practicum: INFO

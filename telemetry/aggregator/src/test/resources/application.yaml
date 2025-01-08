@@ -1,0 +1,16 @@
+spring:
+  main.banner-mode: OFF
+kafka:
+  topics:
+    snapshots: telemetry.snapshots.v1
+  event-listener:
+    topics:
+      - telemetry.sensors.v1
+    properties:
+      bootstrap.servers: localhost:9092
+      group.id: telemetry.aggregators
+      auto.offset.reset: earliest
+      enable.auto.commit: false
+  sender:
+    properties:
+      bootstrap.servers: localhost:9092
