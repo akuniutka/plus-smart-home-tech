@@ -12,7 +12,7 @@ kafka:
   hub-event-listener:
     topics:
       - telemetry.hubs.v1
-    poll-timeout: 120000
+    poll-timeout: 15000
     strategy: at-least-once
     commit-batch-size: 10
     properties:

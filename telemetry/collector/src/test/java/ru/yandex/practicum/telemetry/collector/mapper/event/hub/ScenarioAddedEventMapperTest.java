@@ -47,7 +47,6 @@ class ScenarioAddedEventMapperTest {
 
     private int conditionCount;
     private List<ScenarioConditionProto> conditionsProto;
-    //    private List<ScenarioConditionAvro> conditionsAvro;
     private List<ActionTypeAvro> actionTypesAvro;
     private List<ActionTypeProto> actionTypesProto;
     private ConditionMapperFactory mockConditionMapperFactory;
