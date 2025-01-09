@@ -26,15 +26,19 @@ public class HubEventDispatcherImpl implements HubEventDispatcher {
     }
 
     public void dispatch(final HubEventAvro event) {
-        final Class<?> clazz = event.getPayload().getClass();
-        if (handlers.containsKey(clazz)) {
+        final Class<?> payloadType = event.getPayload().getClass();
+        log.info("Received hub event: hubId = {}, timestamp = {}, payload type = {}", event.getHubId(),
+                event.getTimestamp(), payloadType.getSimpleName());
+        log.debug("Hub event = {}", event);
+        if (handlers.containsKey(payloadType)) {
             try {
-                handlers.get(clazz).handle(event);
+                handlers.get(payloadType).handle(event);
             } catch (EntityValidationException e) {
-                log.warn(e.getMessage());
+                log.warn("{}: hubId = {}, timestamp = {}, payload type = {}{}", e.getMessage(), event.getHubId(),
+                        event.getTimestamp(), payloadType.getSimpleName(), e.getAdditionalInfo());
             }
         } else {
-            throw new IllegalArgumentException("No handler of payload of " + clazz);
+            throw new IllegalArgumentException("No handler found for payload of type " + payloadType);
         }
     }
 }

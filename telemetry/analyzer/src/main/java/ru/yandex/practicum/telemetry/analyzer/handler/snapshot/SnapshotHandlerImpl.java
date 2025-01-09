@@ -32,11 +32,12 @@ public class SnapshotHandlerImpl implements SnapshotHandler {
 
     @Override
     public void handle(final SensorSnapshotAvro snapshot) {
-        log.debug("Processing snapshot... {}", snapshot);
+        log.info("Received snapshot: hubId = {}, timestamp = {}", snapshot.getHubId(), snapshot.getTimestamp());
+        log.debug("Snapshot = {}", snapshot);
         scenarioService.getByHubId(snapshot.getHubId()).stream()
                 .filter(scenario -> toPredicate(scenario.getConditions()).test(snapshot))
                 .forEach(executor::execute);
-        log.debug("Snapshot processed {}", snapshot);
+        log.info("Processed snapshot: hubId = {}, timestamp = {}", snapshot.getHubId(), snapshot.getTimestamp());
     }
 
     private Predicate<SensorSnapshotAvro> toPredicate(final List<ScenarioCondition> conditions) {

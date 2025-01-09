@@ -19,7 +19,7 @@ import ru.yandex.practicum.telemetry.collector.mapper.SensorEventMapperFactory;
 import ru.yandex.practicum.telemetry.collector.service.HubEventService;
 import ru.yandex.practicum.telemetry.collector.service.SensorEventService;
 
-import static ru.yandex.practicum.telemetry.collector.util.Convertors.timestampToInstant;
+import static ru.yandex.practicum.grpc.telemetry.util.Convertors.timestampToInstant;
 
 @GrpcService
 public class EventController extends CollectorControllerGrpc.CollectorControllerImplBase {

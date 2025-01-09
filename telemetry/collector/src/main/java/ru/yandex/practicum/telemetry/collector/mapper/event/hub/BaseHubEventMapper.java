@@ -5,7 +5,7 @@ import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.telemetry.collector.mapper.HubEventMapper;
 
-import static ru.yandex.practicum.telemetry.collector.util.Convertors.timestampToInstant;
+import static ru.yandex.practicum.grpc.telemetry.util.Convertors.timestampToInstant;
 
 public abstract class BaseHubEventMapper<T extends SpecificRecordBase> implements HubEventMapper {
 

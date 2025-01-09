@@ -1,4 +1,4 @@
-package ru.yandex.practicum.telemetry.collector.util;
+package ru.yandex.practicum.grpc.telemetry.util;
 
 import com.google.protobuf.Timestamp;
 
