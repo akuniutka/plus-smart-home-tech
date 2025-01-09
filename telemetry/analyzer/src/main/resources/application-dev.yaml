@@ -1,17 +1,12 @@
 spring:
   main.banner-mode: OFF
-#  datasource:
-#    driver-class-name: org.h2.Driver
-#    url: jdbc:h2:mem:analyzer
-#    username: analyzer
-#    password: analyzer
   jpa:
     hibernate.ddl-auto: none
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        format_sql: true
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
   sql.init.mode: always
 logging.level:
-  ru.yandex.practicum.telemetry.analyzer.handler.snapshot: DEBUG
-#  org.hibernate.orm.jdbc.bind: TRACE
+  ru.yandex.practicum.telemetry.analyzer.handler.snapshot: INFO
+  org.hibernate.orm.jdbc.bind: INFO

@@ -16,6 +16,8 @@ import ru.yandex.practicum.telemetry.analyzer.service.DeviceActionExecutor;
 
 import java.time.Instant;
 
+import static ru.yandex.practicum.grpc.telemetry.util.Convertors.timestampToInstant;
+
 @Service
 public class DeviceActionExecutorImpl implements DeviceActionExecutor {
 
@@ -67,6 +69,8 @@ public class DeviceActionExecutorImpl implements DeviceActionExecutor {
 
     private void send(final DeviceActionRequest request) {
         hubRouterStub.handleDeviceAction(request);
-        log.info("Request for device action sent: {}", request);
+        log.info("Request for device action sent: hubId = {}, scenarioName = {}, timestamp = {}", request.getHubId(),
+                request.getScenarioName(), timestampToInstant(request.getTimestamp()));
+        log.debug("Request = {}", request);
     }
 }

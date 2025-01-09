@@ -5,7 +5,7 @@ import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.telemetry.collector.mapper.SensorEventMapper;
 
-import static ru.yandex.practicum.telemetry.collector.util.Convertors.timestampToInstant;
+import static ru.yandex.practicum.grpc.telemetry.util.Convertors.timestampToInstant;
 
 public abstract class BaseSensorEventMapper<T extends SpecificRecordBase> implements SensorEventMapper {
 
