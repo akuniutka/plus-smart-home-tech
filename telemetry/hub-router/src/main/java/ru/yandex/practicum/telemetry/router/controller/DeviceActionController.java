@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import ru.yandex.practicum.grpc.telemetry.event.DeviceActionRequest;
 import ru.yandex.practicum.grpc.telemetry.router.HubRouterControllerGrpc;
 
+import static ru.yandex.practicum.grpc.telemetry.util.Convertors.timestampToInstant;
+
 @GrpcService
 public class DeviceActionController extends HubRouterControllerGrpc.HubRouterControllerImplBase {
 
@@ -18,11 +20,11 @@ public class DeviceActionController extends HubRouterControllerGrpc.HubRouterCon
     @Override
     public void handleDeviceAction(final DeviceActionRequest request, final StreamObserver<Empty> responseObserver) {
         try {
-            log.debug("Request for device action received: {}", request);
-            log.info("Data received => {}", request);
+            log.info("Received request for device action: hubId = {}, scenarioName = {}, timestamp = {}",
+                    request.getHubId(), request.getScenarioName(), timestampToInstant(request.getTimestamp()));
+            log.debug("Request = {}", request);
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
-            log.debug("Request for device action processed: {}", request);
         } catch (Exception e) {
             log.error("Request processing error: {}, request: {}", e.getMessage(), request, e);
             responseObserver.onError(new StatusRuntimeException(

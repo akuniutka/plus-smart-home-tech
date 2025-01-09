@@ -69,7 +69,7 @@ public class DeviceActionExecutorImpl implements DeviceActionExecutor {
 
     private void send(final DeviceActionRequest request) {
         hubRouterStub.handleDeviceAction(request);
-        log.info("Request for device action sent: hubId = {}, scenarioName = {}, timestamp = {}", request.getHubId(),
+        log.info("Sent request for device action: hubId = {}, scenarioName = {}, timestamp = {}", request.getHubId(),
                 request.getScenarioName(), timestampToInstant(request.getTimestamp()));
         log.debug("Request = {}", request);
     }
