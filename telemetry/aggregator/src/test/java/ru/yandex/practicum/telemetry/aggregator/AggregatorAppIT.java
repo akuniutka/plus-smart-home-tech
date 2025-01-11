@@ -30,17 +30,17 @@ class AggregatorAppIT {
         AggregatorAppIT.sensorEventListener = sensorEventListener;
     }
 
+    @DynamicPropertySource
+    static void overrideProperties(final DynamicPropertyRegistry registry) {
+        registry.add("kafka.sender.properties.bootstrap.servers", kafka::getBootstrapServers);
+        registry.add("kafka.event-listener.properties.bootstrap.servers", kafka::getBootstrapServers);
+    }
+
     @AfterAll
     static void destroy() {
         if (sensorEventListener != null) {
             sensorEventListener.stop();
         }
-    }
-
-    @DynamicPropertySource
-    static void overrideProperties(final DynamicPropertyRegistry registry) {
-        registry.add("kafka.sender.properties.bootstrap.servers", kafka::getBootstrapServers);
-        registry.add("kafka.event-listener.properties.bootstrap.servers", kafka::getBootstrapServers);
     }
 
     @Test
