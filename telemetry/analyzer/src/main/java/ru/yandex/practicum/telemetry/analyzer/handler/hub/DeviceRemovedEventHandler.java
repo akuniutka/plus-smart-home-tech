@@ -15,8 +15,8 @@ public class DeviceRemovedEventHandler extends BaseHubEventHandler<DeviceRemoved
     }
 
     @Override
-    public Class<DeviceRemovedEventAvro> getPayloadType() {
-        return DeviceRemovedEventAvro.class;
+    public String getPayloadType() {
+        return DeviceRemovedEventAvro.class.getName();
     }
 
     @Override

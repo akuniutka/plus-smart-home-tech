@@ -1,7 +1,8 @@
 package ru.yandex.practicum.telemetry.analyzer;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -13,6 +14,12 @@ import org.testcontainers.utility.DockerImageName;
 import ru.yandex.practicum.kafka.telemetry.client.KafkaListener;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorSnapshotAvro;
+import ru.yandex.practicum.telemetry.analyzer.handler.HubEventHandler;
+import ru.yandex.practicum.telemetry.analyzer.handler.HubEventHandlerFactory;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 @SpringBootTest
 @Testcontainers
@@ -26,6 +33,9 @@ class AnalyzerAppIT {
 
     @Container
     static final KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.2"));
+
+    @Autowired
+    private HubEventHandlerFactory hubEventHandlerFactory;
 
     @Autowired
     public AnalyzerAppIT(
@@ -52,7 +62,12 @@ class AnalyzerAppIT {
         }
     }
 
-    @Test
-    void whenLoadContext_ThenNoErrors() {
+    @ParameterizedTest
+    @MethodSource("ru.yandex.practicum.telemetry.analyzer.util.TestModels#getPossibleHubEventPayloadTypes")
+    void whenGetHubEventHandler_ThenRequiredBeanExist(final String payloadType) {
+        final HubEventHandler handler = hubEventHandlerFactory.getHandler(payloadType);
+
+        assertThat(handler, notNullValue());
+        assertThat(handler.getPayloadType(), equalTo(payloadType));
     }
 }

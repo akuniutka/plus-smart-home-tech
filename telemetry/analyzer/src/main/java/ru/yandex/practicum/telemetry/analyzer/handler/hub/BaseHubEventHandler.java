@@ -8,7 +8,7 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
 
     @Override
     public void handle(final HubEventAvro event) {
-        if (event.getPayload().getClass() != getPayloadType()) {
+        if (!event.getPayload().getClass().getName().equals(getPayloadType())) {
             throw new IllegalArgumentException("Unknown payload type: " + event.getPayload().getClass());
         }
         final String hubId = event.getHubId();
