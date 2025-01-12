@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received hub event: hubId = test.hub.1, timestamp = 2000-01-31T13:30:55.123Z, payload type = ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro"
+  },
+  {
+    "level": "WARN",
+    "message": "Test exception: hubId = test.hub.1, timestamp = 2000-01-31T13:30:55.123Z, payload type = ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro"
+  }
+]

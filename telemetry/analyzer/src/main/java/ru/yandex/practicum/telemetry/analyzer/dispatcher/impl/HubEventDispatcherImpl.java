@@ -28,8 +28,10 @@ public class HubEventDispatcherImpl implements HubEventDispatcher {
         try {
             handler.handle(event);
         } catch (EntityValidationException e) {
+            final String extraInfo = e.getParameterName() == null ? "" :
+                    ", %s = %s".formatted(e.getParameterName(), e.getParameterValue());
             log.warn("{}: hubId = {}, timestamp = {}, payload type = {}{}", e.getMessage(), event.getHubId(),
-                    event.getTimestamp(), payloadType, e.getAdditionalInfo());
+                    event.getTimestamp(), payloadType, extraInfo);
         }
     }
 }
