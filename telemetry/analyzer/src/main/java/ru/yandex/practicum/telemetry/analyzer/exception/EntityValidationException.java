@@ -17,8 +17,4 @@ public class EntityValidationException extends RuntimeException {
         this.parameterName = parameterName;
         this.parameterValue = parameterValue;
     }
-
-    public String getAdditionalInfo() {
-        return parameterName != null ? ", " + parameterName + " = " + parameterValue : "";
-    }
 }
