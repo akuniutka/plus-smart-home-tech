@@ -22,8 +22,8 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
     }
 
     @Override
-    public Class<ScenarioAddedEventAvro> getPayloadType() {
-        return ScenarioAddedEventAvro.class;
+    public String getPayloadType() {
+        return ScenarioAddedEventAvro.class.getName();
     }
 
     @Override

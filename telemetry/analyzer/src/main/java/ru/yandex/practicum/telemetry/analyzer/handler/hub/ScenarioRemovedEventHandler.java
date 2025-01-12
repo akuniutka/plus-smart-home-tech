@@ -15,8 +15,8 @@ public class ScenarioRemovedEventHandler extends BaseHubEventHandler<ScenarioRem
     }
 
     @Override
-    public Class<ScenarioRemovedEventAvro> getPayloadType() {
-        return ScenarioRemovedEventAvro.class;
+    public String getPayloadType() {
+        return ScenarioRemovedEventAvro.class.getName();
     }
 
     @Override
