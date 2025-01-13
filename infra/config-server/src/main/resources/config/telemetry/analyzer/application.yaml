@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5433/analyzer
+    username: analyzer
+    password: analyzer
+  jpa:
+    hibernate.ddl-auto: none
+    open-in-view: false
+  sql.init.mode: always
+kafka:
+  hub-event-listener:
+    topics:
+      - telemetry.hubs.v1
+    poll-timeout: 15000
+    strategy: at-least-once
+    commit-batch-size: 10
+    properties:
+      bootstrap.servers: localhost:9092
+      group.id: telemetry.hub-analyzers
+      auto.offset.reset: earliest
+      enable.auto.commit: false
+      fetch.min.bytes: 500
+      fetch.max.wait.ms: 30000
+  snapshot-listener:
+    topics:
+      - telemetry.snapshots.v1
+    poll-timeout: 10000
+    strategy: at-most-once
+    properties:
+      bootstrap.servers: localhost:9092
+      group.id: telemetry.snapshot-analyzers
+      auto.offset.reset: earliest
+      enable.auto.commit: false
+grpc:
+  client:
+    router:
+      address: 'static://127.0.0.1:59090'
+      enable-keep-alive: true
+      keep-alive-without-calls: true
+      negotiation-type: plaintext
+logging.level:
+  org.apache.kafka: WARN

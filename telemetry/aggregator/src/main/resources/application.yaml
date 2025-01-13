@@ -1,16 +1,11 @@
-kafka:
-  topics:
-    snapshots: telemetry.snapshots.v1
-  event-listener:
-    topics:
-      - telemetry.sensors.v1
-    properties:
-      bootstrap.servers: localhost:9092
-      group.id: telemetry.aggregators
-      auto.offset.reset: earliest
-      enable.auto.commit: false
-  sender:
-    properties:
-      bootstrap.servers: localhost:9092
-logging.level:
-  org.apache.kafka: WARN
+spring:
+  application:
+    name: aggregator
+  config:
+    import: configserver:http://localhost:8888
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        use-random-policy: true
+        max-interval: 6000
