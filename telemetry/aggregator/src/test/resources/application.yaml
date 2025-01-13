@@ -1,5 +1,6 @@
 spring:
   main.banner-mode: OFF
+  cloud.config.enabled: false
 kafka:
   topics:
     snapshots: telemetry.snapshots.v1
