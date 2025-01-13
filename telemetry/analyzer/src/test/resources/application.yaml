@@ -1,5 +1,6 @@
 spring:
   main.banner-mode: OFF
+  cloud.config.enabled: false
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     url: jdbc:tc:postgresql://localhost:5433/analyzer

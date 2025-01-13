@@ -1,5 +1,6 @@
 spring:
   main.banner-mode: OFF
+  cloud.config.enabled: false
 grpc:
   server:
     port: 9090
