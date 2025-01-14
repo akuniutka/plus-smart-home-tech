@@ -2,10 +2,23 @@ spring:
   application:
     name: collector
   config:
-    import: configserver:http://localhost:8888
+    import: 'configserver:'
   cloud:
     config:
+      discovery:
+        service-id: config-server
+        enabled: true
       fail-fast: true
       retry:
         use-random-policy: true
         max-interval: 6000
+eureka:
+  instance:
+    hostname: localhost
+    metadata-map:
+      supported-sensor-event-proto: v1
+      supported-hub-event-proto: v1
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+    register-with-eureka: true

@@ -35,7 +35,7 @@ kafka:
 grpc:
   client:
     router:
-      address: 'static://127.0.0.1:59090'
+      address: 'discovery:///hub-router'
       enable-keep-alive: true
       keep-alive-without-calls: true
       negotiation-type: plaintext

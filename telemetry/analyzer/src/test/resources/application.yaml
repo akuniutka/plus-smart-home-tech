@@ -30,5 +30,6 @@ kafka:
       group.id: telemetry.snapshot-analyzers
       auto.offset.reset: earliest
       enable.auto.commit: false
+eureka.client.enabled: false
 logging.level:
   org.apache.kafka: WARN
