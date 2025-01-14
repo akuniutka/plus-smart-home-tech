@@ -15,5 +15,6 @@ kafka:
   sender:
     properties:
       bootstrap.servers: localhost:9092
+eureka.client.enabled: false
 logging.level:
   org.apache.kafka: WARN
