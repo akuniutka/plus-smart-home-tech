@@ -13,7 +13,7 @@ import ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro;
 import java.util.UUID;
 
 @Entity
-@Table(name = "scenario_conditions")
+@Table(name = "scenario_conditions", schema = "analyzer")
 @Data
 @EqualsAndHashCode(of = "id")
 public class ScenarioCondition {

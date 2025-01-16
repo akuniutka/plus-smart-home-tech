@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceTypeAvro;
 
 @Entity
-@Table(name = "devices")
+@Table(name = "devices", schema = "analyzer")
 @Data
 @EqualsAndHashCode(of = "id")
 public class Device {

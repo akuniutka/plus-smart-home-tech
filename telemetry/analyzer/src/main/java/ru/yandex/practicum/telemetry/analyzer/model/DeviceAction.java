@@ -12,7 +12,7 @@ import ru.yandex.practicum.kafka.telemetry.event.ActionTypeAvro;
 import java.util.UUID;
 
 @Entity
-@Table(name = "device_actions")
+@Table(name = "device_actions", schema = "analyzer")
 @Data
 @EqualsAndHashCode(of = "id")
 public class DeviceAction {
