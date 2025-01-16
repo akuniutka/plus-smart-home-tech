@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5433/analyzer
-    username: analyzer
-    password: analyzer
+    url: jdbc:postgresql://localhost:6543/smart
+    username: smart
+    password: smart
   jpa:
     hibernate.ddl-auto: none
     open-in-view: false
