@@ -19,5 +19,5 @@ eureka:
       supported-sensor-event-avro: v1
   client:
     service-url:
-      default-zone: http://localhost:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
