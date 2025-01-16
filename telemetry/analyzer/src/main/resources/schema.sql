@@ -1,16 +1,18 @@
-CREATE TABLE IF NOT EXISTS hubs
+CREATE SCHEMA IF NOT EXISTS analyzer;
+
+CREATE TABLE IF NOT EXISTS analyzer.hubs
 (
   id VARCHAR PRIMARY KEY
 );
 
-CREATE TABLE IF NOT EXISTS devices
+CREATE TABLE IF NOT EXISTS analyzer.devices
 (
   id     VARCHAR PRIMARY KEY,
   hub_id VARCHAR,
   type   VARCHAR
 );
 
-CREATE TABLE IF NOT EXISTS scenarios
+CREATE TABLE IF NOT EXISTS analyzer.scenarios
 (
   id     UUID PRIMARY KEY,
   hub_id VARCHAR,
@@ -18,7 +20,7 @@ CREATE TABLE IF NOT EXISTS scenarios
   CONSTRAINT scenarios_name_hub_id_ux UNIQUE (hub_id, name)
 );
 
-CREATE TABLE IF NOT EXISTS scenario_conditions
+CREATE TABLE IF NOT EXISTS analyzer.scenario_conditions
 (
   id             UUID PRIMARY KEY,
   scenario_id    UUID,
@@ -29,7 +31,7 @@ CREATE TABLE IF NOT EXISTS scenario_conditions
   value          VARCHAR
 );
 
-CREATE TABLE IF NOT EXISTS device_actions
+CREATE TABLE IF NOT EXISTS analyzer.device_actions
 (
   id          UUID PRIMARY KEY,
   scenario_id UUID,
