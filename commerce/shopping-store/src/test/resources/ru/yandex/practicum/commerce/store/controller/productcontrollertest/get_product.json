@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request for product: productId = 25182563-067b-441c-b11d-9ad1fb249e25"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with requested product: productId = 25182563-067b-441c-b11d-9ad1fb249e25, productName = light sensor v.1"
+  }
+]

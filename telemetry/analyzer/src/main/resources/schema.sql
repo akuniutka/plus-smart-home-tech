@@ -38,4 +38,4 @@ CREATE TABLE IF NOT EXISTS analyzer.device_actions
   device_id   VARCHAR,
   type        VARCHAR,
   value       INT
-)
+);

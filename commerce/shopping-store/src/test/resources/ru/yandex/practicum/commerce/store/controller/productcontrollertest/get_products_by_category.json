@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request for products in category: category = SENSORS"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with 2 products in category: category = SENSORS"
+  }
+]
