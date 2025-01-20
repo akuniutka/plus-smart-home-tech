@@ -3,9 +3,9 @@ spring:
   cloud.config.enabled: false
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    url: jdbc:tc:postgresql://localhost:5433/analyzer
-    username: analyzer
-    password: analyzer
+    url: jdbc:tc:postgresql://localhost:6543/smart
+    username: smart
+    password: smart
 kafka:
   hub-event-listener:
     topics:

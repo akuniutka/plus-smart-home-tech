@@ -1,0 +1,11 @@
+{
+  "productId": "0112f4d1-4940-4cd5-84ed-e7d44f683808",
+  "productName": "lighting device v.2",
+  "description": "A new version of smart lighting device",
+  "imageSrc": "/lighting/lighting-device-v2.jpg",
+  "quantityState": "FEW",
+  "productState": "DEACTIVATE",
+  "rating": 3.0,
+  "productCategory": "LIGHTING",
+  "price": 4.99
+}

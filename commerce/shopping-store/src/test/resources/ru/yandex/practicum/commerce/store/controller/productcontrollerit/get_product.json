@@ -1,0 +1,11 @@
+{
+  "productId": "25182563-067b-441c-b11d-9ad1fb249e25",
+  "productName": "light sensor v.1",
+  "description": "A modern energy efficient light sensor",
+  "imageSrc": "/sensors/light/light-sensor-v1.jpg",
+  "quantityState": "ENOUGH",
+  "productState": "ACTIVE",
+  "rating": 5.0,
+  "productCategory": "SENSORS",
+  "price": 9.99
+}

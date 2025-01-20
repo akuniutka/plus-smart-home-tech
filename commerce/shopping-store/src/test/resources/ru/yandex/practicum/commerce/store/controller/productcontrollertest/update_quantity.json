@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to update product quantity: productId = 25182563-067b-441c-b11d-9ad1fb249e25, quantityState = FEW"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded to quantity update request: productId = 25182563-067b-441c-b11d-9ad1fb249e25, quantityState = FEW, result = true"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to update product: productId = 0112f4d1-4940-4cd5-84ed-e7d44f683808, productName = lighting device v.2"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with updated product: productId = 25182563-067b-441c-b11d-9ad1fb249e25, productName = light sensor v.1"
+  }
+]
