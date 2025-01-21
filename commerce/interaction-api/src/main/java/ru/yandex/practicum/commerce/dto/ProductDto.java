@@ -39,5 +39,6 @@ public class ProductDto {
 
     @NotNull
     @Digits(integer = 17, fraction = 2)
+    @Min(1)
     private BigDecimal price;
 }
