@@ -82,14 +82,14 @@ class ProductControllerIT {
     }
 
     @Test
-    void whenPutAtBasePath_ThenInvokeAddProductMethodAndProcessResponse() throws Exception {
+    void whenPostAtBasePath_ThenInvokeAddProductMethodAndProcessResponse() throws Exception {
         final String requestBody = loadJson("add_product_request.json", getClass());
         final String responseBody = loadJson("add_product_response.json", getClass());
         when(mockMapper.mapToEntity(any())).thenReturn(getTestNewProduct());
         when(mockService.addProduct(any())).thenReturn(getTestProductA());
         when(mockMapper.mapToDto(any(Product.class))).thenReturn(getTestProductDtoA());
 
-        mvc.perform(put(BASE_PATH)
+        mvc.perform(post(BASE_PATH)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -148,14 +148,14 @@ class ProductControllerIT {
     }
 
     @Test
-    void whenPostAtBasePath_ThenInvokeUpdateProductMethodAndProcessResponse() throws Exception {
+    void whenPutAtBasePath_ThenInvokeUpdateProductMethodAndProcessResponse() throws Exception {
         final String requestBody = loadJson("update_product_request.json", getClass());
         final String responseBody = loadJson("update_product_response.json", getClass());
         when(mockMapper.mapToEntity(any())).thenReturn(getTestProductB());
         when(mockService.updateProduct(any())).thenReturn(getTestProductA());
         when(mockMapper.mapToDto(any(Product.class))).thenReturn(getTestProductDtoA());
 
-        mvc.perform(post(BASE_PATH)
+        mvc.perform(put(BASE_PATH)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
