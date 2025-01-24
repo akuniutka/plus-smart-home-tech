@@ -3,17 +3,16 @@ package ru.yandex.practicum.commerce.store.service.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import ru.yandex.practicum.commerce.exception.ProductNotFoundException;
 import ru.yandex.practicum.commerce.store.model.Product;
 import ru.yandex.practicum.commerce.store.repository.ProductRepository;
 import ru.yandex.practicum.commerce.store.service.ProductService;
 import ru.yandex.practicum.commerce.store.util.LogListener;
+import ru.yandex.practicum.commerce.store.util.UUIDGenerator;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -42,37 +41,36 @@ class ProductServiceImplTest {
 
     private static final LogListener logListener = new LogListener(ProductServiceImpl.class);
     private ProductRepository mockRepository;
+    private UUIDGenerator mockUUIDGenerator;
 
     private ProductService service;
 
     @BeforeEach
     void setUp() {
         mockRepository = Mockito.mock(ProductRepository.class);
+        mockUUIDGenerator = Mockito.mock(UUIDGenerator.class);
         logListener.startListen();
         logListener.reset();
-        service = new ProductServiceImpl(mockRepository);
+        service = new ProductServiceImpl(mockRepository, mockUUIDGenerator);
     }
 
     @AfterEach
     void tearDown() {
         logListener.stopListen();
-        Mockito.verifyNoMoreInteractions(mockRepository);
+        Mockito.verifyNoMoreInteractions(mockRepository, mockUUIDGenerator);
     }
 
     @Test
     void whenAddProduct_ThenAssignProductIdAndSaveInRepositoryAndReturnSavedAndLog() throws Exception {
-        try (MockedStatic<UUID> uuid = Mockito.mockStatic(UUID.class)) {
-            when(mockRepository.save(any())).thenReturn(getTestProductA());
-            uuid.when(UUID::randomUUID).thenReturn(PRODUCT_ID_A);
+        when(mockUUIDGenerator.getNewUUID()).thenReturn(PRODUCT_ID_A);
+        when(mockRepository.save(any())).thenReturn(getTestProductA());
 
-            final Product product = service.addProduct(getTestNewProduct());
+        final Product product = service.addProduct(getTestNewProduct());
 
-            uuid.verify(UUID::randomUUID);
-            uuid.verifyNoMoreInteractions();
-            verify(mockRepository).save(argThat(samePropertyValuesAs(getTestProductA())));
-            assertThat(product, samePropertyValuesAs(getTestProductA()));
-            assertLogs(logListener.getEvents(), "add_product.json", getClass());
-        }
+        verify(mockUUIDGenerator).getNewUUID();
+        verify(mockRepository).save(argThat(samePropertyValuesAs(getTestProductA())));
+        assertThat(product, samePropertyValuesAs(getTestProductA()));
+        assertLogs(logListener.getEvents(), "add_product.json", getClass());
     }
 
     @Test

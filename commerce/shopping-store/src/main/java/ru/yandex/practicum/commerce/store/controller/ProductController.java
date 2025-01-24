@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.commerce.client.ShoppingStoreClient;
+import ru.yandex.practicum.commerce.service.ShoppingStoreOperations;
 import ru.yandex.practicum.commerce.dto.Pageable;
 import ru.yandex.practicum.commerce.dto.ProductCategory;
 import ru.yandex.practicum.commerce.dto.ProductDto;
@@ -20,7 +20,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class ProductController implements ShoppingStoreClient {
+public class ProductController implements ShoppingStoreOperations {
 
     private final ProductService productService;
     private final ProductMapper productMapper;

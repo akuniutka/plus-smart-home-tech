@@ -7,6 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 class ShoppingStoreAppIT {
 
     @Test
-    void whenLoadContext_NoError() {
+    void whenLoadContext_ThenNoError() {
     }
 }
