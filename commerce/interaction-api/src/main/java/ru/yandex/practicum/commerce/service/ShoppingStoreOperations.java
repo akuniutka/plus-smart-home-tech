@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public interface ShoppingStoreOperations {
 
-    @PutMapping("/api/v1/shopping-store")
+    @PostMapping("/api/v1/shopping-store")
     ProductDto addProduct(@RequestBody @Valid ProductDto product);
 
     @GetMapping("/api/v1/shopping-store/{productId}")
@@ -26,7 +26,7 @@ public interface ShoppingStoreOperations {
     @GetMapping("/api/v1/shopping-store")
     List<ProductDto> findProductsByCategory(@RequestParam ProductCategory category, Pageable pageable);
 
-    @PostMapping("/api/v1/shopping-store")
+    @PutMapping("/api/v1/shopping-store")
     ProductDto updateProduct(@RequestBody @Valid ProductDto product);
 
     @PostMapping("/api/v1/shopping-store/quantityState")
