@@ -1,7 +1,6 @@
 package ru.yandex.practicum.commerce.dto;
 
 import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -28,12 +27,6 @@ public class ProductDto {
 
     @NotNull
     private ProductState productState;
-
-    @NotNull
-    @Digits(integer = 1, fraction = 1)
-    @Min(1)
-    @Max(5)
-    private BigDecimal rating;
 
     private ProductCategory productCategory;
 

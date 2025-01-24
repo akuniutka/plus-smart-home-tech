@@ -6,7 +6,6 @@
     "imageSrc": "/sensors/light/light-sensor-v1.jpg",
     "quantityState": "ENOUGH",
     "productState": "ACTIVE",
-    "rating": 5.0,
     "productCategory": "SENSORS",
     "price": 9.99
   },
@@ -17,7 +16,6 @@
     "imageSrc": "/lighting/lighting-device-v2.jpg",
     "quantityState": "FEW",
     "productState": "DEACTIVATE",
-    "rating": 3.0,
     "productCategory": "LIGHTING",
     "price": 4.99
   }

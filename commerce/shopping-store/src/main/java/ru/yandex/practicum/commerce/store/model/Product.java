@@ -33,8 +33,6 @@ public class Product {
     @Enumerated(EnumType.STRING)
     ProductState productState;
 
-    BigDecimal rating;
-
     @Enumerated(EnumType.STRING)
     ProductCategory productCategory;
 

@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS store.products
   image_src VARCHAR,
   quantity_state VARCHAR,
   product_state VARCHAR,
-  rating NUMERIC(2, 1),
   product_category VARCHAR,
   price NUMERIC(19, 2)
 );

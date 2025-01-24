@@ -4,7 +4,6 @@ INSERT INTO store.products (product_id,
                             image_src,
                             quantity_state,
                             product_state,
-                            rating,
                             product_category,
                             price)
 VALUES
@@ -15,7 +14,6 @@ VALUES
   '/sensors/light/light-sensor-v1.jpg',
   'ENOUGH',
   'ACTIVE',
-  5.0,
   'SENSORS',
   9.99
 ),
@@ -26,7 +24,6 @@ VALUES
  '/lighting/lighting-device-v2.jpg',
  'FEW',
  'DEACTIVATE',
- 3.0,
  'LIGHTING',
  4.99
 ),
@@ -37,7 +34,6 @@ VALUES
   '/sensors/light/light-sensor-alpha.jpg',
   'FEW',
   'ACTIVE',
-  3.0,
   'SENSORS',
   3.99
 ),
@@ -48,7 +44,6 @@ VALUES
   '/sensors/light/light-sensor-beta.jpg',
   'FEW',
   'ACTIVE',
-  4.0,
   'SENSORS',
   5.99
 );
