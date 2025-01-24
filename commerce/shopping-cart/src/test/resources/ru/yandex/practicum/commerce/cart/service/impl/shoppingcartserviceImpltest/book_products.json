@@ -1,0 +1,6 @@
+[
+  {
+    "level": "INFO",
+    "message": "Booked products in warehouse: shoppingCartId = 801b5a89-c5f1-435c-a54e-d06cd6662a6a, deliveryVolume = 1.00, deliveryWeight = 10.00, fragile = true"
+  }
+]

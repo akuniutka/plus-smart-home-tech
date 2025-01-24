@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to delete 2 product(s) from shopping cart: username = ***"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with updated shopping cart: shoppingCartId = 801b5a89-c5f1-435c-a54e-d06cd6662a6a, username = ***, products deleted = 2"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to deactivate shopping cart: username = ***"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with 200 OK to deactivate shopping cart request: username = ***"
+  }
+]

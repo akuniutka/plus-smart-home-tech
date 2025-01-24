@@ -1,5 +1,4 @@
-INSERT INTO store.products (
-                            product_id,
+INSERT INTO store.products (product_id,
                             product_name,
                             description,
                             image_src,

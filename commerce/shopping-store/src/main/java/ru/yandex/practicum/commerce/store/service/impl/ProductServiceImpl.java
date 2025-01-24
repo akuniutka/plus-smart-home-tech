@@ -11,6 +11,7 @@ import ru.yandex.practicum.commerce.exception.ProductNotFoundException;
 import ru.yandex.practicum.commerce.store.model.Product;
 import ru.yandex.practicum.commerce.store.repository.ProductRepository;
 import ru.yandex.practicum.commerce.store.service.ProductService;
+import ru.yandex.practicum.commerce.store.util.UUIDGenerator;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,10 +22,11 @@ import java.util.UUID;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository repository;
+    private final UUIDGenerator uuidGenerator;
 
     @Override
     public Product addProduct(final Product product) {
-        product.setProductId(UUID.randomUUID());
+        product.setProductId(uuidGenerator.getNewUUID());
         final Product savedProduct = repository.save(product);
         log.info("Added new product: productId = {}, productName = {}", savedProduct.getProductId(),
                 savedProduct.getProductName());
