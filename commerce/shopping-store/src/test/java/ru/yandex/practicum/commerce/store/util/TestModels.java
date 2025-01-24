@@ -23,7 +23,6 @@ public final class TestModels {
     public static final String IMAGE_SRC_A = "/sensors/light/light-sensor-v1.jpg";
     public static final QuantityState QUANTITY_A = QuantityState.ENOUGH;
     public static final ProductState PRODUCT_STATE_A = ProductState.ACTIVE;
-    public static final BigDecimal RATING_A = BigDecimal.valueOf(50, 1);
     public static final ProductCategory CATEGORY_A = ProductCategory.SENSORS;
     public static final BigDecimal PRICE_A = BigDecimal.valueOf(999, 2);
 
@@ -33,7 +32,6 @@ public final class TestModels {
     public static final String IMAGE_SRC_B = "/lighting/lighting-device-v2.jpg";
     public static final QuantityState QUANTITY_B = QuantityState.FEW;
     public static final ProductState PRODUCT_STATE_B = ProductState.DEACTIVATE;
-    public static final BigDecimal RATING_B = BigDecimal.valueOf(30, 1);
     public static final ProductCategory CATEGORY_B = ProductCategory.LIGHTING;
     public static final BigDecimal PRICE_B = BigDecimal.valueOf(499, 2);
 
@@ -65,7 +63,6 @@ public final class TestModels {
         dto.setImageSrc(IMAGE_SRC_A);
         dto.setQuantityState(QUANTITY_A);
         dto.setProductState(PRODUCT_STATE_A);
-        dto.setRating(RATING_A);
         dto.setProductCategory(CATEGORY_A);
         dto.setPrice(PRICE_A);
         return dto;
@@ -79,7 +76,6 @@ public final class TestModels {
         dto.setImageSrc(IMAGE_SRC_B);
         dto.setQuantityState(QUANTITY_B);
         dto.setProductState(PRODUCT_STATE_B);
-        dto.setRating(RATING_B);
         dto.setProductCategory(CATEGORY_B);
         dto.setPrice(PRICE_B);
         return dto;
@@ -121,7 +117,6 @@ public final class TestModels {
         product.setImageSrc(IMAGE_SRC_A);
         product.setQuantityState(quantity);
         product.setProductState(state);
-        product.setRating(RATING_A);
         product.setProductCategory(CATEGORY_A);
         product.setPrice(PRICE_A);
         return product;
@@ -135,7 +130,6 @@ public final class TestModels {
         product.setImageSrc(IMAGE_SRC_B);
         product.setQuantityState(QUANTITY_B);
         product.setProductState(PRODUCT_STATE_B);
-        product.setRating(RATING_B);
         product.setProductCategory(CATEGORY_B);
         product.setPrice(PRICE_B);
         return product;

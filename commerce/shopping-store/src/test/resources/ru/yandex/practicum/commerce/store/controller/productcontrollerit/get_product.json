@@ -5,7 +5,6 @@
   "imageSrc": "/sensors/light/light-sensor-v1.jpg",
   "quantityState": "ENOUGH",
   "productState": "ACTIVE",
-  "rating": 5.0,
   "productCategory": "SENSORS",
   "price": 9.99
 }
