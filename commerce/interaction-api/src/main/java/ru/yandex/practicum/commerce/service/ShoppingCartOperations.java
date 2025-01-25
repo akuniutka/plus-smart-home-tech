@@ -1,5 +1,6 @@
 package ru.yandex.practicum.commerce.service;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +31,7 @@ public interface ShoppingCartOperations {
 
     @PostMapping("/api/v1/shopping-cart/change-quantity")
     ShoppingCartDto changeProductQuantity(@RequestParam String username,
-            @RequestBody ChangeProductQuantityRequest request);
+            @RequestBody @Valid ChangeProductQuantityRequest request);
 
     @PostMapping("/api/v1/shopping-cart/booking")
     BookedProductsDto bookProductsInWarehouse(@RequestParam String username);
