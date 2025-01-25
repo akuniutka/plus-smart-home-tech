@@ -1,0 +1,68 @@
+package ru.yandex.practicum.commerce.warehouse.controller;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.commerce.dto.AddProductToWarehouseRequest;
+import ru.yandex.practicum.commerce.dto.AddressDto;
+import ru.yandex.practicum.commerce.dto.BookedProductsDto;
+import ru.yandex.practicum.commerce.dto.NewProductInWarehouseRequest;
+import ru.yandex.practicum.commerce.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.service.WarehouseOperations;
+import ru.yandex.practicum.commerce.warehouse.mapper.BookedProductsMapper;
+import ru.yandex.practicum.commerce.warehouse.mapper.ProductMapper;
+import ru.yandex.practicum.commerce.warehouse.model.BookedProducts;
+import ru.yandex.practicum.commerce.warehouse.model.Product;
+import ru.yandex.practicum.commerce.warehouse.service.AddressService;
+import ru.yandex.practicum.commerce.warehouse.service.ProductService;
+
+@RestController
+@RequiredArgsConstructor
+@Slf4j
+public class WarehouseController implements WarehouseOperations {
+
+    private final ProductService productService;
+    private final AddressService addressService;
+    private final ProductMapper productMapper;
+    private final BookedProductsMapper bookedProductsMapper;
+
+    @Override
+    public void addNewProduct(final NewProductInWarehouseRequest request) {
+        log.info("Received request to add new product: productId = {}", request.getProductId());
+        log.debug("Add new product request = {}", request);
+        final Product product = productMapper.mapToEntity(request);
+        productService.addNewProduct(product);
+        log.info("Responded with 200 OK to add new product request: productId = {}", request.getProductId());
+    }
+
+    @Override
+    public BookedProductsDto bookProducts(final ShoppingCartDto shoppingCart) {
+        log.info("Received request to book products from shopping cart: shoppingCartId = {}",
+                shoppingCart.getShoppingCartId());
+        log.debug("Shopping cart = {}", shoppingCart);
+        final BookedProducts bookedProducts = productService.bookProductsInWarehouse(shoppingCart);
+        final BookedProductsDto dto = bookedProductsMapper.mapToDto(bookedProducts);
+        log.info("Responded with delivery parameters for booked shopping cart: shoppingCarId = {}",
+                shoppingCart.getShoppingCartId());
+        log.debug("Delivery parameters = {}", dto);
+        return dto;
+    }
+
+    @Override
+    public void increaseProductQuantity(final AddProductToWarehouseRequest request) {
+        log.info("Received request to increase product quantity: productId = {}, quantity to add = {}",
+                request.getProductId(), request.getQuantity());
+        productService.increaseProductQuantity(request);
+        log.info("Responded with 200 OK to increase product quantity: productId = {}, quantity to add = {}",
+                request.getProductId(), request.getQuantity());
+    }
+
+    @Override
+    public AddressDto getWarehouseAddress() {
+        log.info("Received request for warehouse address");
+        final AddressDto address = addressService.getAddress();
+        log.info("Responded with warehouse address");
+        log.debug("Warehouse address = {}", address);
+        return address;
+    }
+}
