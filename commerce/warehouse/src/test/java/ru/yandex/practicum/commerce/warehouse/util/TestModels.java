@@ -1,10 +1,16 @@
 package ru.yandex.practicum.commerce.warehouse.util;
 
+import ru.yandex.practicum.commerce.dto.AddProductToWarehouseRequest;
 import ru.yandex.practicum.commerce.dto.AddressDto;
+import ru.yandex.practicum.commerce.dto.BookedProductsDto;
+import ru.yandex.practicum.commerce.dto.DimensionDto;
+import ru.yandex.practicum.commerce.dto.NewProductInWarehouseRequest;
+import ru.yandex.practicum.commerce.dto.ShoppingCartDto;
 import ru.yandex.practicum.commerce.warehouse.model.Dimension;
 import ru.yandex.practicum.commerce.warehouse.model.Product;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.UUID;
 
 public final class TestModels {
@@ -31,6 +37,14 @@ public final class TestModels {
 
     public static final UUID PRODUCT_ID_C = UUID.fromString("0a53f38d-dd00-4f80-9b2e-c9d17ee46385");
 
+    public static final UUID SHOPPING_CART_ID = UUID.fromString("801b5a89-c5f1-435c-a54e-d06cd6662a6a");
+    public static final long PRODUCT_QUANTITY_A = 1L;
+    public static final long PRODUCT_QUANTITY_B = 2L;
+
+    public static final BigDecimal BOOKED_WEIGHT = BigDecimal.valueOf(14000, SCALE);
+    public static final BigDecimal BOOKED_VOLUME = BigDecimal.valueOf(54000, SCALE);
+    public static final boolean BOOKED_FRAGILE = true;
+
     public static final String TEST_EXCEPTION_MESSAGE = "Test exception message";
 
     private static final String ADDRESS_A = "ADDRESS_1";
@@ -38,6 +52,19 @@ public final class TestModels {
 
     private TestModels() {
         throw new AssertionError();
+    }
+
+    public static NewProductInWarehouseRequest getTestNewProductDto() {
+        final DimensionDto dimension = new DimensionDto();
+        dimension.setWidth(PRODUCT_WIDTH_A);
+        dimension.setHeight(PRODUCT_HEIGHT_A);
+        dimension.setDepth(PRODUCT_DEPTH_A);
+        final NewProductInWarehouseRequest dto = new NewProductInWarehouseRequest();
+        dto.setProductId(PRODUCT_ID_A);
+        dto.setFragile(PRODUCT_FRAGILE_A);
+        dto.setDimension(dimension);
+        dto.setWeight(PRODUCT_WEIGHT_A);
+        return dto;
     }
 
     public static Product getTestProductA() {
@@ -68,6 +95,31 @@ public final class TestModels {
         product.setTotalQuantity(PRODUCT_TOTAL_QUANTITY_B);
         product.setBookedQuantity(PRODUCT_BOOKED_QUANTITY_B);
         return product;
+    }
+
+    public static ShoppingCartDto getTestShoppingCart() {
+        final ShoppingCartDto dto = new ShoppingCartDto();
+        dto.setShoppingCartId(SHOPPING_CART_ID);
+        dto.setProducts(Map.of(
+                PRODUCT_ID_A, PRODUCT_QUANTITY_A,
+                PRODUCT_ID_B, PRODUCT_QUANTITY_B
+        ));
+        return dto;
+    }
+
+    public static BookedProductsDto getTestBookedProducts() {
+        final BookedProductsDto dto = new BookedProductsDto();
+        dto.setDeliveryWeight(BOOKED_WEIGHT);
+        dto.setDeliveryVolume(BOOKED_VOLUME);
+        dto.setFragile(BOOKED_FRAGILE);
+        return dto;
+    }
+
+    public static AddProductToWarehouseRequest getTestAddProductToWarehouseRequest() {
+        final AddProductToWarehouseRequest request = new AddProductToWarehouseRequest();
+        request.setProductId(PRODUCT_ID_A);
+        request.setQuantity(PRODUCT_QUANTITY_A);
+        return request;
     }
 
     public static AddressDto getTestAddressDtoA() {
