@@ -3,6 +3,7 @@ package ru.yandex.practicum.commerce.cart.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.commerce.cart.exception.BookingNotPossibleException;
 import ru.yandex.practicum.commerce.cart.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.commerce.cart.model.ShoppingCart;
 import ru.yandex.practicum.commerce.cart.model.ShoppingCartState;
@@ -108,12 +109,17 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         }
         requireShoppingCartNotDeactivated(shoppingCart);
         final ShoppingCartDto shoppingCartDto = shoppingCartMapper.mapToDto(shoppingCart);
-        final BookedProductsDto bookedProductsDto = warehouseService.bookProducts(shoppingCartDto);
-        log.info("Booked products in warehouse: shoppingCartId = {}, deliveryVolume = {}, deliveryWeight = {}, "
-                        + "fragile = {}", shoppingCart.getShoppingCartId(), bookedProductsDto.getDeliveryVolume(),
-                bookedProductsDto.getDeliveryWeight(), bookedProductsDto.getFragile());
-        log.debug("Booked shopping cart = {}", shoppingCart);
-        return bookedProductsDto;
+
+        try {
+            final BookedProductsDto bookedProductsDto = warehouseService.bookProducts(shoppingCartDto);
+            log.info("Booked products in warehouse: shoppingCartId = {}, deliveryVolume = {}, deliveryWeight = {}, "
+                            + "fragile = {}", shoppingCart.getShoppingCartId(), bookedProductsDto.getDeliveryVolume(),
+                    bookedProductsDto.getDeliveryWeight(), bookedProductsDto.getFragile());
+            log.debug("Booked shopping cart = {}", shoppingCart);
+            return bookedProductsDto;
+        } catch (Exception e) {
+            throw new BookingNotPossibleException("Cannot book products in warehouse now");
+        }
     }
 
     private ShoppingCart createShoppingCart(final String username) {

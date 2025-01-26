@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+import ru.yandex.practicum.commerce.cart.exception.BookingNotPossibleException;
 import ru.yandex.practicum.commerce.cart.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.commerce.cart.model.ShoppingCart;
 import ru.yandex.practicum.commerce.cart.repository.ShoppingCartRepository;
@@ -376,13 +377,13 @@ class ShoppingCartServiceImplTest {
         when(mockWarehouseService.bookProducts(any()))
                 .thenThrow(new ProductInShoppingCartNotInWarehouse(TEST_EXCEPTION_MESSAGE));
 
-        final ProductInShoppingCartNotInWarehouse exception = assertThrows(ProductInShoppingCartNotInWarehouse.class,
+        final BookingNotPossibleException exception = assertThrows(BookingNotPossibleException.class,
                 () -> service.bookProductsInWarehouse(USERNAME_A));
 
         inOrder.verify(mockRepository).findByUsername(USERNAME_A);
         inOrder.verify(mockMapper).mapToDto(argThat(samePropertyValuesAs(getTestFullShoppingCart())));
         inOrder.verify(mockWarehouseService).bookProducts(getTestFullShoppingCartDto());
-        assertThat(exception.getUserMessage(), equalTo(TEST_EXCEPTION_MESSAGE));
+        assertThat(exception.getUserMessage(), equalTo("Cannot book products in warehouse now"));
     }
 
     @Test
