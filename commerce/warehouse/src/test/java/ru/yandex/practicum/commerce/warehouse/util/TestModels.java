@@ -35,8 +35,6 @@ public final class TestModels {
     public static final long PRODUCT_TOTAL_QUANTITY_B = 20L;
     public static final long PRODUCT_BOOKED_QUANTITY_B = 15L;
 
-    public static final UUID PRODUCT_ID_C = UUID.fromString("0a53f38d-dd00-4f80-9b2e-c9d17ee46385");
-
     public static final UUID SHOPPING_CART_ID = UUID.fromString("801b5a89-c5f1-435c-a54e-d06cd6662a6a");
     public static final long PRODUCT_QUANTITY_A = 1L;
     public static final long PRODUCT_QUANTITY_B = 2L;
@@ -82,6 +80,18 @@ public final class TestModels {
         return product;
     }
 
+    public static Product getTestProductAIncreased() {
+        final Product product = getTestProductA();
+        product.setTotalQuantity(product.getTotalQuantity() + PRODUCT_QUANTITY_A);
+        return product;
+    }
+
+    public static Product getTestProductABooked() {
+        final Product product = getTestProductA();
+        product.setBookedQuantity(product.getBookedQuantity() + PRODUCT_QUANTITY_A);
+        return product;
+    }
+
     public static Product getTestProductB() {
         final Dimension dimension = new Dimension();
         dimension.setWidth(PRODUCT_WIDTH_B);
@@ -94,6 +104,18 @@ public final class TestModels {
         product.setWeight(PRODUCT_WEIGHT_B);
         product.setTotalQuantity(PRODUCT_TOTAL_QUANTITY_B);
         product.setBookedQuantity(PRODUCT_BOOKED_QUANTITY_B);
+        return product;
+    }
+
+    public static Product getTestProductBLow() {
+        final Product product = getTestProductB();
+        product.setBookedQuantity(product.getTotalQuantity() - 1);
+        return product;
+    }
+
+    public static Product getTestProductBBooked() {
+        final Product product = getTestProductB();
+        product.setBookedQuantity(product.getBookedQuantity() + PRODUCT_QUANTITY_B);
         return product;
     }
 
