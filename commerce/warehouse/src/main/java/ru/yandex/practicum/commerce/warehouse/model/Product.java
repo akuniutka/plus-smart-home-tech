@@ -25,4 +25,6 @@ public class Product {
     private Dimension dimension;
 
     private BigDecimal weight;
+    private long totalQuantity;
+    private long bookedQuantity;
 }

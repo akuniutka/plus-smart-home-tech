@@ -3,7 +3,9 @@ INSERT INTO warehouse.products (product_id,
                                 width,
                                 height,
                                 depth,
-                                weight)
+                                weight,
+                                total_quantity,
+                                booked_quantity)
 VALUES
 (
   '25182563-067b-441c-b11d-9ad1fb249e25',
@@ -11,7 +13,9 @@ VALUES
   1.000,
   2.000,
   3.000,
-  4.000
+  4.000,
+  10,
+  5
 ),
 (
   '0112f4d1-4940-4cd5-84ed-e7d44f683808',
@@ -19,20 +23,7 @@ VALUES
   2.000,
   3.000,
   4.000,
-  5.000
-);
-
-INSERT INTO warehouse.stocks (product_id,
-                              total_quantity,
-                              booked_quantity)
-VALUES
-(
-  '25182563-067b-441c-b11d-9ad1fb249e25',
-  10,
-  5
-),
-(
-  '0112f4d1-4940-4cd5-84ed-e7d44f683808',
+  5.000,
   20,
   15
 );

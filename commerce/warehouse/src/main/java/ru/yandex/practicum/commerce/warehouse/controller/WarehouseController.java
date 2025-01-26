@@ -9,9 +9,7 @@ import ru.yandex.practicum.commerce.dto.BookedProductsDto;
 import ru.yandex.practicum.commerce.dto.NewProductInWarehouseRequest;
 import ru.yandex.practicum.commerce.dto.ShoppingCartDto;
 import ru.yandex.practicum.commerce.service.WarehouseOperations;
-import ru.yandex.practicum.commerce.warehouse.mapper.BookedProductsMapper;
 import ru.yandex.practicum.commerce.warehouse.mapper.ProductMapper;
-import ru.yandex.practicum.commerce.warehouse.model.BookedProducts;
 import ru.yandex.practicum.commerce.warehouse.model.Product;
 import ru.yandex.practicum.commerce.warehouse.service.AddressService;
 import ru.yandex.practicum.commerce.warehouse.service.ProductService;
@@ -24,7 +22,6 @@ public class WarehouseController implements WarehouseOperations {
     private final ProductService productService;
     private final AddressService addressService;
     private final ProductMapper productMapper;
-    private final BookedProductsMapper bookedProductsMapper;
 
     @Override
     public void addNewProduct(final NewProductInWarehouseRequest request) {
@@ -40,8 +37,7 @@ public class WarehouseController implements WarehouseOperations {
         log.info("Received request to book products from shopping cart: shoppingCartId = {}",
                 shoppingCart.getShoppingCartId());
         log.debug("Shopping cart = {}", shoppingCart);
-        final BookedProducts bookedProducts = productService.bookProductsInWarehouse(shoppingCart);
-        final BookedProductsDto dto = bookedProductsMapper.mapToDto(bookedProducts);
+        final BookedProductsDto dto = productService.bookProductsInWarehouse(shoppingCart);
         log.info("Responded with delivery parameters for booked shopping cart: shoppingCarId = {}",
                 shoppingCart.getShoppingCartId());
         log.debug("Delivery parameters = {}", dto);
