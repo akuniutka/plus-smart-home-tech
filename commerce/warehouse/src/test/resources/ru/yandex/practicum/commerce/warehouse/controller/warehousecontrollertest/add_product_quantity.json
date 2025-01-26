@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to increase product quantity: productId = 25182563-067b-441c-b11d-9ad1fb249e25, quantity to add = 1"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with 200 OK to increase product quantity: productId = 25182563-067b-441c-b11d-9ad1fb249e25, quantity to add = 1"
+  }
+]
