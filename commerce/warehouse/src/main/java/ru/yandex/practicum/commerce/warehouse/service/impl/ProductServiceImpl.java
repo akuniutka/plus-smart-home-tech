@@ -7,18 +7,19 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.commerce.dto.AddProductToWarehouseRequest;
+import ru.yandex.practicum.commerce.dto.BookedProductsDto;
 import ru.yandex.practicum.commerce.dto.ShoppingCartDto;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
 import ru.yandex.practicum.commerce.exception.SpecifiedProductAlreadyInWarehouseException;
-import ru.yandex.practicum.commerce.warehouse.model.BookedProducts;
+import ru.yandex.practicum.commerce.warehouse.model.Dimension;
 import ru.yandex.practicum.commerce.warehouse.model.Product;
-import ru.yandex.practicum.commerce.warehouse.model.Stock;
 import ru.yandex.practicum.commerce.warehouse.repository.ProductRepository;
-import ru.yandex.practicum.commerce.warehouse.repository.StockRepository;
 import ru.yandex.practicum.commerce.warehouse.service.ProductService;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -31,8 +32,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
+    private static final int DIMENSION_SCALE = 3;
     private final ProductRepository productRepository;
-    private final StockRepository stockRepository;
 
     @Override
     public void addNewProduct(final Product product) {
@@ -41,45 +42,26 @@ public class ProductServiceImpl implements ProductService {
                     + " already exists");
         }
         final Product savedProduct = productRepository.save(product);
-        final Stock initialStock = createInitialStock(savedProduct.getProductId());
-        final Stock savedStock = stockRepository.save(initialStock);
         log.info("Added new product to warehouse: productId = {}", savedProduct.getProductId());
         log.debug("Added product = {}", product);
-        log.debug("Initial stock = {}", savedStock);
     }
 
     @Transactional
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Override
-    public BookedProducts bookProductsInWarehouse(final ShoppingCartDto shoppingCart) {
-        final Set<UUID> productIds = shoppingCart.getProducts().keySet();
-        final Map<UUID, Product> products = getProductsByIds(productIds);
-        final Map<UUID, Stock> stocks = getStocksByIds(productIds);
+    public BookedProductsDto bookProductsInWarehouse(final ShoppingCartDto shoppingCart) {
+        final Map<UUID, Product> products = getProductsByIds(shoppingCart.getProducts().keySet());
+        requireAllProductsExist(shoppingCart, products);
+        requireAllProductsSuffice(shoppingCart, products);
 
-        final BookedProducts bookedProducts = new BookedProducts();
-        final Set<UUID> notFound = new HashSet<>();
-        final Set<UUID> insufficient = new HashSet<>();
-        shoppingCart.getProducts().forEach((productId, quantity) -> {
-            Stock stock = stocks.get(productId);
-            if (stock == null) {
-                notFound.add(productId);
-            } else if (quantity > stock.getTotalQuantity() - stock.getBookedQuantity()) {
-                insufficient.add(productId);
-            } else {
-                bookedProducts.addProduct(products.get(productId), quantity);
-                stock.setBookedQuantity(stock.getBookedQuantity() + quantity);
-            }
-        });
-
-        if (!notFound.isEmpty()) {
-            throw new ProductInShoppingCartNotInWarehouse("Products not found: " + toString(notFound));
-        } else if (!insufficient.isEmpty()) {
-            throw new ProductInShoppingCartLowQuantityInWarehouse("Insufficient stocks: " + toString(insufficient));
-        }
-        stockRepository.saveAll(stocks.values());
+        final BookedProductsDto bookedProducts = initBookedProductsDto();
+        shoppingCart.getProducts().forEach((productId, quantity) ->
+            bookProductInWarehouse(products.get(productId), quantity, bookedProducts)
+        );
+        productRepository.saveAll(products.values());
         log.info("Booked products for shopping cart: shoppingCartId = {}", shoppingCart.getShoppingCartId());
         log.debug("Shopping cart = {}", shoppingCart);
-        log.debug("Stocks after booking = {}", stocks.values());
+        log.debug("Updated products in warehouse = {}", products.values());
         return bookedProducts;
     }
 
@@ -87,21 +69,15 @@ public class ProductServiceImpl implements ProductService {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Override
     public void increaseProductQuantity(final AddProductToWarehouseRequest request) {
-        Stock stock = stockRepository.findById(request.getProductId()).orElseThrow(
+        Product product = productRepository.findById(request.getProductId()).orElseThrow(
                 () -> new NoSpecifiedProductInWarehouseException("Product with productId " + request.getProductId()
-                        + "does not exist")
+                        + " does not exist")
         );
-        stock.setTotalQuantity(stock.getTotalQuantity() + request.getQuantity());
-        stock = stockRepository.save(stock);
+        product.setTotalQuantity(product.getTotalQuantity() + request.getQuantity());
+        product = productRepository.save(product);
         log.info("Increased quantity of product in warehouse: productId = {}, new quantity = {}",
-                stock.getProductId(), stock.getTotalQuantity());
-        log.debug("Updated stock = {}", stock);
-    }
-
-    private Stock createInitialStock(final UUID productId) {
-        final Stock stock = new Stock();
-        stock.setProductId(productId);
-        return stock;
+                product.getProductId(), product.getTotalQuantity());
+        log.debug("Updated product in warehouse = {}", product);
     }
 
     private Map<UUID, Product> getProductsByIds(final Set<UUID> productIds) {
@@ -109,9 +85,27 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toMap(Product::getProductId, Function.identity()));
     }
 
-    private Map<UUID, Stock> getStocksByIds(final Set<UUID> productIds) {
-        return stockRepository.findAllById(productIds).stream()
-                .collect(Collectors.toMap(Stock::getProductId, Function.identity()));
+    private void requireAllProductsExist(final ShoppingCartDto shoppingCart, Map<UUID, Product> products) {
+        final Set<UUID> notFound = shoppingCart.getProducts().keySet().stream()
+                .filter(productId -> !products.containsKey(productId))
+                .collect(Collectors.toSet());
+        if (!notFound.isEmpty()) {
+            throw new ProductInShoppingCartNotInWarehouse("Products not found in warehouse: " + toString(notFound));
+        }
+    }
+
+    private void requireAllProductsSuffice(final ShoppingCartDto shoppingCart, Map<UUID, Product> products) {
+        final Set<UUID> insufficient = new HashSet<>();
+        shoppingCart.getProducts().forEach((productId, quantity) -> {
+            Product product = products.get(productId);
+            if (quantity > product.getTotalQuantity() - product.getBookedQuantity()) {
+                insufficient.add(productId);
+            }
+        });
+        if (!insufficient.isEmpty()) {
+            throw new ProductInShoppingCartLowQuantityInWarehouse("Insufficient stocks in warehouse: "
+                    + toString(insufficient));
+        }
     }
 
     private String toString(final Set<UUID> productIds) {
@@ -119,5 +113,29 @@ public class ProductServiceImpl implements ProductService {
                 .map(Object::toString)
                 .sorted()
                 .collect(Collectors.joining(", "));
+    }
+
+    private BookedProductsDto initBookedProductsDto() {
+        final BookedProductsDto dto = new BookedProductsDto();
+        dto.setDeliveryVolume(BigDecimal.valueOf(0L, DIMENSION_SCALE));
+        dto.setDeliveryWeight(BigDecimal.valueOf(0L, DIMENSION_SCALE));
+        dto.setFragile(false);
+        return dto;
+    }
+
+    private void bookProductInWarehouse(final Product product, final long quantity, final BookedProductsDto booked) {
+        final BigDecimal _quantity = BigDecimal.valueOf(quantity);
+        final Dimension dimension = product.getDimension();
+        booked.setDeliveryVolume(dimension.getWidth()
+                .multiply(dimension.getHeight())
+                .multiply(dimension.getDepth())
+                .multiply(_quantity)
+                .setScale(DIMENSION_SCALE, RoundingMode.HALF_UP)
+                .add(booked.getDeliveryVolume()));
+        booked.setDeliveryWeight(product.getWeight()
+                .multiply(_quantity)
+                .add(booked.getDeliveryWeight()));
+        booked.setFragile(booked.getFragile() || Boolean.TRUE.equals(product.getFragile()));
+        product.setBookedQuantity(product.getBookedQuantity() + quantity);
     }
 }

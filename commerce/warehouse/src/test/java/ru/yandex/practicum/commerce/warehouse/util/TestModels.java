@@ -3,7 +3,6 @@ package ru.yandex.practicum.commerce.warehouse.util;
 import ru.yandex.practicum.commerce.dto.AddressDto;
 import ru.yandex.practicum.commerce.warehouse.model.Dimension;
 import ru.yandex.practicum.commerce.warehouse.model.Product;
-import ru.yandex.practicum.commerce.warehouse.model.Stock;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -51,6 +50,8 @@ public final class TestModels {
         product.setFragile(PRODUCT_FRAGILE_A);
         product.setDimension(dimension);
         product.setWeight(PRODUCT_WEIGHT_A);
+        product.setTotalQuantity(PRODUCT_TOTAL_QUANTITY_A);
+        product.setBookedQuantity(PRODUCT_BOOKED_QUANTITY_A);
         return product;
     }
 
@@ -64,23 +65,9 @@ public final class TestModels {
         product.setFragile(PRODUCT_FRAGILE_B);
         product.setDimension(dimension);
         product.setWeight(PRODUCT_WEIGHT_B);
+        product.setTotalQuantity(PRODUCT_TOTAL_QUANTITY_B);
+        product.setBookedQuantity(PRODUCT_BOOKED_QUANTITY_B);
         return product;
-    }
-
-    public static Stock getTestStockA() {
-        final Stock stock = new Stock();
-        stock.setProductId(PRODUCT_ID_A);
-        stock.setTotalQuantity(PRODUCT_TOTAL_QUANTITY_A);
-        stock.setBookedQuantity(PRODUCT_BOOKED_QUANTITY_A);
-        return stock;
-    }
-
-    public static Stock getTestStockB() {
-        final Stock stock = new Stock();
-        stock.setProductId(PRODUCT_ID_B);
-        stock.setTotalQuantity(PRODUCT_TOTAL_QUANTITY_B);
-        stock.setBookedQuantity(PRODUCT_BOOKED_QUANTITY_B);
-        return stock;
     }
 
     public static AddressDto getTestAddressDtoA() {
