@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to add new product: productId = 25182563-067b-441c-b11d-9ad1fb249e25"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with 200 OK to add new product request: productId = 25182563-067b-441c-b11d-9ad1fb249e25"
+  }
+]

@@ -38,7 +38,7 @@ public class WarehouseController implements WarehouseOperations {
                 shoppingCart.getShoppingCartId());
         log.debug("Shopping cart = {}", shoppingCart);
         final BookedProductsDto dto = productService.bookProductsInWarehouse(shoppingCart);
-        log.info("Responded with delivery parameters for booked shopping cart: shoppingCarId = {}",
+        log.info("Responded with delivery parameters for booked shopping cart: shoppingCartId = {}",
                 shoppingCart.getShoppingCartId());
         log.debug("Delivery parameters = {}", dto);
         return dto;

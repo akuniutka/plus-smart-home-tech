@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request for warehouse address"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with warehouse address"
+  }
+]
