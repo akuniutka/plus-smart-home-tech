@@ -57,7 +57,7 @@ public class ProductController implements ShoppingStoreOperations {
         final PageRequest page = PageRequest.of(pageable.getPage(), pageable.getSize(), Sort.by(pageable.getSort()));
         final List<Product> products = productService.findProductsByCategory(category, page);
         final List<ProductDto> dtos = productMapper.mapToDto(products);
-        log.info("Responded with {} products in category: category = {}", dtos.size(), category);
+        log.info("Responded with products in category: category = {}", category);
         log.debug("Requested products = {}", dtos);
         return dtos;
     }

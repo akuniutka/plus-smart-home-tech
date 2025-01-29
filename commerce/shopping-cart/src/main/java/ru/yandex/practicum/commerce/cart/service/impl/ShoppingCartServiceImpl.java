@@ -47,8 +47,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         requireShoppingCartNotDeactivated(shoppingCart);
         shoppingCart.getProducts().putAll(products);
         shoppingCart = repository.save(shoppingCart);
-        log.info("Put {} product(s) to shopping cart: shoppingCartId = {}", products.size(),
-                shoppingCart.getShoppingCartId());
+        log.info("Put products to shopping cart: shoppingCartId = {}", shoppingCart.getShoppingCartId());
         log.debug("Shopping cart after products added = {}", shoppingCart);
         return shoppingCart;
     }
@@ -79,8 +78,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         requireShoppingCartNotDeactivated(shoppingCart);
         products.forEach(shoppingCart.getProducts()::remove);
         final ShoppingCart savedShoppingCart = repository.save(shoppingCart);
-        log.info("Deleted {} product(s) from shopping cart: shoppingCartId = {}", products.size(),
-                savedShoppingCart.getShoppingCartId());
+        log.info("Deleted products from shopping cart: shoppingCartId = {}", savedShoppingCart.getShoppingCartId());
         log.debug("Shopping cart after products deleted = {}", savedShoppingCart);
         return savedShoppingCart;
     }
