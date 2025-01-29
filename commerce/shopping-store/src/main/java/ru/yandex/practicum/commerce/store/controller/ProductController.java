@@ -1,11 +1,18 @@
 package ru.yandex.practicum.commerce.store.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.commerce.service.ShoppingStoreOperations;
 import ru.yandex.practicum.commerce.dto.store.Pageable;
 import ru.yandex.practicum.commerce.dto.store.ProductCategory;
 import ru.yandex.practicum.commerce.dto.store.ProductDto;
@@ -18,15 +25,16 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("/api/v1/shopping-store")
 @RequiredArgsConstructor
 @Slf4j
-public class ProductController implements ShoppingStoreOperations {
+public class ProductController {
 
     private final ProductService productService;
     private final ProductMapper productMapper;
 
-    @Override
-    public ProductDto addProduct(final ProductDto newProductDto) {
+    @PostMapping
+    public ProductDto addProduct(@RequestBody @Valid final ProductDto newProductDto) {
         log.info("Received request to add new product: productName = {}", newProductDto.getProductName());
         log.debug("New product = {}", newProductDto);
         final Product newProduct = productMapper.mapToEntity(newProductDto);
@@ -38,8 +46,8 @@ public class ProductController implements ShoppingStoreOperations {
         return savedProductDto;
     }
 
-    @Override
-    public ProductDto getProductById(final UUID productId) {
+    @GetMapping("/{productId}")
+    public ProductDto getProductById(@PathVariable final UUID productId) {
         log.info("Received request for product: productId = {}", productId);
         final Product product = productService.getProductById(productId);
         final ProductDto dto = productMapper.mapToDto(product);
@@ -49,8 +57,8 @@ public class ProductController implements ShoppingStoreOperations {
         return dto;
     }
 
-    @Override
-    public List<ProductDto> findProductsByCategory(final ProductCategory category, final Pageable pageable) {
+    @GetMapping
+    public List<ProductDto> findProductsByCategory(@RequestParam final ProductCategory category, final Pageable pageable) {
         log.info("Received request for products in category: category = {}", category);
         log.debug("Requested page = {}, page size = {}, sort by {}", pageable.getPage(), pageable.getSize(),
                 pageable.getSort());
@@ -62,8 +70,8 @@ public class ProductController implements ShoppingStoreOperations {
         return dtos;
     }
 
-    @Override
-    public ProductDto updateProduct(final ProductDto updatedProductDto) {
+    @PutMapping
+    public ProductDto updateProduct(@RequestBody @Valid final ProductDto updatedProductDto) {
         log.info("Received request to update product: productId = {}, productName = {}",
                 updatedProductDto.getProductId(), updatedProductDto.getProductName());
         log.debug("Update for product = {}", updatedProductDto);
@@ -75,8 +83,8 @@ public class ProductController implements ShoppingStoreOperations {
         return savedProductDto;
     }
 
-    @Override
-    public boolean setProductQuantity(final SetProductQuantityStateRequest request) {
+    @PostMapping("/quantityState")
+    public boolean setProductQuantity(@Valid final SetProductQuantityStateRequest request) {
         log.info("Received request to update product quantity: productId = {}, quantityState = {}",
                 request.getProductId(), request.getQuantityState());
         final boolean result = productService.setProductQuantity(request);
@@ -85,8 +93,8 @@ public class ProductController implements ShoppingStoreOperations {
         return result;
     }
 
-    @Override
-    public boolean deleteProduct(final UUID productId) {
+    @PostMapping("/removeProductFromStore")
+    public boolean deleteProduct(@RequestBody final UUID productId) {
         log.info("Received request to delete product: productId = {}", productId);
         final boolean result = productService.deleteProductById(productId);
         log.info("Responded to product delete request: productId = {}, result = {}", productId, result);
