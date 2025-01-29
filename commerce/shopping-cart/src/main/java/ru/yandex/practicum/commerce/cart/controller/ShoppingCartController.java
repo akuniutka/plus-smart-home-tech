@@ -25,63 +25,64 @@ public class ShoppingCartController implements ShoppingCartOperations {
 
     @Override
     public ShoppingCartDto getShoppingCartByUsername(final String username) {
-        log.info("Received request for shopping cart by username: username = {}", "***");
+        log.info("Received request for shopping cart by username: username = {}", username);
         final ShoppingCart shoppingCart = shoppingCartService.getShoppingCartByUsername(username);
         final ShoppingCartDto dto = shoppingCartMapper.mapToDto(shoppingCart);
         log.info("Responded with requested shopping cart: shoppingCartId = {}, username = {}", dto.getShoppingCartId(),
-                "***");
+                username);
         log.debug("Requested shopping cart = {}", dto);
         return dto;
     }
 
     @Override
     public ShoppingCartDto addProductsToShoppingCart(final String username, final Map<UUID, Long> products) {
-        log.info("Received request to put {} product(s) to shopping cart: username = {}", products.size(), "***");
+        log.info("Received request to put {} product(s) to shopping cart: username = {}", products.size(), username);
         final ShoppingCart shoppingCart = shoppingCartService.addProductsToShoppingCart(username, products);
         final ShoppingCartDto dto = shoppingCartMapper.mapToDto(shoppingCart);
         log.info("Responded with updated shopping cart: shoppingCartId = {}, username = {}, products put = {}",
-                dto.getShoppingCartId(), "***", products.size());
+                dto.getShoppingCartId(), username, products.size());
         log.debug("Shopping cart after product(s) put = {}", dto);
         return dto;
     }
 
     @Override
     public void deactivateShoppingCartByUsername(final String username) {
-        log.info("Received request to deactivate shopping cart: username = {}", "***");
+        log.info("Received request to deactivate shopping cart: username = {}", username);
         shoppingCartService.deactivateShoppingCart(username);
-        log.info("Responded with 200 OK to deactivate shopping cart request: username = {}", "***");
+        log.info("Responded with 200 OK to deactivate shopping cart request: username = {}", username);
     }
 
     @Override
     public ShoppingCartDto deleteProductsFromShoppingCart(final String username, final Set<UUID> products) {
-        log.info("Received request to delete {} product(s) from shopping cart: username = {}", products.size(), "***");
+        log.info("Received request to delete {} product(s) from shopping cart: username = {}", products.size(),
+                username);
         final ShoppingCart shoppingCart = shoppingCartService.deleteProductsFromShoppingCart(username, products);
         final ShoppingCartDto dto = shoppingCartMapper.mapToDto(shoppingCart);
         log.info("Responded with updated shopping cart: shoppingCartId = {}, username = {}, products deleted = {}",
-                dto.getShoppingCartId(), "***", products.size());
+                dto.getShoppingCartId(), username, products.size());
         log.debug("Shopping cart after product(s) deleted = {}", dto);
         return dto;
     }
 
     @Override
     public ShoppingCartDto changeProductQuantity(final String username, final ChangeProductQuantityRequest request) {
-        log.info("Received request to change product quantity in shopping cart: username = {}, productId = {}", "***",
-                request.getProductId());
+        log.info("Received request to change product quantity in shopping cart: username = {}, productId = {}",
+                username, request.getProductId());
         log.debug("Change product quantity request = {}", request);
         final ShoppingCart shoppingCart = shoppingCartService.changeProductQuantity(username, request);
         final ShoppingCartDto dto = shoppingCartMapper.mapToDto(shoppingCart);
         log.info("Responded with updated shopping cart: shoppingCartId = {}, username = {}, productId = {}",
-                dto.getShoppingCartId(), "***", request.getProductId());
+                dto.getShoppingCartId(), username, request.getProductId());
         log.debug("Shopping cart after product quantity changed = {}", dto);
         return dto;
     }
 
     @Override
     public BookedProductsDto bookProductsInWarehouse(final String username) {
-        log.info("Received request to book products in warehouse: username = {}", "***");
+        log.info("Received request to book products in warehouse: username = {}", username);
         final BookedProductsDto dto = shoppingCartService.bookProductsInWarehouse(username);
         log.info("Responded with booking parameters: username = {}, deliveryVolume = {}, deliveryWeight = {}, fragile "
-                + "= {}", "***", dto.getDeliveryVolume(), dto.getDeliveryWeight(), dto.getFragile());
+                + "= {}", username, dto.getDeliveryVolume(), dto.getDeliveryWeight(), dto.getFragile());
         return dto;
     }
 }
