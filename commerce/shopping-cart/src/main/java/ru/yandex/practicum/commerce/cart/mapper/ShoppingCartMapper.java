@@ -2,7 +2,7 @@ package ru.yandex.practicum.commerce.cart.mapper;
 
 import org.mapstruct.Mapper;
 import ru.yandex.practicum.commerce.cart.model.ShoppingCart;
-import ru.yandex.practicum.commerce.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 
 @Mapper
 public interface ShoppingCartMapper {

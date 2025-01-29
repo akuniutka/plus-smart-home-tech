@@ -1,11 +1,11 @@
 package ru.yandex.practicum.commerce.warehouse.util;
 
-import ru.yandex.practicum.commerce.dto.AddProductToWarehouseRequest;
-import ru.yandex.practicum.commerce.dto.AddressDto;
-import ru.yandex.practicum.commerce.dto.BookedProductsDto;
-import ru.yandex.practicum.commerce.dto.DimensionDto;
-import ru.yandex.practicum.commerce.dto.NewProductInWarehouseRequest;
-import ru.yandex.practicum.commerce.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.dto.warehouse.AddProductToWarehouseRequest;
+import ru.yandex.practicum.commerce.dto.warehouse.AddressDto;
+import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
+import ru.yandex.practicum.commerce.dto.warehouse.DimensionDto;
+import ru.yandex.practicum.commerce.dto.warehouse.NewProductInWarehouseRequest;
+import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 import ru.yandex.practicum.commerce.warehouse.model.Dimension;
 import ru.yandex.practicum.commerce.warehouse.model.Product;
 

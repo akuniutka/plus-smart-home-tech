@@ -8,8 +8,8 @@ import org.mockito.Mockito;
 import ru.yandex.practicum.commerce.cart.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.commerce.cart.service.ShoppingCartService;
 import ru.yandex.practicum.commerce.cart.util.LogListener;
-import ru.yandex.practicum.commerce.dto.BookedProductsDto;
-import ru.yandex.practicum.commerce.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
+import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

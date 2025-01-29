@@ -13,7 +13,7 @@ import ru.yandex.practicum.commerce.cart.service.ShoppingCartService;
 import ru.yandex.practicum.commerce.cart.service.WarehouseService;
 import ru.yandex.practicum.commerce.cart.util.LogListener;
 import ru.yandex.practicum.commerce.cart.util.UUIDGenerator;
-import ru.yandex.practicum.commerce.dto.BookedProductsDto;
+import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
 import ru.yandex.practicum.commerce.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.commerce.exception.NotAuthorizedUserException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;

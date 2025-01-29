@@ -7,9 +7,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import ru.yandex.practicum.commerce.dto.ProductCategory;
-import ru.yandex.practicum.commerce.dto.ProductState;
-import ru.yandex.practicum.commerce.dto.QuantityState;
+import ru.yandex.practicum.commerce.dto.store.ProductCategory;
+import ru.yandex.practicum.commerce.dto.store.ProductState;
+import ru.yandex.practicum.commerce.dto.store.QuantityState;
 
 import java.math.BigDecimal;
 import java.util.UUID;

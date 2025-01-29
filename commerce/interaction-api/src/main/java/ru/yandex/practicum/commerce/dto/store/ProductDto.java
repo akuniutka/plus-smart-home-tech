@@ -1,4 +1,4 @@
-package ru.yandex.practicum.commerce.dto;
+package ru.yandex.practicum.commerce.dto.store;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
