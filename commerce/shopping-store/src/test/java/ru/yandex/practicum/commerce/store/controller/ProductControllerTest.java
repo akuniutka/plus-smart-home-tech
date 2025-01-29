@@ -9,7 +9,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import ru.yandex.practicum.commerce.service.ShoppingStoreOperations;
 import ru.yandex.practicum.commerce.dto.store.ProductDto;
 import ru.yandex.practicum.commerce.store.mapper.ProductMapper;
 import ru.yandex.practicum.commerce.store.model.Product;
@@ -59,7 +58,7 @@ class ProductControllerTest {
 
     private InOrder inOrder;
 
-    private ShoppingStoreOperations controller;
+    private ProductController controller;
 
     @BeforeEach
     void setUp() {
