@@ -36,12 +36,12 @@ public class ShoppingCartController implements ShoppingCartOperations {
 
     @Override
     public ShoppingCartDto addProductsToShoppingCart(final String username, final Map<UUID, Long> products) {
-        log.info("Received request to put {} product(s) to shopping cart: username = {}", products.size(), username);
+        log.info("Received request to put products to shopping cart: username = {}", username);
         final ShoppingCart shoppingCart = shoppingCartService.addProductsToShoppingCart(username, products);
         final ShoppingCartDto dto = shoppingCartMapper.mapToDto(shoppingCart);
-        log.info("Responded with updated shopping cart: shoppingCartId = {}, username = {}, products put = {}",
-                dto.getShoppingCartId(), username, products.size());
-        log.debug("Shopping cart after product(s) put = {}", dto);
+        log.info("Responded with shopping cart after products put: shoppingCartId = {}, username = {}",
+                dto.getShoppingCartId(), username);
+        log.debug("Shopping cart after products put = {}", dto);
         return dto;
     }
 
@@ -54,13 +54,12 @@ public class ShoppingCartController implements ShoppingCartOperations {
 
     @Override
     public ShoppingCartDto deleteProductsFromShoppingCart(final String username, final Set<UUID> products) {
-        log.info("Received request to delete {} product(s) from shopping cart: username = {}", products.size(),
-                username);
+        log.info("Received request to delete products from shopping cart: username = {}", username);
         final ShoppingCart shoppingCart = shoppingCartService.deleteProductsFromShoppingCart(username, products);
         final ShoppingCartDto dto = shoppingCartMapper.mapToDto(shoppingCart);
-        log.info("Responded with updated shopping cart: shoppingCartId = {}, username = {}, products deleted = {}",
-                dto.getShoppingCartId(), username, products.size());
-        log.debug("Shopping cart after product(s) deleted = {}", dto);
+        log.info("Responded with shopping cart after products deleted: shoppingCartId = {}, username = {}",
+                dto.getShoppingCartId(), username);
+        log.debug("Shopping cart after products deleted = {}", dto);
         return dto;
     }
 

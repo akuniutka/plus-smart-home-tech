@@ -1,10 +1,10 @@
 [
   {
     "level": "INFO",
-    "message": "Received request to delete 2 product(s) from shopping cart: username = alice"
+    "message": "Received request to delete products from shopping cart: username = alice"
   },
   {
     "level": "INFO",
-    "message": "Responded with updated shopping cart: shoppingCartId = 801b5a89-c5f1-435c-a54e-d06cd6662a6a, username = alice, products deleted = 2"
+    "message": "Responded with shopping cart after products deleted: shoppingCartId = 801b5a89-c5f1-435c-a54e-d06cd6662a6a, username = alice"
   }
 ]

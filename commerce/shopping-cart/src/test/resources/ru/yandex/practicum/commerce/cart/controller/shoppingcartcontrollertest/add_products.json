@@ -1,10 +1,10 @@
 [
   {
     "level": "INFO",
-    "message": "Received request to put 2 product(s) to shopping cart: username = alice"
+    "message": "Received request to put products to shopping cart: username = alice"
   },
   {
     "level": "INFO",
-    "message": "Responded with updated shopping cart: shoppingCartId = 801b5a89-c5f1-435c-a54e-d06cd6662a6a, username = alice, products put = 2"
+    "message": "Responded with shopping cart after products put: shoppingCartId = 801b5a89-c5f1-435c-a54e-d06cd6662a6a, username = alice"
   }
 ]
