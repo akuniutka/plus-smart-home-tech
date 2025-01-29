@@ -28,13 +28,13 @@ public class Product {
     private String imageSrc;
 
     @Enumerated(EnumType.STRING)
-    QuantityState quantityState;
+    private QuantityState quantityState;
 
     @Enumerated(EnumType.STRING)
-    ProductState productState;
+    private ProductState productState;
 
     @Enumerated(EnumType.STRING)
-    ProductCategory productCategory;
+    private ProductCategory productCategory;
 
-    BigDecimal price;
+    private BigDecimal price;
 }
