@@ -2,12 +2,12 @@ package ru.yandex.practicum.commerce.store.util;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import ru.yandex.practicum.commerce.dto.Pageable;
-import ru.yandex.practicum.commerce.dto.ProductCategory;
-import ru.yandex.practicum.commerce.dto.ProductDto;
-import ru.yandex.practicum.commerce.dto.ProductState;
-import ru.yandex.practicum.commerce.dto.QuantityState;
-import ru.yandex.practicum.commerce.dto.SetProductQuantityStateRequest;
+import ru.yandex.practicum.commerce.dto.store.Pageable;
+import ru.yandex.practicum.commerce.dto.store.ProductCategory;
+import ru.yandex.practicum.commerce.dto.store.ProductDto;
+import ru.yandex.practicum.commerce.dto.store.ProductState;
+import ru.yandex.practicum.commerce.dto.store.QuantityState;
+import ru.yandex.practicum.commerce.dto.store.SetProductQuantityStateRequest;
 import ru.yandex.practicum.commerce.exception.ProductNotFoundException;
 import ru.yandex.practicum.commerce.store.model.Product;
 

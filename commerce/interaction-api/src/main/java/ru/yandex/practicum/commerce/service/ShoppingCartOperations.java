@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.yandex.practicum.commerce.dto.BookedProductsDto;
-import ru.yandex.practicum.commerce.dto.ChangeProductQuantityRequest;
-import ru.yandex.practicum.commerce.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
+import ru.yandex.practicum.commerce.dto.warehouse.ChangeProductQuantityRequest;
+import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 
 import java.util.Map;
 import java.util.Set;

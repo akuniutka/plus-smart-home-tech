@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.yandex.practicum.commerce.dto.Pageable;
-import ru.yandex.practicum.commerce.dto.ProductCategory;
-import ru.yandex.practicum.commerce.dto.ProductDto;
-import ru.yandex.practicum.commerce.dto.SetProductQuantityStateRequest;
+import ru.yandex.practicum.commerce.dto.store.Pageable;
+import ru.yandex.practicum.commerce.dto.store.ProductCategory;
+import ru.yandex.practicum.commerce.dto.store.ProductDto;
+import ru.yandex.practicum.commerce.dto.store.SetProductQuantityStateRequest;
 
 import java.util.List;
 import java.util.UUID;

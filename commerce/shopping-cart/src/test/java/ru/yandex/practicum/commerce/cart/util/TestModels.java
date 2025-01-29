@@ -2,9 +2,9 @@ package ru.yandex.practicum.commerce.cart.util;
 
 import ru.yandex.practicum.commerce.cart.model.ShoppingCart;
 import ru.yandex.practicum.commerce.cart.model.ShoppingCartState;
-import ru.yandex.practicum.commerce.dto.BookedProductsDto;
-import ru.yandex.practicum.commerce.dto.ChangeProductQuantityRequest;
-import ru.yandex.practicum.commerce.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
+import ru.yandex.practicum.commerce.dto.warehouse.ChangeProductQuantityRequest;
+import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 
 import java.math.BigDecimal;
 import java.util.Map;

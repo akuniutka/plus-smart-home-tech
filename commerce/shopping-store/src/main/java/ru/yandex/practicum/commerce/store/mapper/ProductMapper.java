@@ -1,7 +1,7 @@
 package ru.yandex.practicum.commerce.store.mapper;
 
 import org.mapstruct.Mapper;
-import ru.yandex.practicum.commerce.dto.ProductDto;
+import ru.yandex.practicum.commerce.dto.store.ProductDto;
 import ru.yandex.practicum.commerce.store.model.Product;
 
 import java.util.List;

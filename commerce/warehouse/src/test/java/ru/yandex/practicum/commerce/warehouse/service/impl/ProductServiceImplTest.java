@@ -9,7 +9,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import ru.yandex.practicum.commerce.dto.BookedProductsDto;
+import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
