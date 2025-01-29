@@ -1,10 +1,10 @@
 [
   {
     "level": "INFO",
-    "message": "Received request to book products in warehouse: username = ***"
+    "message": "Received request to book products in warehouse: username = alice"
   },
   {
     "level": "INFO",
-    "message": "Responded with booking parameters: username = ***, deliveryVolume = 1.00, deliveryWeight = 10.00, fragile = true"
+    "message": "Responded with booking parameters: username = alice, deliveryVolume = 1.00, deliveryWeight = 10.00, fragile = true"
   }
 ]
