@@ -35,7 +35,7 @@ public final class TestModels {
     public static final ProductCategory CATEGORY_B = ProductCategory.LIGHTING;
     public static final BigDecimal PRICE_B = BigDecimal.valueOf(499, 2);
 
-    public static final String SORT_BY = "price";
+    public static final String[] SORT_BY = {"price", "productName"};
     public static final String EXCEPTION_MESSAGE = "Test exception";
     public static final org.springframework.data.domain.Pageable PAGEABLE = PageRequest.of(1, 2, Sort.by(SORT_BY));
 
