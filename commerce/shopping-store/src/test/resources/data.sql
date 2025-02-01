@@ -45,5 +45,5 @@ VALUES
   'FEW',
   'ACTIVE',
   'SENSORS',
-  5.99
+  9.99
 );
