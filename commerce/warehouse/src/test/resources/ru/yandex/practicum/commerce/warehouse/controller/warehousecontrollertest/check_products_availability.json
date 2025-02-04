@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to check products availability for shopping cart: shoppingCartId = 801b5a89-c5f1-435c-a54e-d06cd6662a6a"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with delivery parameters for shopping cart: shoppingCartId = 801b5a89-c5f1-435c-a54e-d06cd6662a6a"
+  }
+]

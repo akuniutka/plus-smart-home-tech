@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to get user's orders: username = alice"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with user's orders: username = alice"
+  }
+]

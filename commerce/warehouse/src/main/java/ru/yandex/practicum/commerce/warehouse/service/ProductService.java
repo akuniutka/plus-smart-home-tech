@@ -9,7 +9,7 @@ public interface ProductService {
 
     void addNewProduct(Product product);
 
-    BookedProductsDto bookProductsInWarehouse(ShoppingCartDto shoppingCart);
+    BookedProductsDto checkProductsAvailability(ShoppingCartDto shoppingCart);
 
     void increaseProductQuantity(AddProductToWarehouseRequest request);
 }

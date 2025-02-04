@@ -2,7 +2,7 @@ package ru.yandex.practicum.commerce.warehouse.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.commerce.dto.warehouse.AddressDto;
+import ru.yandex.practicum.commerce.dto.delivery.AddressDto;
 import ru.yandex.practicum.commerce.warehouse.service.AddressService;
 
 import static org.hamcrest.MatcherAssert.assertThat;

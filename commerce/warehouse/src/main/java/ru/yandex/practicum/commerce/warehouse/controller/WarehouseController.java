@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.commerce.dto.warehouse.AddProductToWarehouseRequest;
-import ru.yandex.practicum.commerce.dto.warehouse.AddressDto;
+import ru.yandex.practicum.commerce.dto.delivery.AddressDto;
 import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
 import ru.yandex.practicum.commerce.dto.warehouse.NewProductInWarehouseRequest;
 import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
@@ -39,12 +39,12 @@ public class WarehouseController {
     }
 
     @PostMapping("/check")
-    public BookedProductsDto bookProducts(@RequestBody @Valid final ShoppingCartDto shoppingCart) {
-        log.info("Received request to book products from shopping cart: shoppingCartId = {}",
+    public BookedProductsDto checkProductsAvailability(@RequestBody @Valid final ShoppingCartDto shoppingCart) {
+        log.info("Received request to check products availability for shopping cart: shoppingCartId = {}",
                 shoppingCart.getShoppingCartId());
         log.debug("Shopping cart = {}", shoppingCart);
-        final BookedProductsDto dto = productService.bookProductsInWarehouse(shoppingCart);
-        log.info("Responded with delivery parameters for booked shopping cart: shoppingCartId = {}",
+        final BookedProductsDto dto = productService.checkProductsAvailability(shoppingCart);
+        log.info("Responded with delivery parameters for shopping cart: shoppingCartId = {}",
                 shoppingCart.getShoppingCartId());
         log.debug("Delivery parameters = {}", dto);
         return dto;

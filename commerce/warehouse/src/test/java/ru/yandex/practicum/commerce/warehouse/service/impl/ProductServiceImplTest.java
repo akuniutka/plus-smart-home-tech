@@ -14,12 +14,10 @@ import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseExcep
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
 import ru.yandex.practicum.commerce.exception.SpecifiedProductAlreadyInWarehouseException;
-import ru.yandex.practicum.commerce.warehouse.model.Product;
 import ru.yandex.practicum.commerce.warehouse.repository.ProductRepository;
 import ru.yandex.practicum.commerce.warehouse.service.ProductService;
 import ru.yandex.practicum.commerce.warehouse.util.LogListener;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,7 +29,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,10 +38,8 @@ import static ru.yandex.practicum.commerce.warehouse.util.TestModels.PRODUCT_ID_
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestAddProductToWarehouseRequest;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestBookedProducts;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductA;
-import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductABooked;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductAIncreased;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductB;
-import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductBBooked;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductBLow;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShoppingCart;
 import static ru.yandex.practicum.commerce.warehouse.util.TestUtils.assertLogs;
@@ -60,9 +55,6 @@ class ProductServiceImplTest {
 
     @Captor
     private ArgumentCaptor<Set<UUID>> uuidSetCaptor;
-
-    @Captor
-    private ArgumentCaptor<Collection<Product>> productsCaptor;
 
     private ProductService service;
 
@@ -108,11 +100,11 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void whenBookProductsInWarehouseAndProductNotExist_ThenThrowException() {
+    void whenCheckProductsAvailabilityAndProductNotExist_ThenThrowException() {
         when(mockRepository.findAllById(anySet())).thenReturn(List.of(getTestProductB()));
 
         final ProductInShoppingCartNotInWarehouse exception = assertThrows(ProductInShoppingCartNotInWarehouse.class,
-                () -> service.bookProductsInWarehouse(getTestShoppingCart()));
+                () -> service.checkProductsAvailability(getTestShoppingCart()));
 
         verify(mockRepository).findAllById(uuidSetCaptor.capture());
         assertThat(uuidSetCaptor.getValue(), containsInAnyOrder(PRODUCT_ID_A, PRODUCT_ID_B));
@@ -120,12 +112,12 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void whenBookProductsInWarehouseAndProductNotSuffice_ThenThrowException() {
+    void whenCheckProductsAvailabilityAndProductNotSuffice_ThenThrowException() {
         when(mockRepository.findAllById(anySet())).thenReturn(List.of(getTestProductA(), getTestProductBLow()));
 
         final ProductInShoppingCartLowQuantityInWarehouse exception = assertThrows(
                 ProductInShoppingCartLowQuantityInWarehouse.class,
-                () -> service.bookProductsInWarehouse(getTestShoppingCart())
+                () -> service.checkProductsAvailability(getTestShoppingCart())
         );
 
         verify(mockRepository).findAllById(uuidSetCaptor.capture());
@@ -134,21 +126,14 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void whenBookProductsInWarehouseAndProductSuffice_ThenUpdateBookedQuantityAndReturnDeliveryParametersAndLog()
-            throws Exception {
+    void whenCheckProductsAvailabilityAndProductSuffice_ThenReturnDeliveryParameters() {
         when(mockRepository.findAllById(anySet())).thenReturn(List.of(getTestProductA(), getTestProductB()));
-        when(mockRepository.saveAll(anyCollection())).thenReturn(List.of(getTestProductABooked(),
-                getTestProductBBooked()));
 
-        final BookedProductsDto dto = service.bookProductsInWarehouse(getTestShoppingCart());
+        final BookedProductsDto dto = service.checkProductsAvailability(getTestShoppingCart());
 
-        inOrder.verify(mockRepository).findAllById(uuidSetCaptor.capture());
+        verify(mockRepository).findAllById(uuidSetCaptor.capture());
         assertThat(uuidSetCaptor.getValue(), containsInAnyOrder(PRODUCT_ID_A, PRODUCT_ID_B));
-        inOrder.verify(mockRepository).saveAll(productsCaptor.capture());
-        assertThat(productsCaptor.getValue(), containsInAnyOrder(samePropertyValuesAs(getTestProductABooked()),
-                samePropertyValuesAs(getTestProductBBooked())));
         assertThat(dto, equalTo(getTestBookedProducts()));
-        assertLogs(logListener.getEvents(), "book_products.json", getClass());
     }
 
     @Test

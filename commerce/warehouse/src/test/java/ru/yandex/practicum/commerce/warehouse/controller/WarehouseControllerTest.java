@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
-import ru.yandex.practicum.commerce.dto.warehouse.AddressDto;
+import ru.yandex.practicum.commerce.dto.delivery.AddressDto;
 import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
 import ru.yandex.practicum.commerce.warehouse.mapper.ProductMapper;
 import ru.yandex.practicum.commerce.warehouse.service.AddressService;
@@ -67,15 +67,15 @@ class WarehouseControllerTest {
     }
 
     @Test
-    void whenBookProducts_ThenPassShoppingCartToProductServiceAndReturnBookedProductsFromProductServiceAndLog()
+    void whenCheckProductsAvailability_ThenPassShoppingCartToProductServiceAndReturnBookedProductsAvailabilityAndLog()
             throws Exception {
-        when(mockProductService.bookProductsInWarehouse(any())).thenReturn(getTestBookedProducts());
+        when(mockProductService.checkProductsAvailability(any())).thenReturn(getTestBookedProducts());
 
-        final BookedProductsDto dto = controller.bookProducts(getTestShoppingCart());
+        final BookedProductsDto dto = controller.checkProductsAvailability(getTestShoppingCart());
 
-        verify(mockProductService).bookProductsInWarehouse(getTestShoppingCart());
+        verify(mockProductService).checkProductsAvailability(getTestShoppingCart());
         assertThat(dto, equalTo(getTestBookedProducts()));
-        assertLogs(logListener.getEvents(), "book_products.json", getClass());
+        assertLogs(logListener.getEvents(), "check_products_availability.json", getClass());
     }
 
     @Test

@@ -1,0 +1,112 @@
+package ru.yandex.practicum.commerce.order.controller;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import ru.yandex.practicum.commerce.dto.order.OrderDto;
+import ru.yandex.practicum.commerce.order.mapper.AddressMapper;
+import ru.yandex.practicum.commerce.order.mapper.OrderMapper;
+import ru.yandex.practicum.commerce.order.model.Order;
+import ru.yandex.practicum.commerce.order.service.OrderService;
+import ru.yandex.practicum.commerce.order.util.LogListener;
+
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.samePropertyValuesAs;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.when;
+import static ru.yandex.practicum.commerce.order.util.TestModels.PAGEABLE;
+import static ru.yandex.practicum.commerce.order.util.TestModels.USERNAME_A;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressDtoA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestCreateNewOrderRequest;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrderDto;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderB;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoB;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestPageable;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestShoppingCartA;
+import static ru.yandex.practicum.commerce.order.util.TestUtils.assertLogs;
+
+class OrderControllerTest {
+
+    private static final LogListener logListener = new LogListener(OrderController.class);
+    private AutoCloseable openMocks;
+
+    @Mock
+    private OrderService mockOrderService;
+
+    @Mock
+    private OrderMapper mockOrderMapper;
+
+    @Captor
+    private ArgumentCaptor<List<Order>> ordersCaptor;
+
+    @Mock
+    private AddressMapper mockAddressMapper;
+
+    private InOrder inOrder;
+
+    private OrderController controller;
+
+    @BeforeEach
+    void setUp() {
+        openMocks = MockitoAnnotations.openMocks(this);
+        inOrder = Mockito.inOrder(mockOrderService, mockOrderMapper, mockAddressMapper);
+        logListener.startListen();
+        logListener.reset();
+        controller = new OrderController(mockOrderService, mockOrderMapper, mockAddressMapper);
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        logListener.stopListen();
+        Mockito.verifyNoMoreInteractions(mockOrderService, mockOrderMapper, mockAddressMapper);
+        openMocks.close();
+    }
+
+    @Test
+    void whenCreateOrder_ThenMapAddressAndPassUsernameCartAddressToServiceAndMapServiceResponseAndReturnItAndLog()
+            throws Exception {
+        when(mockAddressMapper.mapToEntity(any())).thenReturn(getTestAddressA());
+        when(mockOrderService.addNewOrder(any(), any(), any())).thenReturn(getTestNewOrder());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestNewOrderDto());
+
+        final OrderDto dto = controller.createOrder(USERNAME_A, getTestCreateNewOrderRequest());
+
+        inOrder.verify(mockAddressMapper).mapToEntity(getTestAddressDtoA());
+        inOrder.verify(mockOrderService).addNewOrder(USERNAME_A, getTestShoppingCartA(), getTestAddressA());
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestNewOrder()));
+        assertThat(dto, equalTo(getTestNewOrderDto()));
+        assertLogs(logListener.getEvents(), "create_order.json", getClass());
+    }
+
+    @Test
+    void whenGetOrdersByUsername_ThenMapPageableAndPassWithUsernameToServiceAndMapServiceResponseAndReturnItAndLog()
+            throws Exception {
+        when(mockOrderService.findOrdersByUsername(any(), any())).thenReturn(List.of(getTestOrderA(), getTestOrderB()));
+        when(mockOrderMapper.mapToDto(anyList())).thenReturn(List.of(getTestOrderDtoA(), getTestOrderDtoB()));
+
+        final List<OrderDto> dtos = controller.getOrdersByUsername(USERNAME_A, getTestPageable());
+
+        inOrder.verify(mockOrderService).findOrdersByUsername(USERNAME_A, PAGEABLE);
+        inOrder.verify(mockOrderMapper).mapToDto(ordersCaptor.capture());
+        assertThat(ordersCaptor.getValue(), contains(samePropertyValuesAs(getTestOrderA()),
+                samePropertyValuesAs(getTestOrderB())));
+        assertThat(dtos, contains(getTestOrderDtoA(), getTestOrderDtoB()));
+        assertLogs(logListener.getEvents(), "get_orders_by_username.json", getClass());
+    }
+}

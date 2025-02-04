@@ -1,0 +1,36 @@
+[
+  {
+    "orderId": "f8991fc5-1c29-4395-b781-7717893cea92",
+    "shoppingCartId": "801b5a89-c5f1-435c-a54e-d06cd6662a6a",
+    "products": {
+      "25182563-067b-441c-b11d-9ad1fb249e25": 1,
+      "0112f4d1-4940-4cd5-84ed-e7d44f683808": 2
+    },
+    "paymentId": "ff035258-939e-4f09-8119-61459eb68949",
+    "deliveryId": "1c44948b-78ca-48a5-80e5-6a901af8c117",
+    "state": "COMPLETED",
+    "deliveryWeight": 14.000,
+    "deliveryVolume": 54.000,
+    "fragile": true,
+    "totalPrice": 25.98,
+    "deliveryPrice": 5.99,
+    "productPrice": 19.99
+  },
+  {
+    "orderId": "2b8dc08c-af0a-422f-b54b-eb2157e8bf59",
+    "shoppingCartId": "3771b0ec-41ec-4c28-80e1-d28b7092df8c",
+    "products": {
+      "c504066c-e949-46c6-b6b3-31a9bdcb3176": 7,
+      "dbe1ac64-08b7-4209-a877-21caa44ede79": 8
+    },
+    "paymentId": "6b32d033-a160-4193-9f22-a2714c512735",
+    "deliveryId": "83b2e862-2613-4b3e-a910-b24afafd6983",
+    "state": "ASSEMBLED",
+    "deliveryWeight": 65.500,
+    "deliveryVolume": 33.333,
+    "fragile": false,
+    "totalPrice": 71.99,
+    "deliveryPrice": 12.00,
+    "productPrice": 59.99
+  }
+]

@@ -1,0 +1,64 @@
+package ru.yandex.practicum.commerce.order.controller;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
+import ru.yandex.practicum.commerce.dto.order.CreateNewOrderRequest;
+import ru.yandex.practicum.commerce.dto.order.OrderDto;
+import ru.yandex.practicum.commerce.dto.store.Pageable;
+import ru.yandex.practicum.commerce.order.mapper.AddressMapper;
+import ru.yandex.practicum.commerce.order.mapper.OrderMapper;
+import ru.yandex.practicum.commerce.order.model.Address;
+import ru.yandex.practicum.commerce.order.model.Order;
+import ru.yandex.practicum.commerce.order.service.OrderService;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/order")
+@RequiredArgsConstructor
+@Slf4j
+public class OrderController {
+
+    private final OrderService orderService;
+    private final OrderMapper orderMapper;
+    private final AddressMapper addressMapper;
+
+    @PutMapping
+    public OrderDto createOrder(@RequestParam final String username,
+            @RequestBody @Valid final CreateNewOrderRequest request) {
+        log.info("Received request to create order: username = {}, shoppingCartId = {}", username,
+                request.getShoppingCart().getShoppingCartId());
+        log.debug("Create new order request = {}", request);
+        final ShoppingCartDto shoppingCart = request.getShoppingCart();
+        final Address deliveryAddress = addressMapper.mapToEntity(request.getDeliveryAddress());
+        final Order order = orderService.addNewOrder(username, shoppingCart, deliveryAddress);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with created order: orderId = {}, username = {}, shoppingCartId = {}", dto.getOrderId(),
+                username, dto.getShoppingCartId());
+        log.debug("Created order = {}", dto);
+        return dto;
+    }
+
+    @GetMapping
+    public List<OrderDto> getOrdersByUsername(@RequestParam final String username, final Pageable pageable) {
+        log.info("Received request to get user's orders: username = {}", username);
+        log.debug("Requested page = {}, page size = {}, sort by {}", pageable.getPage(), pageable.getSize(),
+                pageable.getSort());
+        final PageRequest page = PageRequest.of(pageable.getPage(), pageable.getSize(), Sort.by(pageable.getSort()));
+        final List<Order> orders = orderService.findOrdersByUsername(username, page);
+        final List<OrderDto> dtos = orderMapper.mapToDto(orders);
+        log.info("Responded with user's orders: username = {}", username);
+        log.debug("Requested orders = {}", dtos);
+        return dtos;
+    }
+}
