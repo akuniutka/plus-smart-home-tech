@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.commerce.cart.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.commerce.cart.service.ShoppingCartService;
+import ru.yandex.practicum.commerce.exception.ApiExceptions;
 import ru.yandex.practicum.commerce.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.commerce.exception.NotAuthorizedUserException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
@@ -34,6 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.yandex.practicum.commerce.cart.util.TestModels.TEST_EXCEPTION_MESSAGE;
@@ -202,6 +204,8 @@ class ShoppingCartControllerIT {
                 .andExpectAll(
                         status().isUnauthorized(),
                         content().contentType(MediaType.APPLICATION_JSON),
+                        header().string(ApiExceptions.API_EXCEPTION_HEADER,
+                                NotAuthorizedUserException.class.getSimpleName()),
                         jsonPath("$.httpStatus", equalTo(HttpStatus.UNAUTHORIZED.name())),
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE))
                 );
@@ -225,6 +229,8 @@ class ShoppingCartControllerIT {
                 .andExpectAll(
                         status().isLocked(),
                         content().contentType(MediaType.APPLICATION_JSON),
+                        header().string(ApiExceptions.API_EXCEPTION_HEADER,
+                                ShoppingCartDeactivatedException.class.getSimpleName()),
                         jsonPath("$.httpStatus", equalTo(HttpStatus.LOCKED.name())),
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE))
                 );
@@ -248,6 +254,8 @@ class ShoppingCartControllerIT {
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON),
+                        header().string(ApiExceptions.API_EXCEPTION_HEADER,
+                                NoProductsInShoppingCartException.class.getSimpleName()),
                         jsonPath("$.httpStatus", equalTo(HttpStatus.BAD_REQUEST.name())),
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE))
                 );
@@ -267,6 +275,8 @@ class ShoppingCartControllerIT {
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON),
+                        header().string(ApiExceptions.API_EXCEPTION_HEADER,
+                                ProductInShoppingCartNotInWarehouse.class.getSimpleName()),
                         jsonPath("$.httpStatus", equalTo(HttpStatus.BAD_REQUEST.name())),
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE))
                 );

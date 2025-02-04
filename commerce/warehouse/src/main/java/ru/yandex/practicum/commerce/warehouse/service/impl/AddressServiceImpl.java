@@ -1,7 +1,7 @@
 package ru.yandex.practicum.commerce.warehouse.service.impl;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.commerce.dto.warehouse.AddressDto;
+import ru.yandex.practicum.commerce.dto.delivery.AddressDto;
 import ru.yandex.practicum.commerce.warehouse.service.AddressService;
 
 import java.security.SecureRandom;

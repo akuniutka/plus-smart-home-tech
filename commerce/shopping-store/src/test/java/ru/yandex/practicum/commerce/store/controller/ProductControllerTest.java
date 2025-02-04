@@ -112,8 +112,8 @@ class ProductControllerTest {
 
         final List<ProductDto> dtos = controller.findProductsByCategory(CATEGORY_A, getTestPageable());
 
-        verify(mockService).findProductsByCategory(CATEGORY_A, PAGEABLE);
-        verify(mockMapper).mapToDto(productsCaptor.capture());
+        inOrder.verify(mockService).findProductsByCategory(CATEGORY_A, PAGEABLE);
+        inOrder.verify(mockMapper).mapToDto(productsCaptor.capture());
         assertThat(productsCaptor.getValue(), contains(samePropertyValuesAs(getTestProductA()),
                 samePropertyValuesAs(getTestProductB())));
         assertThat(dtos, contains(getTestProductDtoA(), getTestProductDtoB()));

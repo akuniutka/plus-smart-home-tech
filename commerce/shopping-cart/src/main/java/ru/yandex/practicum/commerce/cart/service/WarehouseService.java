@@ -11,5 +11,5 @@ import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
 public interface WarehouseService {
 
     @PostMapping("/api/v1/warehouse/check")
-    BookedProductsDto bookProducts(@RequestBody @Valid ShoppingCartDto shoppingCart);
+    BookedProductsDto checkProductsAvailability(@RequestBody @Valid ShoppingCartDto shoppingCart);
 }

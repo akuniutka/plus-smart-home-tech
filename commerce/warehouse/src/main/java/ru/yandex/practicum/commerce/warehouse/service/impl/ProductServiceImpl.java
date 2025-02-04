@@ -49,19 +49,15 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Override
-    public BookedProductsDto bookProductsInWarehouse(final ShoppingCartDto shoppingCart) {
+    public BookedProductsDto checkProductsAvailability(final ShoppingCartDto shoppingCart) {
         final Map<UUID, Product> products = getProductsByIds(shoppingCart.getProducts().keySet());
         requireAllProductsExist(shoppingCart, products);
         requireAllProductsSuffice(shoppingCart, products);
 
         final BookedProductsDto bookedProducts = initBookedProductsDto();
         shoppingCart.getProducts().forEach((productId, quantity) ->
-            bookProductInWarehouse(products.get(productId), quantity, bookedProducts)
+            addProductToBooked(products.get(productId), quantity, bookedProducts)
         );
-        productRepository.saveAll(products.values());
-        log.info("Booked products for shopping cart: shoppingCartId = {}", shoppingCart.getShoppingCartId());
-        log.debug("Shopping cart = {}", shoppingCart);
-        log.debug("Updated products in warehouse = {}", products.values());
         return bookedProducts;
     }
 
@@ -123,7 +119,7 @@ public class ProductServiceImpl implements ProductService {
         return dto;
     }
 
-    private void bookProductInWarehouse(final Product product, final long quantity, final BookedProductsDto booked) {
+    private void addProductToBooked(final Product product, final long quantity, final BookedProductsDto booked) {
         final BigDecimal _quantity = BigDecimal.valueOf(quantity);
         final Dimension dimension = product.getDimension();
         booked.setDeliveryVolume(dimension.getWidth()
@@ -136,6 +132,5 @@ public class ProductServiceImpl implements ProductService {
                 .multiply(_quantity)
                 .add(booked.getDeliveryWeight()));
         booked.setFragile(booked.getFragile() || Boolean.TRUE.equals(product.getFragile()));
-        product.setBookedQuantity(product.getBookedQuantity() + quantity);
     }
 }

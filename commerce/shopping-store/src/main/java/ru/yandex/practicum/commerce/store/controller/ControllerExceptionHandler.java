@@ -1,19 +1,9 @@
 package ru.yandex.practicum.commerce.store.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.commerce.exception.ProductNotFoundException;
+import ru.yandex.practicum.commerce.exception.handler.BaseExceptionHandler;
 
 @RestControllerAdvice
-@Slf4j
-public class ControllerExceptionHandler {
+public class ControllerExceptionHandler extends BaseExceptionHandler {
 
-    @ExceptionHandler
-    public ResponseEntity<ProductNotFoundException> handleProductNotFoundException(
-            final ProductNotFoundException exception) {
-        log.warn(exception.getMessage());
-        return new ResponseEntity<>(exception, exception.getHttpStatus());
-    }
 }

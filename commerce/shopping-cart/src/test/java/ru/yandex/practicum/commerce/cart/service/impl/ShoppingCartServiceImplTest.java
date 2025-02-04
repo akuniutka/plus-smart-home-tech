@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
-import ru.yandex.practicum.commerce.cart.exception.BookingNotPossibleException;
 import ru.yandex.practicum.commerce.cart.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.commerce.cart.model.ShoppingCart;
 import ru.yandex.practicum.commerce.cart.repository.ShoppingCartRepository;
@@ -16,7 +15,6 @@ import ru.yandex.practicum.commerce.cart.util.UUIDGenerator;
 import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
 import ru.yandex.practicum.commerce.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.commerce.exception.NotAuthorizedUserException;
-import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
 import ru.yandex.practicum.commerce.exception.ShoppingCartDeactivatedException;
 
 import java.util.Optional;
@@ -32,7 +30,6 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import static ru.yandex.practicum.commerce.cart.util.TestModels.PRODUCT_ID_B;
 import static ru.yandex.practicum.commerce.cart.util.TestModels.PRODUCT_ID_C;
 import static ru.yandex.practicum.commerce.cart.util.TestModels.SHOPPING_CART_ID;
-import static ru.yandex.practicum.commerce.cart.util.TestModels.TEST_EXCEPTION_MESSAGE;
 import static ru.yandex.practicum.commerce.cart.util.TestModels.USERNAME_A;
 import static ru.yandex.practicum.commerce.cart.util.TestModels.WRONG_USERNAME;
 import static ru.yandex.practicum.commerce.cart.util.TestModels.getTestBookedProductsDto;
@@ -371,32 +368,16 @@ class ShoppingCartServiceImplTest {
     }
 
     @Test
-    void whenBookProductsInWarehouseAndNotEnoughProductsInWarehouse_ThenThrowException() {
-        when(mockRepository.findByUsername(any())).thenReturn(Optional.of(getTestFullShoppingCart()));
-        when(mockMapper.mapToDto(any())).thenReturn(getTestFullShoppingCartDto());
-        when(mockWarehouseService.bookProducts(any()))
-                .thenThrow(new ProductInShoppingCartNotInWarehouse(TEST_EXCEPTION_MESSAGE));
-
-        final BookingNotPossibleException exception = assertThrows(BookingNotPossibleException.class,
-                () -> service.bookProductsInWarehouse(USERNAME_A));
-
-        inOrder.verify(mockRepository).findByUsername(USERNAME_A);
-        inOrder.verify(mockMapper).mapToDto(argThat(samePropertyValuesAs(getTestFullShoppingCart())));
-        inOrder.verify(mockWarehouseService).bookProducts(getTestFullShoppingCartDto());
-        assertThat(exception.getUserMessage(), equalTo("Cannot book products in warehouse now"));
-    }
-
-    @Test
     void whenBookProductsInWarehouse_ThenMapToDtoAndPassToWarehouseServiceAndReturnResponseAndLog() throws Exception {
         when(mockRepository.findByUsername(any())).thenReturn(Optional.of(getTestFullShoppingCart()));
         when(mockMapper.mapToDto(any())).thenReturn(getTestFullShoppingCartDto());
-        when(mockWarehouseService.bookProducts(any())).thenReturn(getTestBookedProductsDto());
+        when(mockWarehouseService.checkProductsAvailability(any())).thenReturn(getTestBookedProductsDto());
 
         final BookedProductsDto dto = service.bookProductsInWarehouse(USERNAME_A);
 
         inOrder.verify(mockRepository).findByUsername(USERNAME_A);
         inOrder.verify(mockMapper).mapToDto(argThat(samePropertyValuesAs(getTestFullShoppingCart())));
-        inOrder.verify(mockWarehouseService).bookProducts(getTestFullShoppingCartDto());
+        inOrder.verify(mockWarehouseService).checkProductsAvailability(getTestFullShoppingCartDto());
         assertThat(dto, equalTo(getTestBookedProductsDto()));
         assertLogs(logListener.getEvents(), "book_products.json", getClass());
     }

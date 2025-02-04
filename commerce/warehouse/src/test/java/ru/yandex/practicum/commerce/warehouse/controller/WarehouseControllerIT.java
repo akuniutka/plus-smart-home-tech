@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.yandex.practicum.commerce.exception.ApiExceptions;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
@@ -33,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.TEST_EXCEPTION_MESSAGE;
@@ -92,10 +94,10 @@ class WarehouseControllerIT {
     }
 
     @Test
-    void whenPostAtCheckEndpoint_ThenInvokeBookProductsMethodAndProcessResponse() throws Exception {
-        final String requestBody = loadJson("book_products_request.json", getClass());
-        final String responseBody = loadJson("book_products_response.json", getClass());
-        when(mockProductService.bookProductsInWarehouse(any())).thenReturn(getTestBookedProducts());
+    void whenPostAtCheckEndpoint_ThenInvokeCheckProductsAvailabilityMethodAndProcessResponse() throws Exception {
+        final String requestBody = loadJson("check_products_availability_request.json", getClass());
+        final String responseBody = loadJson("check_products_availability_response.json", getClass());
+        when(mockProductService.checkProductsAvailability(any())).thenReturn(getTestBookedProducts());
 
         mvc.perform(post(BASE_PATH + "/check")
                         .accept(MediaType.APPLICATION_JSON)
@@ -108,11 +110,11 @@ class WarehouseControllerIT {
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().json(responseBody, true));
 
-        verify(mockProductService).bookProductsInWarehouse(getTestShoppingCart());
+        verify(mockProductService).checkProductsAvailability(getTestShoppingCart());
     }
 
     @Test
-    void whenPostAtAddEndpoint_ThenInvokeIncreaseProductQuantity() throws Exception {
+    void whenPostAtAddEndpoint_ThenInvokeIncreaseProductQuantityMethod() throws Exception {
         final String requestBody = loadJson("add_product_quantity.json", getClass());
         doNothing().when(mockProductService).increaseProductQuantity(any());
 
@@ -127,7 +129,7 @@ class WarehouseControllerIT {
     }
 
     @Test
-    void whenGetAtAddressEndpoint_ThenInvokerGetWarehouseAddressAndProcessResponse() throws Exception {
+    void whenGetAtAddressEndpoint_ThenInvokerGetWarehouseAddressMethodAndProcessResponse() throws Exception {
         final String responseBody = loadJson("get_address_request.json", getClass());
         when(mockAddressService.getAddress()).thenReturn(getTestAddressDtoA());
 
@@ -157,6 +159,8 @@ class WarehouseControllerIT {
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON),
+                        header().string(ApiExceptions.API_EXCEPTION_HEADER,
+                                SpecifiedProductAlreadyInWarehouseException.class.getSimpleName()),
                         jsonPath("$.httpStatus", equalTo(HttpStatus.BAD_REQUEST.name())),
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE)));
 
@@ -166,8 +170,8 @@ class WarehouseControllerIT {
 
     @Test
     void whenProductInShoppingCartNotInWarehouse_ThenInvokeControllerExceptionHandler() throws Exception {
-        final String requestBody = loadJson("book_products_request.json", getClass());
-        when(mockProductService.bookProductsInWarehouse(any()))
+        final String requestBody = loadJson("check_products_availability_request.json", getClass());
+        when(mockProductService.checkProductsAvailability(any()))
                 .thenThrow(new ProductInShoppingCartNotInWarehouse(TEST_EXCEPTION_MESSAGE));
 
         mvc.perform(post(BASE_PATH + "/check")
@@ -179,16 +183,18 @@ class WarehouseControllerIT {
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON),
+                        header().string(ApiExceptions.API_EXCEPTION_HEADER,
+                                ProductInShoppingCartNotInWarehouse.class.getSimpleName()),
                         jsonPath("$.httpStatus", equalTo(HttpStatus.BAD_REQUEST.name())),
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE)));
 
-        verify(mockProductService).bookProductsInWarehouse(getTestShoppingCart());
+        verify(mockProductService).checkProductsAvailability(getTestShoppingCart());
     }
 
     @Test
     void whenProductInShoppingCartLowQuantityInWarehouse_ThenInvokeControllerExceptionHandler() throws Exception {
-        final String requestBody = loadJson("book_products_request.json", getClass());
-        when(mockProductService.bookProductsInWarehouse(any()))
+        final String requestBody = loadJson("check_products_availability_request.json", getClass());
+        when(mockProductService.checkProductsAvailability(any()))
                 .thenThrow(new ProductInShoppingCartLowQuantityInWarehouse(TEST_EXCEPTION_MESSAGE));
 
         mvc.perform(post(BASE_PATH + "/check")
@@ -200,10 +206,12 @@ class WarehouseControllerIT {
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON),
+                        header().string(ApiExceptions.API_EXCEPTION_HEADER,
+                                ProductInShoppingCartLowQuantityInWarehouse.class.getSimpleName()),
                         jsonPath("$.httpStatus", equalTo(HttpStatus.BAD_REQUEST.name())),
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE)));
 
-        verify(mockProductService).bookProductsInWarehouse(getTestShoppingCart());
+        verify(mockProductService).checkProductsAvailability(getTestShoppingCart());
     }
 
     @Test
@@ -220,6 +228,8 @@ class WarehouseControllerIT {
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON),
+                        header().string(ApiExceptions.API_EXCEPTION_HEADER,
+                                NoSpecifiedProductInWarehouseException.class.getSimpleName()),
                         jsonPath("$.httpStatus", equalTo(HttpStatus.BAD_REQUEST.name())),
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE)));
 

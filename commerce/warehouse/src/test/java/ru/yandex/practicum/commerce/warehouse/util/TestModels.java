@@ -1,7 +1,7 @@
 package ru.yandex.practicum.commerce.warehouse.util;
 
 import ru.yandex.practicum.commerce.dto.warehouse.AddProductToWarehouseRequest;
-import ru.yandex.practicum.commerce.dto.warehouse.AddressDto;
+import ru.yandex.practicum.commerce.dto.delivery.AddressDto;
 import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
 import ru.yandex.practicum.commerce.dto.warehouse.DimensionDto;
 import ru.yandex.practicum.commerce.dto.warehouse.NewProductInWarehouseRequest;
@@ -86,12 +86,6 @@ public final class TestModels {
         return product;
     }
 
-    public static Product getTestProductABooked() {
-        final Product product = getTestProductA();
-        product.setBookedQuantity(product.getBookedQuantity() + PRODUCT_QUANTITY_A);
-        return product;
-    }
-
     public static Product getTestProductB() {
         final Dimension dimension = new Dimension();
         dimension.setWidth(PRODUCT_WIDTH_B);
@@ -110,12 +104,6 @@ public final class TestModels {
     public static Product getTestProductBLow() {
         final Product product = getTestProductB();
         product.setBookedQuantity(product.getTotalQuantity() - 1);
-        return product;
-    }
-
-    public static Product getTestProductBBooked() {
-        final Product product = getTestProductB();
-        product.setBookedQuantity(product.getBookedQuantity() + PRODUCT_QUANTITY_B);
         return product;
     }
 
