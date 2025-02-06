@@ -5,7 +5,7 @@ spring:
     username: smart
     password: smart
   jpa:
-    hibernate.dll-auto: none
+    hibernate.ddl-auto: none
     open-in-view: false
   sql.init.mode: always
 server:

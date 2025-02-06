@@ -1,0 +1,18 @@
+{
+  "fromAddress": {
+    "country": "ADDRESS_1",
+    "city": "ADDRESS_1",
+    "street": "ADDRESS_1",
+    "house": "ADDRESS_1",
+    "flat": "ADDRESS_1"
+  },
+  "toAddress": {
+    "country": "NOLAND",
+    "city": "STONE CITY",
+    "street": "FIRST LANE",
+    "house": "15",
+    "flat": "42"
+  },
+  "orderId": "f8991fc5-1c29-4395-b781-7717893cea92",
+  "deliveryState": "CREATED"
+}

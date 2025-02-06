@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to calculate delivery cost: orderId = f8991fc5-1c29-4395-b781-7717893cea92"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with order delivery cost: orderId = f8991fc5-1c29-4395-b781-7717893cea92, deliveryCost = 32.40"
+  }
+]

@@ -8,6 +8,4 @@ import ru.yandex.practicum.commerce.order.model.Address;
 public interface AddressMapper {
 
     Address mapToEntity(AddressDto dto);
-
-    AddressDto mapToDto(Address address);
 }
