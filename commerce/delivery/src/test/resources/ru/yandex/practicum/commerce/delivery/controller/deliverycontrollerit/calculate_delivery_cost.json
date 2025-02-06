@@ -1,0 +1,13 @@
+{
+  "orderId": "f8991fc5-1c29-4395-b781-7717893cea92",
+  "shoppingCartId": "3771b0ec-41ec-4c28-80e1-d28b7092df8c",
+  "products": {
+    "25182563-067b-441c-b11d-9ad1fb249e25": 1,
+    "0112f4d1-4940-4cd5-84ed-e7d44f683808": 2
+  },
+  "deliveryId": "1c44948b-78ca-48a5-80e5-6a901af8c117",
+  "state": "NEW",
+  "deliveryWeight": 14.000,
+  "deliveryVolume": 54.000,
+  "fragile": true
+}
