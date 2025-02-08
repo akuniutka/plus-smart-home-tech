@@ -1,0 +1,6 @@
+spring:
+  main.banner-mode: OFF
+  jpa.hibernate.ddl-auto: validate
+management:
+  endpoints.web.exposure.include: loggers
+  endpoint.loggers.enabled: true
