@@ -16,10 +16,13 @@ public final class ApiExceptions {
         final Map<String, Class<? extends ApiException>> exceptions = new HashMap<>();
         exceptions.put("NoDeliveryFoundException", NoDeliveryFoundException.class);
         exceptions.put("NoOrderFoundException", NoOrderFoundException.class);
+        exceptions.put("NoPaymentFoundException", NoPaymentFoundException.class);
         exceptions.put("NoProductsInShoppingCartException", NoProductsInShoppingCartException.class);
         exceptions.put("NoSpecifiedProductInWarehouseException", NoSpecifiedProductInWarehouseException.class);
         exceptions.put("NotAuthorizedUserException", NotAuthorizedUserException.class);
+        exceptions.put("NotEnoughInfoInOrderToCalculateException", NotEnoughInfoInOrderToCalculateException.class);
         exceptions.put("OrderDeliveryAlreadyExistsException", OrderDeliveryAlreadyExistsException.class);
+        exceptions.put("OrderPaymentAlreadyExistsException", OrderPaymentAlreadyExistsException.class);
         exceptions.put("ProductInShoppingCartLowQuantityInWarehouse",
                 ProductInShoppingCartLowQuantityInWarehouse.class);
         exceptions.put("ProductInShoppingCartNotInWarehouse", ProductInShoppingCartNotInWarehouse.class);

@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to set payment as successful: orderId = f8991fc5-1c29-4395-b781-7717893cea92"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with 200 OK to set payment as successful: orderId = f8991fc5-1c29-4395-b781-7717893cea92"
+  }
+]

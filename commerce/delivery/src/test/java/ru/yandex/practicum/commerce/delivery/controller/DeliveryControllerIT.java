@@ -70,7 +70,7 @@ class DeliveryControllerIT {
     }
 
     @Test
-    void whenPutAtBasPath_ThenInvokePlanDeliveryMethodAndProcessResponse() throws Exception {
+    void whenPutAtBasePath_ThenInvokePlanDeliveryMethodAndProcessResponse() throws Exception {
         final String requestBody = loadJson("plan_delivery_request.json", getClass());
         final String responseBody = loadJson("plan_delivery_response.json", getClass());
         when(mockMapper.mapToEntity(any())).thenReturn(getTestNewDelivery());

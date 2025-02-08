@@ -1,9 +1,9 @@
-package ru.yandex.practicum.commerce.delivery.util.impl;
+package ru.yandex.practicum.commerce.payment.util.impl;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import ru.yandex.practicum.commerce.delivery.util.UUIDGenerator;
+import ru.yandex.practicum.commerce.payment.util.UUIDGenerator;
 
 import java.util.UUID;
 
