@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ import ru.yandex.practicum.commerce.order.model.Order;
 import ru.yandex.practicum.commerce.order.service.OrderService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/order")
@@ -60,5 +62,25 @@ public class OrderController {
         log.info("Responded with user's orders: username = {}", username);
         log.debug("Requested orders = {}", dtos);
         return dtos;
+    }
+
+    @PostMapping("/payment")
+    public OrderDto confirmPayment(@RequestBody final UUID orderId) {
+        log.info("Received request to mark order as successfully paid: orderId = {}", orderId);
+        final Order order = orderService.confirmPayment(orderId);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with successfully paid order: orderId = {}, paymentId = {}", orderId, dto.getPaymentId());
+        log.debug("Paid order = {}", dto);
+        return dto;
+    }
+
+    @PostMapping("/payment/failed")
+    public OrderDto setPaymentFailed(@RequestBody final UUID orderId) {
+        log.info("Received request to save payment failure for order: orderId = {}", orderId);
+        final Order order = orderService.setPaymentFailed(orderId);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with unpaid order: orderId = {}, paymentId = {}", orderId, dto.getPaymentId());
+        log.debug("Unpaid order = {}", dto);
+        return dto;
     }
 }

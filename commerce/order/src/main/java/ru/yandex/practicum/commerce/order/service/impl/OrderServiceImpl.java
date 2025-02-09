@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 import ru.yandex.practicum.commerce.dto.order.OrderState;
+import ru.yandex.practicum.commerce.exception.NoOrderFoundException;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.NotAuthorizedUserException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
@@ -18,6 +19,7 @@ import ru.yandex.practicum.commerce.order.service.WarehouseService;
 import ru.yandex.practicum.commerce.order.util.UUIDGenerator;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +54,26 @@ public class OrderServiceImpl implements OrderService {
         return repository.findAllByUsername(username, pageable);
     }
 
+    @Override
+    public Order confirmPayment(final UUID orderId) {
+        Order order = getOrderById(orderId);
+        order.setState(OrderState.PAID);
+        order = repository.save(order);
+        log.info("Mark order as successfully paid: orderId = {}, paymentId = {}", orderId, order.getPaymentId());
+        log.debug("Paid order = {}", order);
+        return order;
+    }
+
+    @Override
+    public Order setPaymentFailed(final UUID orderId) {
+        Order order = getOrderById(orderId);
+        order.setState(OrderState.PAYMENT_FAILED);
+        order = repository.save(order);
+        log.info("Save payment failure for order: orderId = {}, paymentId = {}", orderId, order.getPaymentId());
+        log.debug("Order with payment failed = {}", order);
+        return order;
+    }
+
     private void requireUsernameNotBlank(final String username) {
         if (username.isBlank()) {
             throw new NotAuthorizedUserException("User not authorized");
@@ -64,5 +86,11 @@ public class OrderServiceImpl implements OrderService {
         } catch (ProductInShoppingCartNotInWarehouse | ProductInShoppingCartLowQuantityInWarehouse e) {
             throw new NoSpecifiedProductInWarehouseException(e.getUserMessage());
         }
+    }
+
+    private Order getOrderById(final UUID orderId) {
+        return repository.findById(orderId).orElseThrow(
+                () -> new NoOrderFoundException("Order %s does not exist".formatted(orderId))
+        );
     }
 }

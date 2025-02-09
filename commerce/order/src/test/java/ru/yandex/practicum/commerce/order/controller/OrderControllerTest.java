@@ -21,11 +21,13 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.equalToObject;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.when;
+import static ru.yandex.practicum.commerce.order.util.TestModels.ORDER_ID_A;
 import static ru.yandex.practicum.commerce.order.util.TestModels.PAGEABLE;
 import static ru.yandex.practicum.commerce.order.util.TestModels.USERNAME_A;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressA;
@@ -34,8 +36,12 @@ import static ru.yandex.practicum.commerce.order.util.TestModels.getTestCreateNe
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrderDto;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAPaid;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAUnpaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderB;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAPaid;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAUnpaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoB;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestPageable;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestShoppingCartA;
@@ -108,5 +114,31 @@ class OrderControllerTest {
                 samePropertyValuesAs(getTestOrderB())));
         assertThat(dtos, contains(getTestOrderDtoA(), getTestOrderDtoB()));
         assertLogs(logListener.getEvents(), "get_orders_by_username.json", getClass());
+    }
+
+    @Test
+    void whenConfirmPayment_ThenPassOrderIdToServiceAndMapServiceResponseAndLog() throws Exception {
+        when(mockOrderService.confirmPayment(any())).thenReturn(getTestOrderAPaid());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAPaid());
+
+        final OrderDto dto = controller.confirmPayment(ORDER_ID_A);
+
+        inOrder.verify(mockOrderService).confirmPayment(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAPaid()));
+        assertThat(dto, equalToObject(getTestOrderDtoAPaid()));
+        assertLogs(logListener.getEvents(), "confirm_payment.json", getClass());
+    }
+
+    @Test
+    void whenSetPaymentFailed_ThenPassOrderIdToServiceAndMapServiceResponseAndLog() throws Exception {
+        when(mockOrderService.setPaymentFailed(any())).thenReturn(getTestOrderAUnpaid());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAUnpaid());
+
+        final OrderDto dto = controller.setPaymentFailed(ORDER_ID_A);
+
+        inOrder.verify(mockOrderService).setPaymentFailed(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAUnpaid()));
+        assertThat(dto, equalTo(getTestOrderDtoAUnpaid()));
+        assertLogs(logListener.getEvents(), "set_payment_failed.json", getClass());
     }
 }
