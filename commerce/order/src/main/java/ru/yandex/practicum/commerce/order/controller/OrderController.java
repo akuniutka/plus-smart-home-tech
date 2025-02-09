@@ -83,4 +83,25 @@ public class OrderController {
         log.debug("Unpaid order = {}", dto);
         return dto;
     }
+
+    @PostMapping("/delivery")
+    public OrderDto confirmDelivery(@RequestBody final UUID orderId) {
+        log.info("Received request to mark order as successfully delivered: orderId = {}", orderId);
+        final Order order = orderService.confirmDelivery(orderId);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with successfully delivered order: orderId = {}, deliveryId = {}", orderId,
+                dto.getDeliveryId());
+        log.debug("Delivered order = {}", dto);
+        return dto;
+    }
+
+    @PostMapping("/delivery/failed")
+    public OrderDto setDeliveryFailed(@RequestBody final UUID orderId) {
+        log.info("Received request to save delivery failure for order: orderId = {}", orderId);
+        final Order order = orderService.setDeliveryFailed(orderId);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with not delivered order: orderId = {}, deliveryId = {}", orderId, dto.getDeliveryId());
+        log.debug("Not delivered order = {}", dto);
+        return dto;
+    }
 }

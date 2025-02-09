@@ -74,6 +74,26 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
+    @Override
+    public Order confirmDelivery(final UUID orderId) {
+        Order order = getOrderById(orderId);
+        order.setState(OrderState.DELIVERED);
+        order = repository.save(order);
+        log.info("Mark order as successfully delivered: orderId = {}, deliveryId = {}", orderId, order.getDeliveryId());
+        log.debug("Delivered order = {}", order);
+        return order;
+    }
+
+    @Override
+    public Order setDeliveryFailed(final UUID orderId) {
+        Order order = getOrderById(orderId);
+        order.setState(OrderState.DELIVERY_FAILED);
+        order = repository.save(order);
+        log.info("Save delivery failure for order: orderId = {}, deliveryId = {}", orderId, order.getDeliveryId());
+        log.debug("Order with delivery failed = {}", order);
+        return order;
+    }
+
     private void requireUsernameNotBlank(final String username) {
         if (username.isBlank()) {
             throw new NotAuthorizedUserException("User not authorized");

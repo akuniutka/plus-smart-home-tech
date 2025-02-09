@@ -50,10 +50,14 @@ import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressD
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrderDto;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderADelivered;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotDelivered;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAPaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAUnpaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderB;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoADelivered;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoANotDelivered;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAPaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAUnpaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoB;
@@ -165,7 +169,7 @@ class OrderControllerIT {
     }
 
     @Test
-    void whenPostAtPaymentFiledEndpoint_ThenInvokeSetPaymentFailedMethodAndProcessResponse() throws Exception {
+    void whenPostAtPaymentFailedEndpoint_ThenInvokeSetPaymentFailedMethodAndProcessResponse() throws Exception {
         final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
         final String responseBody = loadJson("set_payment_failed_response.json", getClass());
         when(mockOrderService.setPaymentFailed(any())).thenReturn(getTestOrderAUnpaid());
@@ -184,6 +188,50 @@ class OrderControllerIT {
 
         inOrder.verify(mockOrderService).setPaymentFailed(ORDER_ID_A);
         inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAUnpaid()));
+    }
+
+    @Test
+    void whenPostAtDeliveryEndpoint_ThenInvokeConfirmDeliveryMethodAndProcessResponse() throws Exception {
+        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String responseBody = loadJson("confirm_delivery_response.json", getClass());
+        when(mockOrderService.confirmDelivery(any())).thenReturn(getTestOrderADelivered());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoADelivered());
+
+        mvc.perform(post(BASE_PATH + "/delivery")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).confirmDelivery(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderADelivered()));
+    }
+
+    @Test
+    void whenPostAtDeliveryFailedEndpoint_ThenInvokeSetDeliveryFailedMethodAndProcessResponse() throws Exception {
+        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String responseBody = loadJson("set_delivery_failed_response.json", getClass());
+        when(mockOrderService.setDeliveryFailed(any())).thenReturn(getTestOrderANotDelivered());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoANotDelivered());
+
+        mvc.perform(post(BASE_PATH + "/delivery/failed")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).setDeliveryFailed(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderANotDelivered()));
     }
 
     @Test

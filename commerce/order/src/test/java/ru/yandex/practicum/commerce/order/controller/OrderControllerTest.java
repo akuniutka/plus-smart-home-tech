@@ -36,10 +36,14 @@ import static ru.yandex.practicum.commerce.order.util.TestModels.getTestCreateNe
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrderDto;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderADelivered;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotDelivered;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAPaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAUnpaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderB;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoADelivered;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoANotDelivered;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAPaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAUnpaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoB;
@@ -117,7 +121,7 @@ class OrderControllerTest {
     }
 
     @Test
-    void whenConfirmPayment_ThenPassOrderIdToServiceAndMapServiceResponseAndLog() throws Exception {
+    void whenConfirmPayment_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
         when(mockOrderService.confirmPayment(any())).thenReturn(getTestOrderAPaid());
         when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAPaid());
 
@@ -130,7 +134,7 @@ class OrderControllerTest {
     }
 
     @Test
-    void whenSetPaymentFailed_ThenPassOrderIdToServiceAndMapServiceResponseAndLog() throws Exception {
+    void whenSetPaymentFailed_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
         when(mockOrderService.setPaymentFailed(any())).thenReturn(getTestOrderAUnpaid());
         when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAUnpaid());
 
@@ -140,5 +144,31 @@ class OrderControllerTest {
         inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAUnpaid()));
         assertThat(dto, equalTo(getTestOrderDtoAUnpaid()));
         assertLogs(logListener.getEvents(), "set_payment_failed.json", getClass());
+    }
+
+    @Test
+    void whenConfirmDelivery_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
+        when(mockOrderService.confirmDelivery(any())).thenReturn(getTestOrderADelivered());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoADelivered());
+
+        final OrderDto dto = controller.confirmDelivery(ORDER_ID_A);
+
+        inOrder.verify(mockOrderService).confirmDelivery(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderADelivered()));
+        assertThat(dto, equalTo(getTestOrderDtoADelivered()));
+        assertLogs(logListener.getEvents(), "confirm_delivery.json", getClass());
+    }
+
+    @Test
+    void whenSetDeliveryFailed_ThenPassOrderIdTOServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
+        when(mockOrderService.setDeliveryFailed(any())).thenReturn(getTestOrderANotDelivered());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoANotDelivered());
+
+        final OrderDto dto = controller.setDeliveryFailed(ORDER_ID_A);
+
+        inOrder.verify(mockOrderService).setDeliveryFailed(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderANotDelivered()));
+        assertThat(dto, equalTo(getTestOrderDtoANotDelivered()));
+        assertLogs(logListener.getEvents(), "set_delivery_failed.json", getClass());
     }
 }
