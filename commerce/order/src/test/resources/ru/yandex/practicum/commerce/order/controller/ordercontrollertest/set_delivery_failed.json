@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to save delivery failure for order: orderId = f8991fc5-1c29-4395-b781-7717893cea92"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with not delivered order: orderId = f8991fc5-1c29-4395-b781-7717893cea92, deliveryId = 1c44948b-78ca-48a5-80e5-6a901af8c117"
+  }
+]
