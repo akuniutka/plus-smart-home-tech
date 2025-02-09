@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to save payment failure for order: orderId = f8991fc5-1c29-4395-b781-7717893cea92"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with unpaid order: orderId = f8991fc5-1c29-4395-b781-7717893cea92, paymentId = ff035258-939e-4f09-8119-61459eb68949"
+  }
+]

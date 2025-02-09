@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+import ru.yandex.practicum.commerce.exception.NoOrderFoundException;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.NotAuthorizedUserException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
@@ -17,6 +18,7 @@ import ru.yandex.practicum.commerce.order.util.LogListener;
 import ru.yandex.practicum.commerce.order.util.UUIDGenerator;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -36,6 +38,9 @@ import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressA
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestBookedProductsDto;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAAssembled;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAPaid;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAUnpaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderB;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestShoppingCartA;
 import static ru.yandex.practicum.commerce.order.util.TestUtils.assertLogs;
@@ -132,5 +137,53 @@ class OrderServiceImplTest {
 
         verify(mockRepository).findAllByUsername(USERNAME_A, PAGEABLE);
         assertThat(orders, contains(samePropertyValuesAs(getTestOrderA()), samePropertyValuesAs(getTestOrderB())));
+    }
+
+    @Test
+    void whenConfirmPaymentAndOrderNotExist_ThenThrowException() {
+        when(mockRepository.findById(any())).thenReturn(Optional.empty());
+
+        final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
+                () -> service.confirmPayment(ORDER_ID_A));
+
+        verify(mockRepository).findById(ORDER_ID_A);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+    }
+
+    @Test
+    void whenConfirmPaymentAndOrderExist_ThenUpdateOrderStateAndLog() throws Exception {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderAAssembled()));
+        when(mockRepository.save(any())).thenReturn(getTestOrderAPaid());
+
+        final Order order = service.confirmPayment(ORDER_ID_A);
+
+        inOrder.verify(mockRepository).findById(ORDER_ID_A);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderAPaid())));
+        assertThat(order, samePropertyValuesAs(getTestOrderAPaid()));
+        assertLogs(logListener.getEvents(), "confirm_payment.json", getClass());
+    }
+
+    @Test
+    void whenSetPaymentFailedAndOrderNotExist_ThenThrowException() {
+        when(mockRepository.findById(any())).thenReturn(Optional.empty());
+
+        final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
+                () -> service.setPaymentFailed(ORDER_ID_A));
+
+        verify(mockRepository).findById(ORDER_ID_A);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+    }
+
+    @Test
+    void whenSetPaymentFailedAndOrderExist_ThenUpdateOrderStateAndLog() throws Exception {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderAAssembled()));
+        when(mockRepository.save(any())).thenReturn(getTestOrderAUnpaid());
+
+        final Order order = service.setPaymentFailed(ORDER_ID_A);
+
+        inOrder.verify(mockRepository).findById(ORDER_ID_A);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderAUnpaid())));
+        assertThat(order, samePropertyValuesAs(getTestOrderAUnpaid()));
+        assertLogs(logListener.getEvents(), "set_payment_failed.json", getClass());
     }
 }

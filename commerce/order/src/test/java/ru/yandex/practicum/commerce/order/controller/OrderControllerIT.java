@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.commerce.exception.ApiExceptions;
+import ru.yandex.practicum.commerce.exception.NoOrderFoundException;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.NotAuthorizedUserException;
 import ru.yandex.practicum.commerce.order.mapper.AddressMapper;
@@ -33,12 +34,14 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.yandex.practicum.commerce.order.util.TestModels.ORDER_ID_A;
 import static ru.yandex.practicum.commerce.order.util.TestModels.PAGEABLE;
 import static ru.yandex.practicum.commerce.order.util.TestModels.TEST_EXCEPTION_MESSAGE;
 import static ru.yandex.practicum.commerce.order.util.TestModels.USERNAME_A;
@@ -47,8 +50,12 @@ import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressD
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrderDto;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAPaid;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAUnpaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderB;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAPaid;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAUnpaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoB;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestPageable;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestShoppingCartA;
@@ -136,6 +143,50 @@ class OrderControllerIT {
     }
 
     @Test
+    void whenPostAtPaymentEndpoint_ThenInvokeConfirmPaymentMethodAndProcessResponse() throws Exception {
+        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String responseBody = loadJson("confirm_payment_response.json", getClass());
+        when(mockOrderService.confirmPayment(any())).thenReturn(getTestOrderAPaid());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAPaid());
+
+        mvc.perform(post(BASE_PATH + "/payment")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).confirmPayment(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAPaid()));
+    }
+
+    @Test
+    void whenPostAtPaymentFiledEndpoint_ThenInvokeSetPaymentFailedMethodAndProcessResponse() throws Exception {
+        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String responseBody = loadJson("set_payment_failed_response.json", getClass());
+        when(mockOrderService.setPaymentFailed(any())).thenReturn(getTestOrderAUnpaid());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAUnpaid());
+
+        mvc.perform(post(BASE_PATH + "/payment/failed")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).setPaymentFailed(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAUnpaid()));
+    }
+
+    @Test
     void whenNotAuthorizedUserException_ThenInvokeControllerExceptionHandler() throws Exception {
         final String requestBody = loadJson("create_order_request.json", getClass());
         when(mockAddressMapper.mapToEntity(any())).thenReturn(getTestAddressA());
@@ -185,5 +236,27 @@ class OrderControllerIT {
 
         inOrder.verify(mockAddressMapper).mapToEntity(getTestAddressDtoA());
         inOrder.verify(mockOrderService).addNewOrder(USERNAME_A, getTestShoppingCartA(), getTestAddressA());
+    }
+
+    @Test
+    void whenNoOrderFoundException_ThenInvokeControllerExceptionHandler() throws Exception {
+        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        when(mockOrderService.confirmPayment(any())).thenThrow(new NoOrderFoundException(TEST_EXCEPTION_MESSAGE));
+
+        mvc.perform(post(BASE_PATH + "/payment")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isBadRequest(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        header().string(ApiExceptions.API_EXCEPTION_HEADER,
+                                NoOrderFoundException.class.getSimpleName()),
+                        jsonPath("$.httpStatus", equalTo(HttpStatus.BAD_REQUEST.name())),
+                        jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE)));
+
+        inOrder.verify(mockOrderService).confirmPayment(ORDER_ID_A);
     }
 }

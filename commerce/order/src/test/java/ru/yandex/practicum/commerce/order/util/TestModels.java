@@ -153,6 +153,24 @@ public final class TestModels {
         return order;
     }
 
+    public static Order getTestOrderAAssembled() {
+        final Order order = getTestOrderA();
+        order.setState(OrderState.ASSEMBLED);
+        return order;
+    }
+
+    public static Order getTestOrderAPaid() {
+        final Order order = getTestOrderA();
+        order.setState(OrderState.PAID);
+        return order;
+    }
+
+    public static Order getTestOrderAUnpaid() {
+        final Order order = getTestOrderA();
+        order.setState(OrderState.PAYMENT_FAILED);
+        return order;
+    }
+
     public static Order getTestOrderB() {
         final Order order = new Order();
         order.setOrderId(ORDER_ID_B);
@@ -192,6 +210,18 @@ public final class TestModels {
         dto.setTotalPrice(TOTAL_PRICE_A);
         dto.setDeliveryPrice(DELIVERY_PRICE_A);
         dto.setProductPrice(PRODUCT_PRICE_A);
+        return dto;
+    }
+
+    public static OrderDto getTestOrderDtoAPaid() {
+        final OrderDto dto = getTestOrderDtoA();
+        dto.setState(OrderState.PAID);
+        return dto;
+    }
+
+    public static OrderDto getTestOrderDtoAUnpaid() {
+        final OrderDto dto = getTestOrderDtoA();
+        dto.setState(OrderState.PAYMENT_FAILED);
         return dto;
     }
 
