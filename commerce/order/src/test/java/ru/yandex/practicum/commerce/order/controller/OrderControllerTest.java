@@ -36,13 +36,17 @@ import static ru.yandex.practicum.commerce.order.util.TestModels.getTestCreateNe
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrderDto;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAAssembled;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderADelivered;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotAssembled;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotDelivered;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAPaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAUnpaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderB;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAAssembled;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoADelivered;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoANotAssembled;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoANotDelivered;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAPaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAUnpaid;
@@ -118,6 +122,32 @@ class OrderControllerTest {
                 samePropertyValuesAs(getTestOrderB())));
         assertThat(dtos, contains(getTestOrderDtoA(), getTestOrderDtoB()));
         assertLogs(logListener.getEvents(), "get_orders_by_username.json", getClass());
+    }
+
+    @Test
+    void whenConfirmAssembly_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
+        when(mockOrderService.confirmAssembly(any())).thenReturn(getTestOrderAAssembled());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAAssembled());
+
+        final OrderDto dto = controller.confirmAssembly(ORDER_ID_A);
+
+        inOrder.verify(mockOrderService).confirmAssembly(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAAssembled()));
+        assertThat(dto, equalTo(getTestOrderDtoAAssembled()));
+        assertLogs(logListener.getEvents(), "confirm_assembly.json", getClass());
+    }
+
+    @Test
+    void whenSetAssemblyFailed_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
+        when(mockOrderService.setAssemblyFailed(any())).thenReturn(getTestOrderANotAssembled());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoANotAssembled());
+
+        final OrderDto dto = controller.setAssemblyFailed(ORDER_ID_A);
+
+        inOrder.verify(mockOrderService).setAssemblyFailed(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderANotAssembled()));
+        assertThat(dto, equalTo(getTestOrderDtoANotAssembled()));
+        assertLogs(logListener.getEvents(), "set_assembly_failed.json", getClass());
     }
 
     @Test

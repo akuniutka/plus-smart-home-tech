@@ -50,13 +50,17 @@ import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressD
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrderDto;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAAssembled;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderADelivered;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotAssembled;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotDelivered;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAPaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAUnpaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderB;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAAssembled;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoADelivered;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoANotAssembled;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoANotDelivered;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAPaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAUnpaid;
@@ -144,6 +148,50 @@ class OrderControllerIT {
         inOrder.verify(mockOrderMapper).mapToDto(ordersCaptor.capture());
         assertThat(ordersCaptor.getValue(), contains(samePropertyValuesAs(getTestOrderA()),
                 samePropertyValuesAs(getTestOrderB())));
+    }
+
+    @Test
+    void whenPostAtDeliveryEndpoint_ThenInvokeConfirmAssemblyMethodAndProcessResponse() throws Exception {
+        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String responseBody = loadJson("confirm_assembly_response.json", getClass());
+        when(mockOrderService.confirmAssembly(any())).thenReturn(getTestOrderAAssembled());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAAssembled());
+
+        mvc.perform(post(BASE_PATH + "/assembly")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).confirmAssembly(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAAssembled()));
+    }
+
+    @Test
+    void whenPostAtAssemblyFailedEndpoint_ThenInvokeSetAssemblyFailedMethodAndProcessResponse() throws Exception {
+        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String responseBody = loadJson("set_assembly_failed_response.json", getClass());
+        when(mockOrderService.setAssemblyFailed(any())).thenReturn(getTestOrderANotAssembled());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoANotAssembled());
+
+        mvc.perform(post(BASE_PATH + "/assembly/failed")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).setAssemblyFailed(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderANotAssembled()));
     }
 
     @Test

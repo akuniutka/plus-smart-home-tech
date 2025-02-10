@@ -40,6 +40,8 @@ import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAAssembled;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderADelivered;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANew;
+import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotAssembled;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotDelivered;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAPaid;
 import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAUnpaid;
@@ -139,6 +141,54 @@ class OrderServiceImplTest {
 
         verify(mockRepository).findAllByUsername(USERNAME_A, PAGEABLE);
         assertThat(orders, contains(samePropertyValuesAs(getTestOrderA()), samePropertyValuesAs(getTestOrderB())));
+    }
+
+    @Test
+    void whenConfirmAssemblyAndOrderNotExist_ThenThrowException() {
+        when(mockRepository.findById(any())).thenReturn(Optional.empty());
+
+        final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
+                () -> service.confirmAssembly(ORDER_ID_A));
+
+        verify(mockRepository).findById(ORDER_ID_A);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+    }
+
+    @Test
+    void whenConfirmAssemblyAndOrderExist_ThenUpdateOrderStateAndLog() throws Exception {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderANew()));
+        when(mockRepository.save(any())).thenReturn(getTestOrderAAssembled());
+
+        final Order order = service.confirmAssembly(ORDER_ID_A);
+
+        inOrder.verify(mockRepository).findById(ORDER_ID_A);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderAAssembled())));
+        assertThat(order, samePropertyValuesAs(getTestOrderAAssembled()));
+        assertLogs(logListener.getEvents(), "confirm_assembly.json", getClass());
+    }
+
+    @Test
+    void whenSetAssemblyFailedAndOrderNotExist_ThenThrowException() {
+        when(mockRepository.findById(any())).thenReturn(Optional.empty());
+
+        final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
+                () -> service.setAssemblyFailed(ORDER_ID_A));
+
+        verify(mockRepository).findById(ORDER_ID_A);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+    }
+
+    @Test
+    void whenSetAssemblyFailedAndOrderExist_ThenUpdateOrderStateAndLog() throws  Exception {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderANew()));
+        when(mockRepository.save(any())).thenReturn(getTestOrderANotAssembled());
+
+        final Order order = service.setAssemblyFailed(ORDER_ID_A);
+
+        inOrder.verify(mockRepository).findById(ORDER_ID_A);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderANotAssembled())));
+        assertThat(order, samePropertyValuesAs(getTestOrderANotAssembled()));
+        assertLogs(logListener.getEvents(), "set_assembly_failed.json", getClass());
     }
 
     @Test

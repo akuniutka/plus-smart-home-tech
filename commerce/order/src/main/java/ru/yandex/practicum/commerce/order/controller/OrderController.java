@@ -64,6 +64,26 @@ public class OrderController {
         return dtos;
     }
 
+    @PostMapping("/assembly")
+    public OrderDto confirmAssembly(@RequestBody final UUID orderId) {
+        log.info("Received request to mark order as successfully assembled: orderId = {}", orderId);
+        final Order order = orderService.confirmAssembly(orderId);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with successfully assembled order: orderId = {}", orderId);
+        log.debug("Assembled order = {}", dto);
+        return dto;
+    }
+
+    @PostMapping("/assembly/failed")
+    public OrderDto setAssemblyFailed(@RequestBody final UUID orderId) {
+        log.info("Received request to save assembly failure for order: orderId = {}", orderId);
+        final Order order = orderService.setAssemblyFailed(orderId);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with not assembled order: orderId = {}", orderId);
+        log.debug("Not assembled order = {}", dto);
+        return dto;
+    }
+
     @PostMapping("/payment")
     public OrderDto confirmPayment(@RequestBody final UUID orderId) {
         log.info("Received request to mark order as successfully paid: orderId = {}", orderId);
