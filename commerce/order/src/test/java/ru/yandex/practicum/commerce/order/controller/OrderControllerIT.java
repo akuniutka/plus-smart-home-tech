@@ -283,6 +283,28 @@ class OrderControllerIT {
     }
 
     @Test
+    void whenPostAtCompletedEndpoint_ThenInvokeCompeteOrderMethodAndProcessResponse() throws Exception {
+        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String responseBody = loadJson("complete_order_response.json", getClass());
+        when(mockOrderService.completeOrder(any())).thenReturn(getTestOrderA());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoA());
+
+        mvc.perform(post(BASE_PATH + "/completed")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).completeOrder(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderA()));
+    }
+
+    @Test
     void whenNotAuthorizedUserException_ThenInvokeControllerExceptionHandler() throws Exception {
         final String requestBody = loadJson("create_order_request.json", getClass());
         when(mockAddressMapper.mapToEntity(any())).thenReturn(getTestAddressA());

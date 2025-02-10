@@ -25,4 +25,6 @@ public interface OrderService {
     Order confirmDelivery(UUID orderId);
 
     Order setDeliveryFailed(UUID orderId);
+
+    Order completeOrder(UUID orderId);
 }

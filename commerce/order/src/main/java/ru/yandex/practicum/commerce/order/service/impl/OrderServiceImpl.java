@@ -114,6 +114,16 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
+    @Override
+    public Order completeOrder(final UUID orderId) {
+        Order order = getOrderById(orderId);
+        order.setState(OrderState.COMPLETED);
+        order = repository.save(order);
+        log.info("Completed order: orderId = {}", orderId);
+        log.debug("Completed order = {}", order);
+        return order;
+    }
+
     private void requireUsernameNotBlank(final String username) {
         if (username.isBlank()) {
             throw new NotAuthorizedUserException("User not authorized");

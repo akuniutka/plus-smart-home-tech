@@ -201,4 +201,17 @@ class OrderControllerTest {
         assertThat(dto, equalTo(getTestOrderDtoANotDelivered()));
         assertLogs(logListener.getEvents(), "set_delivery_failed.json", getClass());
     }
+
+    @Test
+    void whenCompleteOrder_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
+        when(mockOrderService.completeOrder(any())).thenReturn(getTestOrderA());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoA());
+
+        final OrderDto dto = controller.completeOrder(ORDER_ID_A);
+
+        inOrder.verify(mockOrderService).completeOrder(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderA()));
+        assertThat(dto, equalTo(getTestOrderDtoA()));
+        assertLogs(logListener.getEvents(), "complete_order.json", getClass());
+    }
 }

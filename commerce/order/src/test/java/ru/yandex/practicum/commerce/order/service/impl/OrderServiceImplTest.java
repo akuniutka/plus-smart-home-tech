@@ -286,4 +286,28 @@ class OrderServiceImplTest {
         assertThat(order, samePropertyValuesAs(getTestOrderANotDelivered()));
         assertLogs(logListener.getEvents(), "set_delivery_failed.json", getClass());
     }
+
+    @Test
+    void whenCompleteOrderAndOrderNotExist_ThenThrowException() {
+        when(mockRepository.findById(any())).thenReturn(Optional.empty());
+
+        final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
+                () -> service.completeOrder(ORDER_ID_A));
+
+        verify(mockRepository).findById(ORDER_ID_A);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+    }
+
+    @Test
+    void whenCompleteOrderAndOrderExist_ThenUpdateOrderStateAndLog() throws Exception {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderADelivered()));
+        when(mockRepository.save(any())).thenReturn(getTestOrderA());
+
+        final Order order = service.completeOrder(ORDER_ID_A);
+
+        inOrder.verify(mockRepository).findById(ORDER_ID_A);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderA())));
+        assertThat(order, samePropertyValuesAs(getTestOrderA()));
+        assertLogs(logListener.getEvents(), "complete_order.json", getClass());
+    }
 }
