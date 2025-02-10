@@ -124,4 +124,14 @@ public class OrderController {
         log.debug("Not delivered order = {}", dto);
         return dto;
     }
+
+    @PostMapping("/completed")
+    public OrderDto completeOrder(@RequestBody final UUID orderId) {
+        log.info("Received request to complete order: orderId = {}", orderId);
+        final Order order = orderService.completeOrder(orderId);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with completed order: orderId = {}", orderId);
+        log.debug("Completed order = {}", dto);
+        return dto;
+    }
 }
