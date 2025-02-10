@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to save assembly failure for order: orderId = f8991fc5-1c29-4395-b781-7717893cea92"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with not assembled order: orderId = f8991fc5-1c29-4395-b781-7717893cea92"
+  }
+]

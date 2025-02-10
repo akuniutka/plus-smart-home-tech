@@ -153,9 +153,21 @@ public final class TestModels {
         return order;
     }
 
+    public static Order getTestOrderANew() {
+        final Order order = getTestOrderA();
+        order.setState(OrderState.NEW);
+        return order;
+    }
+
     public static Order getTestOrderAAssembled() {
         final Order order = getTestOrderA();
         order.setState(OrderState.ASSEMBLED);
+        return order;
+    }
+
+    public static Order getTestOrderANotAssembled() {
+        final Order order = getTestOrderA();
+        order.setState(OrderState.ASSEMBLY_FAILED);
         return order;
     }
 
@@ -222,6 +234,18 @@ public final class TestModels {
         dto.setTotalPrice(TOTAL_PRICE_A);
         dto.setDeliveryPrice(DELIVERY_PRICE_A);
         dto.setProductPrice(PRODUCT_PRICE_A);
+        return dto;
+    }
+
+    public static OrderDto getTestOrderDtoAAssembled() {
+        final OrderDto dto = getTestOrderDtoA();
+        dto.setState(OrderState.ASSEMBLED);
+        return dto;
+    }
+
+    public static OrderDto getTestOrderDtoANotAssembled() {
+        final OrderDto dto = getTestOrderDtoA();
+        dto.setState(OrderState.ASSEMBLY_FAILED);
         return dto;
     }
 

@@ -55,11 +55,31 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Order confirmAssembly(final UUID orderId) {
+        Order order = getOrderById(orderId);
+        order.setState(OrderState.ASSEMBLED);
+        order = repository.save(order);
+        log.info("Marked order as successfully assembled: orderId = {}", orderId);
+        log.debug("Assembled order = {}", order);
+        return order;
+    }
+
+    @Override
+    public Order setAssemblyFailed(final UUID orderId) {
+        Order order = getOrderById(orderId);
+        order.setState(OrderState.ASSEMBLY_FAILED);
+        order = repository.save(order);
+        log.info("Saved assembly failure for order: orderId = {}", orderId);
+        log.debug("Order with assembly failed = {}", order);
+        return order;
+    }
+
+    @Override
     public Order confirmPayment(final UUID orderId) {
         Order order = getOrderById(orderId);
         order.setState(OrderState.PAID);
         order = repository.save(order);
-        log.info("Mark order as successfully paid: orderId = {}, paymentId = {}", orderId, order.getPaymentId());
+        log.info("Marked order as successfully paid: orderId = {}, paymentId = {}", orderId, order.getPaymentId());
         log.debug("Paid order = {}", order);
         return order;
     }
@@ -69,7 +89,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrderById(orderId);
         order.setState(OrderState.PAYMENT_FAILED);
         order = repository.save(order);
-        log.info("Save payment failure for order: orderId = {}, paymentId = {}", orderId, order.getPaymentId());
+        log.info("Saved payment failure for order: orderId = {}, paymentId = {}", orderId, order.getPaymentId());
         log.debug("Order with payment failed = {}", order);
         return order;
     }
@@ -79,7 +99,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrderById(orderId);
         order.setState(OrderState.DELIVERED);
         order = repository.save(order);
-        log.info("Mark order as successfully delivered: orderId = {}, deliveryId = {}", orderId, order.getDeliveryId());
+        log.info("Marked order as successfully delivered: orderId = {}, deliveryId = {}", orderId, order.getDeliveryId());
         log.debug("Delivered order = {}", order);
         return order;
     }
@@ -89,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrderById(orderId);
         order.setState(OrderState.DELIVERY_FAILED);
         order = repository.save(order);
-        log.info("Save delivery failure for order: orderId = {}, deliveryId = {}", orderId, order.getDeliveryId());
+        log.info("Saved delivery failure for order: orderId = {}, deliveryId = {}", orderId, order.getDeliveryId());
         log.debug("Order with delivery failed = {}", order);
         return order;
     }

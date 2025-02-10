@@ -14,6 +14,10 @@ public interface OrderService {
 
     List<Order> findOrdersByUsername(String username, Pageable pageable);
 
+    Order confirmAssembly(UUID orderId);
+
+    Order setAssemblyFailed(UUID orderId);
+
     Order confirmPayment(UUID orderId);
 
     Order setPaymentFailed(UUID orderId);

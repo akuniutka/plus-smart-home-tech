@@ -1,6 +1,6 @@
 [
   {
     "level": "INFO",
-    "message": "Mark order as successfully delivered: orderId = f8991fc5-1c29-4395-b781-7717893cea92, deliveryId = 1c44948b-78ca-48a5-80e5-6a901af8c117"
+    "message": "Marked order as successfully delivered: orderId = f8991fc5-1c29-4395-b781-7717893cea92, deliveryId = 1c44948b-78ca-48a5-80e5-6a901af8c117"
   }
 ]

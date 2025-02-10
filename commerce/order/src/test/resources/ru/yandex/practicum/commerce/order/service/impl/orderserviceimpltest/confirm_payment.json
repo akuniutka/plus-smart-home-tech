@@ -1,6 +1,6 @@
 [
   {
     "level": "INFO",
-    "message": "Mark order as successfully paid: orderId = f8991fc5-1c29-4395-b781-7717893cea92, paymentId = ff035258-939e-4f09-8119-61459eb68949"
+    "message": "Marked order as successfully paid: orderId = f8991fc5-1c29-4395-b781-7717893cea92, paymentId = ff035258-939e-4f09-8119-61459eb68949"
   }
 ]
