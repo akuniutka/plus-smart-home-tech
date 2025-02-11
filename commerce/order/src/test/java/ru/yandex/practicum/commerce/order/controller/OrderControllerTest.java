@@ -109,6 +109,19 @@ class OrderControllerTest {
     }
 
     @Test
+    void whenGetOrderById_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
+        when(mockOrderService.getOrderById(any())).thenReturn(getTestOrderA());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoA());
+
+        final OrderDto dto = controller.getOrderById(ORDER_ID_A);
+
+        inOrder.verify(mockOrderService).getOrderById(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderA()));
+        assertThat(dto, equalTo(getTestOrderDtoA()));
+        assertLogs(logListener.getEvents(), "get_order_by_id.json", getClass());
+    }
+
+    @Test
     void whenGetOrdersByUsername_ThenMapPageableAndPassWithUsernameToServiceAndMapServiceResponseAndReturnItAndLog()
             throws Exception {
         when(mockOrderService.findOrdersByUsername(any(), any())).thenReturn(List.of(getTestOrderA(), getTestOrderB()));

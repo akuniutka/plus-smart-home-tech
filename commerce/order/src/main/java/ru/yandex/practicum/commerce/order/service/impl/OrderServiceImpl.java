@@ -49,6 +49,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Order getOrderById(final UUID orderId) {
+        return repository.findById(orderId).orElseThrow(
+                () -> new NoOrderFoundException("Order %s does not exist".formatted(orderId))
+        );
+    }
+
+    @Override
     public List<Order> findOrdersByUsername(final String username, final Pageable pageable) {
         requireUsernameNotBlank(username);
         return repository.findAllByUsername(username, pageable);
@@ -136,11 +143,5 @@ public class OrderServiceImpl implements OrderService {
         } catch (ProductInShoppingCartNotInWarehouse | ProductInShoppingCartLowQuantityInWarehouse e) {
             throw new NoSpecifiedProductInWarehouseException(e.getUserMessage());
         }
-    }
-
-    private Order getOrderById(final UUID orderId) {
-        return repository.findById(orderId).orElseThrow(
-                () -> new NoOrderFoundException("Order %s does not exist".formatted(orderId))
-        );
     }
 }

@@ -12,6 +12,8 @@ public interface OrderService {
 
     Order addNewOrder(String username, ShoppingCartDto shoppingCart, Address deliveryAddress);
 
+    Order getOrderById(UUID orderId);
+
     List<Order> findOrdersByUsername(String username, Pageable pageable);
 
     Order confirmAssembly(UUID orderId);
