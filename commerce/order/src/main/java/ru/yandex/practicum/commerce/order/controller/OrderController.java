@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,6 +49,16 @@ public class OrderController {
         log.info("Responded with created order: orderId = {}, username = {}, shoppingCartId = {}", dto.getOrderId(),
                 username, dto.getShoppingCartId());
         log.debug("Created order = {}", dto);
+        return dto;
+    }
+
+    @GetMapping("/{orderId}")
+    public OrderDto getOrderById(@PathVariable final UUID orderId) {
+        log.info("Received request for order: orderId = {}", orderId);
+        final Order order = orderService.getOrderById(orderId);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with requested order: orderId = {}", orderId);
+        log.debug("Requested order = {}", dto);
         return dto;
     }
 

@@ -125,6 +125,27 @@ class OrderServiceImplTest {
     }
 
     @Test
+    void whenGetOrderByIdAndOrderNotExist_ThenThrowException() {
+        when(mockRepository.findById(any())).thenReturn(Optional.empty());
+
+        final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
+                () -> service.getOrderById(ORDER_ID_A));
+
+        verify(mockRepository).findById(ORDER_ID_A);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+    }
+
+    @Test
+    void whenFetOrderBYIdAndOrderExist_ThenReturnOrder() {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderA()));
+
+        final Order order = service.getOrderById(ORDER_ID_A);
+
+        verify(mockRepository).findById(ORDER_ID_A);
+        assertThat(order, samePropertyValuesAs(getTestOrderA()));
+    }
+
+    @Test
     void whenFindOrdersByUsernameAndWrongUsername_ThenThrowException() {
 
         final NotAuthorizedUserException exception = assertThrows(NotAuthorizedUserException.class,

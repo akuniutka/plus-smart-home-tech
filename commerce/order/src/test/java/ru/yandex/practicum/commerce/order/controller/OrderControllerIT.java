@@ -127,6 +127,23 @@ class OrderControllerIT {
     }
 
     @Test
+    void whenGetAtBasePathWithOrderId_ThenInvokeGetOrderByIdMethodAndProcessResponse() throws Exception {
+        final String responseBody = loadJson("get_order_by_id_response.json", getClass());
+        when(mockOrderService.getOrderById(any())).thenReturn(getTestOrderA());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoA());
+
+        mvc.perform(get(BASE_PATH + "/" + ORDER_ID_A)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpectAll(status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).getOrderById(ORDER_ID_A);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderA()));
+    }
+
+    @Test
     void whenGetAtBasePath_ThenInvokeGetOrdersByUserNameMethodAndProcessResponse() throws Exception {
         final String responseBody = loadJson("get_orders_response.json", getClass());
         when(mockOrderService.findOrdersByUsername(any(), any())).thenReturn(List.of(getTestOrderA(), getTestOrderB()));
