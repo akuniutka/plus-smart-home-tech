@@ -1,0 +1,17 @@
+{
+  "orderId": "f8991fc5-1c29-4395-b781-7717893cea92",
+  "shoppingCartId": "801b5a89-c5f1-435c-a54e-d06cd6662a6a",
+  "products": {
+    "25182563-067b-441c-b11d-9ad1fb249e25": 1,
+    "0112f4d1-4940-4cd5-84ed-e7d44f683808": 2
+  },
+  "paymentId": null,
+  "deliveryId": null,
+  "state": "NEW",
+  "deliveryWeight": 14.000,
+  "deliveryVolume": 54.000,
+  "fragile": true,
+  "totalPrice": null,
+  "deliveryPrice": 5.99,
+  "productPrice": 19.99
+}
