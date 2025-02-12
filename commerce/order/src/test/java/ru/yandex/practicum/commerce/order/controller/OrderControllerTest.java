@@ -15,6 +15,13 @@ import ru.yandex.practicum.commerce.order.mapper.OrderMapper;
 import ru.yandex.practicum.commerce.order.model.Order;
 import ru.yandex.practicum.commerce.order.service.OrderService;
 import ru.yandex.practicum.commerce.order.util.LogListener;
+import ru.yandex.practicum.commerce.order.util.TestAddress;
+import ru.yandex.practicum.commerce.order.util.TestAddressDto;
+import ru.yandex.practicum.commerce.order.util.TestCreateNewOrderRequest;
+import ru.yandex.practicum.commerce.order.util.TestOrder;
+import ru.yandex.practicum.commerce.order.util.TestOrderDto;
+import ru.yandex.practicum.commerce.order.util.TestPageable;
+import ru.yandex.practicum.commerce.order.util.TestShoppingCartDto;
 
 import java.util.List;
 
@@ -27,32 +34,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.when;
-import static ru.yandex.practicum.commerce.order.util.TestModels.ORDER_ID_A;
+import static ru.yandex.practicum.commerce.order.util.TestModels.ORDER_ID;
 import static ru.yandex.practicum.commerce.order.util.TestModels.PAGEABLE;
-import static ru.yandex.practicum.commerce.order.util.TestModels.USERNAME_A;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressA;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressDtoA;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestCreateNewOrderRequest;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrderDto;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAAssembled;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderADelivered;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotAssembled;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotDelivered;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAPaid;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAUnpaid;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderB;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoA;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAAssembled;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoADelivered;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoANotAssembled;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoANotDelivered;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAPaid;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAUnpaid;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoB;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestPageable;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestShoppingCartA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.USERNAME;
 import static ru.yandex.practicum.commerce.order.util.TestUtils.assertLogs;
 
 class OrderControllerTest {
@@ -95,136 +79,176 @@ class OrderControllerTest {
     @Test
     void whenCreateOrder_ThenMapAddressAndPassUsernameCartAddressToServiceAndMapServiceResponseAndReturnItAndLog()
             throws Exception {
-        when(mockAddressMapper.mapToEntity(any())).thenReturn(getTestAddressA());
-        when(mockOrderService.addNewOrder(any(), any(), any())).thenReturn(getTestNewOrder());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestNewOrderDto());
+        when(mockAddressMapper.mapToEntity(any())).thenReturn(TestAddress.create());
+        when(mockOrderService.addNewOrder(any(), any(), any())).thenReturn(TestOrder.create());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.create());
 
-        final OrderDto dto = controller.createOrder(USERNAME_A, getTestCreateNewOrderRequest());
+        final OrderDto dto = controller.createOrder(USERNAME, TestCreateNewOrderRequest.create());
 
-        inOrder.verify(mockAddressMapper).mapToEntity(getTestAddressDtoA());
-        inOrder.verify(mockOrderService).addNewOrder(USERNAME_A, getTestShoppingCartA(), getTestAddressA());
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestNewOrder()));
-        assertThat(dto, equalTo(getTestNewOrderDto()));
+        inOrder.verify(mockAddressMapper).mapToEntity(TestAddressDto.create());
+        inOrder.verify(mockOrderService).addNewOrder(USERNAME, TestShoppingCartDto.create(), TestAddress.create());
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.create()));
+        assertThat(dto, equalTo(TestOrderDto.create()));
         assertLogs(logListener.getEvents(), "create_order.json", getClass());
     }
 
     @Test
     void whenGetOrderById_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
-        when(mockOrderService.getOrderById(any())).thenReturn(getTestOrderA());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoA());
+        when(mockOrderService.getOrderById(any())).thenReturn(TestOrder.completed());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.completed());
 
-        final OrderDto dto = controller.getOrderById(ORDER_ID_A);
+        final OrderDto dto = controller.getOrderById(ORDER_ID);
 
-        inOrder.verify(mockOrderService).getOrderById(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderA()));
-        assertThat(dto, equalTo(getTestOrderDtoA()));
+        inOrder.verify(mockOrderService).getOrderById(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.completed()));
+        assertThat(dto, equalTo(TestOrderDto.completed()));
         assertLogs(logListener.getEvents(), "get_order_by_id.json", getClass());
     }
 
     @Test
     void whenGetOrdersByUsername_ThenMapPageableAndPassWithUsernameToServiceAndMapServiceResponseAndReturnItAndLog()
             throws Exception {
-        when(mockOrderService.findOrdersByUsername(any(), any())).thenReturn(List.of(getTestOrderA(), getTestOrderB()));
-        when(mockOrderMapper.mapToDto(anyList())).thenReturn(List.of(getTestOrderDtoA(), getTestOrderDtoB()));
+        when(mockOrderService.findOrdersByUsername(any(), any())).thenReturn(List.of(TestOrder.completed(),
+                TestOrder.other()));
+        when(mockOrderMapper.mapToDto(anyList())).thenReturn(List.of(TestOrderDto.completed(), TestOrderDto.other()));
 
-        final List<OrderDto> dtos = controller.getOrdersByUsername(USERNAME_A, getTestPageable());
+        final List<OrderDto> dtos = controller.getOrdersByUsername(USERNAME, TestPageable.create());
 
-        inOrder.verify(mockOrderService).findOrdersByUsername(USERNAME_A, PAGEABLE);
+        inOrder.verify(mockOrderService).findOrdersByUsername(USERNAME, PAGEABLE);
         inOrder.verify(mockOrderMapper).mapToDto(ordersCaptor.capture());
-        assertThat(ordersCaptor.getValue(), contains(samePropertyValuesAs(getTestOrderA()),
-                samePropertyValuesAs(getTestOrderB())));
-        assertThat(dtos, contains(getTestOrderDtoA(), getTestOrderDtoB()));
+        assertThat(ordersCaptor.getValue(), contains(samePropertyValuesAs(TestOrder.completed()),
+                samePropertyValuesAs(TestOrder.other())));
+        assertThat(dtos, contains(TestOrderDto.completed(), TestOrderDto.other()));
         assertLogs(logListener.getEvents(), "get_orders_by_username.json", getClass());
     }
 
     @Test
+    void whenCalculateProductCost_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
+        when(mockOrderService.calculateProductCost(any())).thenReturn(TestOrder.withProductPrice());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withProductPrice());
+
+        final OrderDto dto = controller.calculateProductCost(ORDER_ID);
+
+        inOrder.verify(mockOrderService).calculateProductCost(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withProductPrice()));
+        assertThat(dto, equalTo(TestOrderDto.withProductPrice()));
+        assertLogs(logListener.getEvents(), "calculate_product_cost.json", getClass());
+    }
+
+    @Test
+    void whenCalculateDeliveryCost_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
+        when(mockOrderService.calculateDeliveryCost(any())).thenReturn(TestOrder.withDeliveryPrice());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withDeliveryPrice());
+
+        final OrderDto dto = controller.calculateDeliveryCost(ORDER_ID);
+
+        inOrder.verify(mockOrderService).calculateDeliveryCost(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withDeliveryPrice()));
+        assertThat(dto, equalTo(TestOrderDto.withDeliveryPrice()));
+        assertLogs(logListener.getEvents(), "calculate_delivery_cost.json", getClass());
+    }
+
+    @Test
+    void whenCalculateTotalCost_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
+        when(mockOrderService.calculateTotalCost(any())).thenReturn(TestOrder.withTotalPrice());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withTotalPrice());
+
+        final OrderDto dto = controller.calculateTotalCost(ORDER_ID);
+
+        inOrder.verify(mockOrderService).calculateTotalCost(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withTotalPrice()));
+        assertThat(dto, equalTo(TestOrderDto.withTotalPrice()));
+        assertLogs(logListener.getEvents(), "calculate_total_cost.json", getClass());
+    }
+
+    @Test
     void whenConfirmAssembly_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
-        when(mockOrderService.confirmAssembly(any())).thenReturn(getTestOrderAAssembled());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAAssembled());
+        when(mockOrderService.confirmAssembly(any())).thenReturn(TestOrder.assembled());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.assembled());
 
-        final OrderDto dto = controller.confirmAssembly(ORDER_ID_A);
+        final OrderDto dto = controller.confirmAssembly(ORDER_ID);
 
-        inOrder.verify(mockOrderService).confirmAssembly(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAAssembled()));
-        assertThat(dto, equalTo(getTestOrderDtoAAssembled()));
+        inOrder.verify(mockOrderService).confirmAssembly(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.assembled()));
+        assertThat(dto, equalTo(TestOrderDto.assembled()));
         assertLogs(logListener.getEvents(), "confirm_assembly.json", getClass());
     }
 
     @Test
     void whenSetAssemblyFailed_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
-        when(mockOrderService.setAssemblyFailed(any())).thenReturn(getTestOrderANotAssembled());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoANotAssembled());
+        when(mockOrderService.setAssemblyFailed(any())).thenReturn(TestOrder.withAssemblyFailed());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withAssemblyFailed());
 
-        final OrderDto dto = controller.setAssemblyFailed(ORDER_ID_A);
+        final OrderDto dto = controller.setAssemblyFailed(ORDER_ID);
 
-        inOrder.verify(mockOrderService).setAssemblyFailed(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderANotAssembled()));
-        assertThat(dto, equalTo(getTestOrderDtoANotAssembled()));
+        inOrder.verify(mockOrderService).setAssemblyFailed(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withAssemblyFailed()));
+        assertThat(dto, equalTo(TestOrderDto.withAssemblyFailed()));
         assertLogs(logListener.getEvents(), "set_assembly_failed.json", getClass());
     }
 
     @Test
     void whenConfirmPayment_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
-        when(mockOrderService.confirmPayment(any())).thenReturn(getTestOrderAPaid());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAPaid());
+        when(mockOrderService.confirmPayment(any())).thenReturn(TestOrder.paid());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.paid());
 
-        final OrderDto dto = controller.confirmPayment(ORDER_ID_A);
+        final OrderDto dto = controller.confirmPayment(ORDER_ID);
 
-        inOrder.verify(mockOrderService).confirmPayment(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAPaid()));
-        assertThat(dto, equalToObject(getTestOrderDtoAPaid()));
+        inOrder.verify(mockOrderService).confirmPayment(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.paid()));
+        assertThat(dto, equalToObject(TestOrderDto.paid()));
         assertLogs(logListener.getEvents(), "confirm_payment.json", getClass());
     }
 
     @Test
     void whenSetPaymentFailed_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
-        when(mockOrderService.setPaymentFailed(any())).thenReturn(getTestOrderAUnpaid());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAUnpaid());
+        when(mockOrderService.setPaymentFailed(any())).thenReturn(TestOrder.withPaymentFailed());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withPaymentFailed());
 
-        final OrderDto dto = controller.setPaymentFailed(ORDER_ID_A);
+        final OrderDto dto = controller.setPaymentFailed(ORDER_ID);
 
-        inOrder.verify(mockOrderService).setPaymentFailed(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAUnpaid()));
-        assertThat(dto, equalTo(getTestOrderDtoAUnpaid()));
+        inOrder.verify(mockOrderService).setPaymentFailed(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withPaymentFailed()));
+        assertThat(dto, equalTo(TestOrderDto.withPaymentFailed()));
         assertLogs(logListener.getEvents(), "set_payment_failed.json", getClass());
     }
 
     @Test
     void whenConfirmDelivery_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
-        when(mockOrderService.confirmDelivery(any())).thenReturn(getTestOrderADelivered());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoADelivered());
+        when(mockOrderService.confirmDelivery(any())).thenReturn(TestOrder.delivered());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.delivered());
 
-        final OrderDto dto = controller.confirmDelivery(ORDER_ID_A);
+        final OrderDto dto = controller.confirmDelivery(ORDER_ID);
 
-        inOrder.verify(mockOrderService).confirmDelivery(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderADelivered()));
-        assertThat(dto, equalTo(getTestOrderDtoADelivered()));
+        inOrder.verify(mockOrderService).confirmDelivery(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.delivered()));
+        assertThat(dto, equalTo(TestOrderDto.delivered()));
         assertLogs(logListener.getEvents(), "confirm_delivery.json", getClass());
     }
 
     @Test
     void whenSetDeliveryFailed_ThenPassOrderIdTOServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
-        when(mockOrderService.setDeliveryFailed(any())).thenReturn(getTestOrderANotDelivered());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoANotDelivered());
+        when(mockOrderService.setDeliveryFailed(any())).thenReturn(TestOrder.withDeliveryFailed());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withDeliveryFailed());
 
-        final OrderDto dto = controller.setDeliveryFailed(ORDER_ID_A);
+        final OrderDto dto = controller.setDeliveryFailed(ORDER_ID);
 
-        inOrder.verify(mockOrderService).setDeliveryFailed(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderANotDelivered()));
-        assertThat(dto, equalTo(getTestOrderDtoANotDelivered()));
+        inOrder.verify(mockOrderService).setDeliveryFailed(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withDeliveryFailed()));
+        assertThat(dto, equalTo(TestOrderDto.withDeliveryFailed()));
         assertLogs(logListener.getEvents(), "set_delivery_failed.json", getClass());
     }
 
     @Test
     void whenCompleteOrder_ThenPassOrderIdToServiceAndMapServiceResponseAndReturnItAndLog() throws Exception {
-        when(mockOrderService.completeOrder(any())).thenReturn(getTestOrderA());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoA());
+        when(mockOrderService.completeOrder(any())).thenReturn(TestOrder.completed());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.completed());
 
-        final OrderDto dto = controller.completeOrder(ORDER_ID_A);
+        final OrderDto dto = controller.completeOrder(ORDER_ID);
 
-        inOrder.verify(mockOrderService).completeOrder(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderA()));
-        assertThat(dto, equalTo(getTestOrderDtoA()));
+        inOrder.verify(mockOrderService).completeOrder(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.completed()));
+        assertThat(dto, equalTo(TestOrderDto.completed()));
         assertLogs(logListener.getEvents(), "complete_order.json", getClass());
     }
 }

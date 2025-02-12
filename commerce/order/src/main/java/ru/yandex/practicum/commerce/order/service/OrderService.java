@@ -16,6 +16,12 @@ public interface OrderService {
 
     List<Order> findOrdersByUsername(String username, Pageable pageable);
 
+    Order calculateProductCost(UUID orderId);
+
+    Order calculateDeliveryCost(UUID orderId);
+
+    Order calculateTotalCost(UUID orderId);
+
     Order confirmAssembly(UUID orderId);
 
     Order setAssemblyFailed(UUID orderId);

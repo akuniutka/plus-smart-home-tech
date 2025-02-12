@@ -21,6 +21,12 @@ import ru.yandex.practicum.commerce.order.mapper.AddressMapper;
 import ru.yandex.practicum.commerce.order.mapper.OrderMapper;
 import ru.yandex.practicum.commerce.order.model.Order;
 import ru.yandex.practicum.commerce.order.service.OrderService;
+import ru.yandex.practicum.commerce.order.util.TestAddress;
+import ru.yandex.practicum.commerce.order.util.TestAddressDto;
+import ru.yandex.practicum.commerce.order.util.TestOrder;
+import ru.yandex.practicum.commerce.order.util.TestOrderDto;
+import ru.yandex.practicum.commerce.order.util.TestPageable;
+import ru.yandex.practicum.commerce.order.util.TestShoppingCartDto;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -41,32 +47,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.yandex.practicum.commerce.order.util.TestModels.ORDER_ID_A;
+import static ru.yandex.practicum.commerce.order.util.TestModels.ORDER_ID;
 import static ru.yandex.practicum.commerce.order.util.TestModels.PAGEABLE;
 import static ru.yandex.practicum.commerce.order.util.TestModels.TEST_EXCEPTION_MESSAGE;
-import static ru.yandex.practicum.commerce.order.util.TestModels.USERNAME_A;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressA;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressDtoA;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrderDto;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAAssembled;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderADelivered;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotAssembled;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotDelivered;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAPaid;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAUnpaid;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderB;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoA;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAAssembled;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoADelivered;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoANotAssembled;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoANotDelivered;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAPaid;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoAUnpaid;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderDtoB;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestPageable;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestShoppingCartA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.USERNAME;
 import static ru.yandex.practicum.commerce.order.util.TestUtils.loadJson;
 
 @WebMvcTest(controllers = OrderController.class)
@@ -105,12 +89,12 @@ class OrderControllerIT {
     void whenPutAtBasePath_ThenInvokeAddNewOrderMethodAndProcessResponse() throws Exception {
         final String requestBody = loadJson("create_order_request.json", getClass());
         final String responseBody = loadJson("create_order_response.json", getClass());
-        when(mockAddressMapper.mapToEntity(any())).thenReturn(getTestAddressA());
-        when(mockOrderService.addNewOrder(any(), any(), any())).thenReturn(getTestNewOrder());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestNewOrderDto());
+        when(mockAddressMapper.mapToEntity(any())).thenReturn(TestAddress.create());
+        when(mockOrderService.addNewOrder(any(), any(), any())).thenReturn(TestOrder.create());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.create());
 
         mvc.perform(put(BASE_PATH)
-                        .param("username", USERNAME_A)
+                        .param("username", USERNAME)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -121,39 +105,40 @@ class OrderControllerIT {
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().json(responseBody, true));
 
-        inOrder.verify(mockAddressMapper).mapToEntity(getTestAddressDtoA());
-        inOrder.verify(mockOrderService).addNewOrder(USERNAME_A, getTestShoppingCartA(), getTestAddressA());
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestNewOrder()));
+        inOrder.verify(mockAddressMapper).mapToEntity(TestAddressDto.create());
+        inOrder.verify(mockOrderService).addNewOrder(USERNAME, TestShoppingCartDto.create(), TestAddress.create());
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.create()));
     }
 
     @Test
     void whenGetAtBasePathWithOrderId_ThenInvokeGetOrderByIdMethodAndProcessResponse() throws Exception {
         final String responseBody = loadJson("get_order_by_id_response.json", getClass());
-        when(mockOrderService.getOrderById(any())).thenReturn(getTestOrderA());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoA());
+        when(mockOrderService.getOrderById(any())).thenReturn(TestOrder.completed());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.completed());
 
-        mvc.perform(get(BASE_PATH + "/" + ORDER_ID_A)
+        mvc.perform(get(BASE_PATH + "/" + ORDER_ID)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpectAll(status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().json(responseBody, true));
 
-        inOrder.verify(mockOrderService).getOrderById(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderA()));
+        inOrder.verify(mockOrderService).getOrderById(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.completed()));
     }
 
     @Test
     void whenGetAtBasePath_ThenInvokeGetOrdersByUserNameMethodAndProcessResponse() throws Exception {
         final String responseBody = loadJson("get_orders_response.json", getClass());
-        when(mockOrderService.findOrdersByUsername(any(), any())).thenReturn(List.of(getTestOrderA(), getTestOrderB()));
-        when(mockOrderMapper.mapToDto(anyList())).thenReturn(List.of(getTestOrderDtoA(), getTestOrderDtoB()));
+        when(mockOrderService.findOrdersByUsername(any(), any())).thenReturn(
+                List.of(TestOrder.completed(), TestOrder.other()));
+        when(mockOrderMapper.mapToDto(anyList())).thenReturn(List.of(TestOrderDto.completed(), TestOrderDto.other()));
 
         mvc.perform(get(BASE_PATH)
-                        .param("username", USERNAME_A)
-                        .param("page", String.valueOf(getTestPageable().getPage()))
-                        .param("size", String.valueOf(getTestPageable().getSize()))
-                        .param("sort", getTestPageable().getSort())
+                        .param("username", USERNAME)
+                        .param("page", String.valueOf(TestPageable.PAGE))
+                        .param("size", String.valueOf(TestPageable.SIZE))
+                        .param("sort", TestPageable.create().getSort())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpectAll(
@@ -161,18 +146,85 @@ class OrderControllerIT {
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().json(responseBody, true));
 
-        inOrder.verify(mockOrderService).findOrdersByUsername(USERNAME_A, PAGEABLE);
+        inOrder.verify(mockOrderService).findOrdersByUsername(USERNAME, PAGEABLE);
         inOrder.verify(mockOrderMapper).mapToDto(ordersCaptor.capture());
-        assertThat(ordersCaptor.getValue(), contains(samePropertyValuesAs(getTestOrderA()),
-                samePropertyValuesAs(getTestOrderB())));
+        assertThat(ordersCaptor.getValue(), contains(samePropertyValuesAs(TestOrder.completed()),
+                samePropertyValuesAs(TestOrder.other())));
+    }
+
+    @Test
+    void whenPostAtCalculateProductEndpoint_ThenInvokeCalculateProductCostMethodAndProcessResponse() throws Exception {
+        final String requestBody = "\"%s\"".formatted(ORDER_ID);
+        final String responseBody = loadJson("calculate_product_cost_response.json", getClass());
+        when(mockOrderService.calculateProductCost(any())).thenReturn(TestOrder.withProductPrice());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withProductPrice());
+
+        mvc.perform(post(BASE_PATH + "/calculate/product")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).calculateProductCost(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withProductPrice()));
+    }
+
+    @Test
+    void whenPostAtCalculateDeliveryEndpoint_ThenInvokeCalculateDeliveryCostMethodAndProcessResponse()
+            throws Exception {
+        final String requestBody = "\"%s\"".formatted(ORDER_ID);
+        final String responseBody = loadJson("calculate_delivery_cost_response.json", getClass());
+        when(mockOrderService.calculateDeliveryCost(any())).thenReturn(TestOrder.withDeliveryPrice());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withDeliveryPrice());
+
+        mvc.perform(post(BASE_PATH + "/calculate/delivery")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).calculateDeliveryCost(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withDeliveryPrice()));
+    }
+
+    @Test
+    void whenPostAtCalculateTotalEndpoint_ThenInvokeCalculateTotalCostMethodAndProcessResponse() throws Exception {
+        final String requestBody = "\"%s\"".formatted(ORDER_ID);
+        final String responseBody = loadJson("calculate_total_cost_response.json", getClass());
+        when(mockOrderService.calculateTotalCost(any())).thenReturn(TestOrder.withTotalPrice());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withTotalPrice());
+
+        mvc.perform(post(BASE_PATH + "/calculate/total")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).calculateTotalCost(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withTotalPrice()));
     }
 
     @Test
     void whenPostAtDeliveryEndpoint_ThenInvokeConfirmAssemblyMethodAndProcessResponse() throws Exception {
-        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String requestBody = "\"%s\"".formatted(ORDER_ID);
         final String responseBody = loadJson("confirm_assembly_response.json", getClass());
-        when(mockOrderService.confirmAssembly(any())).thenReturn(getTestOrderAAssembled());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAAssembled());
+        when(mockOrderService.confirmAssembly(any())).thenReturn(TestOrder.assembled());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.assembled());
 
         mvc.perform(post(BASE_PATH + "/assembly")
                         .accept(MediaType.APPLICATION_JSON)
@@ -185,16 +237,16 @@ class OrderControllerIT {
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().json(responseBody, true));
 
-        inOrder.verify(mockOrderService).confirmAssembly(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAAssembled()));
+        inOrder.verify(mockOrderService).confirmAssembly(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.assembled()));
     }
 
     @Test
     void whenPostAtAssemblyFailedEndpoint_ThenInvokeSetAssemblyFailedMethodAndProcessResponse() throws Exception {
-        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String requestBody = "\"%s\"".formatted(ORDER_ID);
         final String responseBody = loadJson("set_assembly_failed_response.json", getClass());
-        when(mockOrderService.setAssemblyFailed(any())).thenReturn(getTestOrderANotAssembled());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoANotAssembled());
+        when(mockOrderService.setAssemblyFailed(any())).thenReturn(TestOrder.withAssemblyFailed());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withAssemblyFailed());
 
         mvc.perform(post(BASE_PATH + "/assembly/failed")
                         .accept(MediaType.APPLICATION_JSON)
@@ -207,16 +259,16 @@ class OrderControllerIT {
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().json(responseBody, true));
 
-        inOrder.verify(mockOrderService).setAssemblyFailed(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderANotAssembled()));
+        inOrder.verify(mockOrderService).setAssemblyFailed(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withAssemblyFailed()));
     }
 
     @Test
     void whenPostAtPaymentEndpoint_ThenInvokeConfirmPaymentMethodAndProcessResponse() throws Exception {
-        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String requestBody = "\"%s\"".formatted(ORDER_ID);
         final String responseBody = loadJson("confirm_payment_response.json", getClass());
-        when(mockOrderService.confirmPayment(any())).thenReturn(getTestOrderAPaid());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAPaid());
+        when(mockOrderService.confirmPayment(any())).thenReturn(TestOrder.paid());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.paid());
 
         mvc.perform(post(BASE_PATH + "/payment")
                         .accept(MediaType.APPLICATION_JSON)
@@ -229,16 +281,16 @@ class OrderControllerIT {
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().json(responseBody, true));
 
-        inOrder.verify(mockOrderService).confirmPayment(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAPaid()));
+        inOrder.verify(mockOrderService).confirmPayment(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.paid()));
     }
 
     @Test
     void whenPostAtPaymentFailedEndpoint_ThenInvokeSetPaymentFailedMethodAndProcessResponse() throws Exception {
-        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String requestBody = "\"%s\"".formatted(ORDER_ID);
         final String responseBody = loadJson("set_payment_failed_response.json", getClass());
-        when(mockOrderService.setPaymentFailed(any())).thenReturn(getTestOrderAUnpaid());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoAUnpaid());
+        when(mockOrderService.setPaymentFailed(any())).thenReturn(TestOrder.withPaymentFailed());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withPaymentFailed());
 
         mvc.perform(post(BASE_PATH + "/payment/failed")
                         .accept(MediaType.APPLICATION_JSON)
@@ -251,16 +303,16 @@ class OrderControllerIT {
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().json(responseBody, true));
 
-        inOrder.verify(mockOrderService).setPaymentFailed(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderAUnpaid()));
+        inOrder.verify(mockOrderService).setPaymentFailed(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withPaymentFailed()));
     }
 
     @Test
     void whenPostAtDeliveryEndpoint_ThenInvokeConfirmDeliveryMethodAndProcessResponse() throws Exception {
-        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String requestBody = "\"%s\"".formatted(ORDER_ID);
         final String responseBody = loadJson("confirm_delivery_response.json", getClass());
-        when(mockOrderService.confirmDelivery(any())).thenReturn(getTestOrderADelivered());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoADelivered());
+        when(mockOrderService.confirmDelivery(any())).thenReturn(TestOrder.delivered());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.delivered());
 
         mvc.perform(post(BASE_PATH + "/delivery")
                         .accept(MediaType.APPLICATION_JSON)
@@ -273,16 +325,16 @@ class OrderControllerIT {
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().json(responseBody, true));
 
-        inOrder.verify(mockOrderService).confirmDelivery(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderADelivered()));
+        inOrder.verify(mockOrderService).confirmDelivery(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.delivered()));
     }
 
     @Test
     void whenPostAtDeliveryFailedEndpoint_ThenInvokeSetDeliveryFailedMethodAndProcessResponse() throws Exception {
-        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String requestBody = "\"%s\"".formatted(ORDER_ID);
         final String responseBody = loadJson("set_delivery_failed_response.json", getClass());
-        when(mockOrderService.setDeliveryFailed(any())).thenReturn(getTestOrderANotDelivered());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoANotDelivered());
+        when(mockOrderService.setDeliveryFailed(any())).thenReturn(TestOrder.withDeliveryFailed());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.withDeliveryFailed());
 
         mvc.perform(post(BASE_PATH + "/delivery/failed")
                         .accept(MediaType.APPLICATION_JSON)
@@ -295,16 +347,16 @@ class OrderControllerIT {
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().json(responseBody, true));
 
-        inOrder.verify(mockOrderService).setDeliveryFailed(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderANotDelivered()));
+        inOrder.verify(mockOrderService).setDeliveryFailed(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withDeliveryFailed()));
     }
 
     @Test
     void whenPostAtCompletedEndpoint_ThenInvokeCompeteOrderMethodAndProcessResponse() throws Exception {
-        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String requestBody = "\"%s\"".formatted(ORDER_ID);
         final String responseBody = loadJson("complete_order_response.json", getClass());
-        when(mockOrderService.completeOrder(any())).thenReturn(getTestOrderA());
-        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(getTestOrderDtoA());
+        when(mockOrderService.completeOrder(any())).thenReturn(TestOrder.completed());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.completed());
 
         mvc.perform(post(BASE_PATH + "/completed")
                         .accept(MediaType.APPLICATION_JSON)
@@ -317,19 +369,19 @@ class OrderControllerIT {
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().json(responseBody, true));
 
-        inOrder.verify(mockOrderService).completeOrder(ORDER_ID_A);
-        inOrder.verify(mockOrderMapper).mapToDto(refEq(getTestOrderA()));
+        inOrder.verify(mockOrderService).completeOrder(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.completed()));
     }
 
     @Test
     void whenNotAuthorizedUserException_ThenInvokeControllerExceptionHandler() throws Exception {
         final String requestBody = loadJson("create_order_request.json", getClass());
-        when(mockAddressMapper.mapToEntity(any())).thenReturn(getTestAddressA());
+        when(mockAddressMapper.mapToEntity(any())).thenReturn(TestAddress.create());
         when(mockOrderService.addNewOrder(any(), any(), any()))
                 .thenThrow(new NotAuthorizedUserException(TEST_EXCEPTION_MESSAGE));
 
         mvc.perform(put(BASE_PATH)
-                        .param("username", USERNAME_A)
+                        .param("username", USERNAME)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -343,19 +395,19 @@ class OrderControllerIT {
                         jsonPath("$.httpStatus", equalTo(HttpStatus.UNAUTHORIZED.name())),
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE)));
 
-        inOrder.verify(mockAddressMapper).mapToEntity(getTestAddressDtoA());
-        inOrder.verify(mockOrderService).addNewOrder(USERNAME_A, getTestShoppingCartA(), getTestAddressA());
+        inOrder.verify(mockAddressMapper).mapToEntity(TestAddressDto.create());
+        inOrder.verify(mockOrderService).addNewOrder(USERNAME, TestShoppingCartDto.create(), TestAddress.create());
     }
 
     @Test
     void whenNoSpecifiedProductInWarehouseException_ThenInvokeControllerExceptionHandler() throws Exception {
         final String requestBody = loadJson("create_order_request.json", getClass());
-        when(mockAddressMapper.mapToEntity(any())).thenReturn(getTestAddressA());
+        when(mockAddressMapper.mapToEntity(any())).thenReturn(TestAddress.create());
         when(mockOrderService.addNewOrder(any(), any(), any()))
                 .thenThrow(new NoSpecifiedProductInWarehouseException(TEST_EXCEPTION_MESSAGE));
 
         mvc.perform(put(BASE_PATH)
-                        .param("username", USERNAME_A)
+                        .param("username", USERNAME)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -369,13 +421,13 @@ class OrderControllerIT {
                         jsonPath("$.httpStatus", equalTo(HttpStatus.BAD_REQUEST.name())),
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE)));
 
-        inOrder.verify(mockAddressMapper).mapToEntity(getTestAddressDtoA());
-        inOrder.verify(mockOrderService).addNewOrder(USERNAME_A, getTestShoppingCartA(), getTestAddressA());
+        inOrder.verify(mockAddressMapper).mapToEntity(TestAddressDto.create());
+        inOrder.verify(mockOrderService).addNewOrder(USERNAME, TestShoppingCartDto.create(), TestAddress.create());
     }
 
     @Test
     void whenNoOrderFoundException_ThenInvokeControllerExceptionHandler() throws Exception {
-        final String requestBody = "\"%s\"".formatted(ORDER_ID_A);
+        final String requestBody = "\"%s\"".formatted(ORDER_ID);
         when(mockOrderService.confirmPayment(any())).thenThrow(new NoOrderFoundException(TEST_EXCEPTION_MESSAGE));
 
         mvc.perform(post(BASE_PATH + "/payment")
@@ -392,6 +444,6 @@ class OrderControllerIT {
                         jsonPath("$.httpStatus", equalTo(HttpStatus.BAD_REQUEST.name())),
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE)));
 
-        inOrder.verify(mockOrderService).confirmPayment(ORDER_ID_A);
+        inOrder.verify(mockOrderService).confirmPayment(ORDER_ID);
     }
 }

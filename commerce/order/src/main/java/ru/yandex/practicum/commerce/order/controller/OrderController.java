@@ -75,6 +75,36 @@ public class OrderController {
         return dtos;
     }
 
+    @PostMapping("/calculate/product")
+    public OrderDto calculateProductCost(@RequestBody final UUID orderId) {
+        log.info("Received request to calculate order product cost: orderId = {}", orderId);
+        final Order order = orderService.calculateProductCost(orderId);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with updated order: orderId = {}, productPrice = {}", orderId, dto.getProductPrice());
+        log.debug("Order with product cost = {}", dto);
+        return dto;
+    }
+
+    @PostMapping("/calculate/delivery")
+    public OrderDto calculateDeliveryCost(@RequestBody final UUID orderId) {
+        log.info("Received request to calculate order delivery cost: orderId = {}", orderId);
+        final Order order = orderService.calculateDeliveryCost(orderId);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with updated order: orderId = {}, deliveryPrice = {}", orderId, dto.getDeliveryPrice());
+        log.debug("Order with delivery cost = {}", dto);
+        return dto;
+    }
+
+    @PostMapping("/calculate/total")
+    public OrderDto calculateTotalCost(@RequestBody final UUID orderId) {
+        log.info("Received request to calculate order total cost: orderId = {}", orderId);
+        final Order order = orderService.calculateTotalCost(orderId);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with updated order: orderId = {}, totalPrice = {}", orderId, dto.getTotalPrice());
+        log.debug("Order with total cost = {}", dto);
+        return dto;
+    }
+
     @PostMapping("/assembly")
     public OrderDto confirmAssembly(@RequestBody final UUID orderId) {
         log.info("Received request to mark order as successfully assembled: orderId = {}", orderId);

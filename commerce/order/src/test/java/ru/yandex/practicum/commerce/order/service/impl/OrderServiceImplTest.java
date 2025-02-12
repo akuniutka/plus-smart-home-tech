@@ -10,11 +10,19 @@ import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseExcep
 import ru.yandex.practicum.commerce.exception.NotAuthorizedUserException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
+import ru.yandex.practicum.commerce.order.mapper.OrderMapper;
 import ru.yandex.practicum.commerce.order.model.Order;
 import ru.yandex.practicum.commerce.order.repository.OrderRepository;
+import ru.yandex.practicum.commerce.order.service.DeliveryService;
 import ru.yandex.practicum.commerce.order.service.OrderService;
+import ru.yandex.practicum.commerce.order.service.PaymentService;
 import ru.yandex.practicum.commerce.order.service.WarehouseService;
 import ru.yandex.practicum.commerce.order.util.LogListener;
+import ru.yandex.practicum.commerce.order.util.TestAddress;
+import ru.yandex.practicum.commerce.order.util.TestBookedProductsDto;
+import ru.yandex.practicum.commerce.order.util.TestOrder;
+import ru.yandex.practicum.commerce.order.util.TestOrderDto;
+import ru.yandex.practicum.commerce.order.util.TestShoppingCartDto;
 import ru.yandex.practicum.commerce.order.util.UUIDGenerator;
 
 import java.util.List;
@@ -26,34 +34,27 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.yandex.practicum.commerce.order.util.TestModels.ORDER_ID_A;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
+import static ru.yandex.practicum.commerce.order.util.TestModels.DELIVERY_PRICE;
+import static ru.yandex.practicum.commerce.order.util.TestModels.ORDER_ID;
 import static ru.yandex.practicum.commerce.order.util.TestModels.PAGEABLE;
+import static ru.yandex.practicum.commerce.order.util.TestModels.PRODUCT_PRICE;
 import static ru.yandex.practicum.commerce.order.util.TestModels.TEST_EXCEPTION_MESSAGE;
-import static ru.yandex.practicum.commerce.order.util.TestModels.USERNAME_A;
-import static ru.yandex.practicum.commerce.order.util.TestModels.WRONG_USERNAME;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestAddressA;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestBookedProductsDto;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestNewOrder;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderA;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAAssembled;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderADelivered;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANew;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotAssembled;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderANotDelivered;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAPaid;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderAUnpaid;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestOrderB;
-import static ru.yandex.practicum.commerce.order.util.TestModels.getTestShoppingCartA;
+import static ru.yandex.practicum.commerce.order.util.TestModels.TOTAL_PRICE;
+import static ru.yandex.practicum.commerce.order.util.TestModels.USERNAME;
 import static ru.yandex.practicum.commerce.order.util.TestUtils.assertLogs;
 
 class OrderServiceImplTest {
 
     private static final LogListener logListener = new LogListener(OrderServiceImpl.class);
+    private static final String WRONG_USERNAME = "";
     private WarehouseService mockWarehouseService;
+    private PaymentService mockPaymentService;
+    private DeliveryService mockDeliveryService;
     private OrderRepository mockRepository;
+    private OrderMapper mockOrderMapper;
     private UUIDGenerator mockUUIDGenerator;
     private InOrder inOrder;
 
@@ -62,25 +63,31 @@ class OrderServiceImplTest {
     @BeforeEach
     void setUp() {
         mockWarehouseService = Mockito.mock(WarehouseService.class);
+        mockPaymentService = Mockito.mock(PaymentService.class);
+        mockDeliveryService = Mockito.mock(DeliveryService.class);
         mockRepository = Mockito.mock(OrderRepository.class);
+        mockOrderMapper = Mockito.mock(OrderMapper.class);
         mockUUIDGenerator = Mockito.mock(UUIDGenerator.class);
-        inOrder = Mockito.inOrder(mockWarehouseService, mockRepository, mockUUIDGenerator);
+        inOrder = Mockito.inOrder(mockWarehouseService, mockPaymentService, mockDeliveryService, mockRepository,
+                mockOrderMapper, mockUUIDGenerator);
         logListener.startListen();
         logListener.reset();
-        service = new OrderServiceImpl(mockWarehouseService, mockRepository, mockUUIDGenerator);
+        service = new OrderServiceImpl(mockWarehouseService, mockPaymentService, mockDeliveryService, mockRepository,
+                mockOrderMapper, mockUUIDGenerator);
     }
 
     @AfterEach
     void tearDown() {
         logListener.stopListen();
-        Mockito.verifyNoMoreInteractions(mockWarehouseService, mockRepository, mockUUIDGenerator);
+        Mockito.verifyNoMoreInteractions(mockWarehouseService, mockPaymentService, mockDeliveryService, mockRepository,
+                mockOrderMapper, mockUUIDGenerator);
     }
 
     @Test
     void whenAddNewOrderAndWrongUsername_ThenThrowException() {
 
         final NotAuthorizedUserException exception = assertThrows(NotAuthorizedUserException.class,
-                () -> service.addNewOrder(WRONG_USERNAME, getTestShoppingCartA(), getTestAddressA()));
+                () -> service.addNewOrder(WRONG_USERNAME, TestShoppingCartDto.create(), TestAddress.create()));
 
         assertThat(exception.getUserMessage(), equalTo("User not authorized"));
     }
@@ -91,9 +98,9 @@ class OrderServiceImplTest {
                 .thenThrow(new ProductInShoppingCartNotInWarehouse(TEST_EXCEPTION_MESSAGE));
 
         final NoSpecifiedProductInWarehouseException e = assertThrows(NoSpecifiedProductInWarehouseException.class,
-                () -> service.addNewOrder(USERNAME_A, getTestShoppingCartA(), getTestAddressA()));
+                () -> service.addNewOrder(USERNAME, TestShoppingCartDto.create(), TestAddress.create()));
 
-        verify(mockWarehouseService).checkProductsAvailability(getTestShoppingCartA());
+        verify(mockWarehouseService).checkProductsAvailability(TestShoppingCartDto.create());
         assertThat(e.getUserMessage(), equalTo(TEST_EXCEPTION_MESSAGE));
     }
 
@@ -103,24 +110,24 @@ class OrderServiceImplTest {
                 .thenThrow(new ProductInShoppingCartLowQuantityInWarehouse(TEST_EXCEPTION_MESSAGE));
 
         final NoSpecifiedProductInWarehouseException e = assertThrows(NoSpecifiedProductInWarehouseException.class,
-                () -> service.addNewOrder(USERNAME_A, getTestShoppingCartA(), getTestAddressA()));
+                () -> service.addNewOrder(USERNAME, TestShoppingCartDto.create(), TestAddress.create()));
 
-        verify(mockWarehouseService).checkProductsAvailability(getTestShoppingCartA());
+        verify(mockWarehouseService).checkProductsAvailability(TestShoppingCartDto.create());
         assertThat(e.getUserMessage(), equalTo(TEST_EXCEPTION_MESSAGE));
     }
 
     @Test
     void whenAddNewOrderAndCorrectUsername_ThenCreateOrderAndSaveItToRepositoryAndReturnItAndLog() throws Exception {
-        when(mockWarehouseService.checkProductsAvailability(any())).thenReturn(getTestBookedProductsDto());
-        when(mockUUIDGenerator.getNewUUID()).thenReturn(ORDER_ID_A);
-        when(mockRepository.save(any())).thenReturn(getTestNewOrder());
+        when(mockWarehouseService.checkProductsAvailability(any())).thenReturn(TestBookedProductsDto.create());
+        when(mockUUIDGenerator.getNewUUID()).thenReturn(ORDER_ID);
+        when(mockRepository.save(any())).thenReturn(TestOrder.create());
 
-        final Order order = service.addNewOrder(USERNAME_A, getTestShoppingCartA(), getTestAddressA());
+        final Order order = service.addNewOrder(USERNAME, TestShoppingCartDto.create(), TestAddress.create());
 
-        inOrder.verify(mockWarehouseService).checkProductsAvailability(getTestShoppingCartA());
+        inOrder.verify(mockWarehouseService).checkProductsAvailability(TestShoppingCartDto.create());
         inOrder.verify(mockUUIDGenerator).getNewUUID();
-        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestNewOrder())));
-        assertThat(order, samePropertyValuesAs(getTestNewOrder()));
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.create())));
+        assertThat(order, samePropertyValuesAs(TestOrder.create()));
         assertLogs(logListener.getEvents(), "add_order.json", getClass());
     }
 
@@ -129,20 +136,20 @@ class OrderServiceImplTest {
         when(mockRepository.findById(any())).thenReturn(Optional.empty());
 
         final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
-                () -> service.getOrderById(ORDER_ID_A));
+                () -> service.getOrderById(ORDER_ID));
 
-        verify(mockRepository).findById(ORDER_ID_A);
-        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
     }
 
     @Test
-    void whenFetOrderBYIdAndOrderExist_ThenReturnOrder() {
-        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderA()));
+    void whenGetOrderByIdAndOrderExist_ThenReturnOrder() {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.completed()));
 
-        final Order order = service.getOrderById(ORDER_ID_A);
+        final Order order = service.getOrderById(ORDER_ID);
 
-        verify(mockRepository).findById(ORDER_ID_A);
-        assertThat(order, samePropertyValuesAs(getTestOrderA()));
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(order, samePropertyValuesAs(TestOrder.completed()));
     }
 
     @Test
@@ -156,12 +163,110 @@ class OrderServiceImplTest {
 
     @Test
     void whenFindOrdersByUsername_ThenReturnListOfOrders() {
-        when(mockRepository.findAllByUsername(any(), any())).thenReturn(List.of(getTestOrderA(), getTestOrderB()));
+        when(mockRepository.findAllByUsername(any(), any())).thenReturn(List.of(TestOrder.completed(),
+                TestOrder.other()));
 
-        final List<Order> orders = service.findOrdersByUsername(USERNAME_A, PAGEABLE);
+        final List<Order> orders = service.findOrdersByUsername(USERNAME, PAGEABLE);
 
-        verify(mockRepository).findAllByUsername(USERNAME_A, PAGEABLE);
-        assertThat(orders, contains(samePropertyValuesAs(getTestOrderA()), samePropertyValuesAs(getTestOrderB())));
+        verify(mockRepository).findAllByUsername(USERNAME, PAGEABLE);
+        assertThat(orders, contains(samePropertyValuesAs(TestOrder.completed()),
+                samePropertyValuesAs(TestOrder.other())));
+    }
+
+    @Test
+    void whenCalculateProductCostAndOrderNotExist_ThenThrowException() {
+        when(mockRepository.findById(any())).thenReturn(Optional.empty());
+
+        final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
+                () -> service.calculateProductCost(ORDER_ID));
+
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
+    }
+
+    @Test
+    void whenCalculateProductCostAnOrderExist_ThenMapOrderToDtoAndPassToPaymentServiceAndUpdateOrderAndReturnItAndLog()
+            throws Exception {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.withDeliveryParams()));
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenAnswer(invocation -> {
+            assertThat(invocation.getArgument(0), samePropertyValuesAs(TestOrder.withDeliveryParams()));
+            return TestOrderDto.withDeliveryParams();
+        });
+        when(mockPaymentService.calculateProductCost(any())).thenReturn(PRODUCT_PRICE);
+        when(mockRepository.save(any())).thenReturn(TestOrder.withProductPrice());
+
+        final Order order = service.calculateProductCost(ORDER_ID);
+
+        inOrder.verify(mockRepository).findById(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(any(Order.class));
+        inOrder.verify(mockPaymentService).calculateProductCost(TestOrderDto.withDeliveryParams());
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.withProductPrice())));
+        assertThat(order, samePropertyValuesAs(TestOrder.withProductPrice()));
+        assertLogs(logListener.getEvents(), "calculate_product_cost.json", getClass());
+    }
+
+    @Test
+    void whenCalculateDeliveryCostAndOrderNotExist_ThenThrowException() {
+        when(mockRepository.findById(any())).thenReturn(Optional.empty());
+
+        final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
+                () -> service.calculateDeliveryCost(ORDER_ID));
+
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
+    }
+
+    @Test
+    void whenCalculateDeliveryCostAndOrderExist_ThenMapOrderToDtoAndPassToDeliveryServiceAndUpdateOrderAndReturnAndLog()
+            throws Exception {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.withProductPrice()));
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenAnswer(invocation -> {
+            assertThat(invocation.getArgument(0), samePropertyValuesAs(TestOrder.withProductPrice()));
+            return TestOrderDto.withProductPrice();
+        });
+        when(mockDeliveryService.calculateDeliveryCost(any())).thenReturn(DELIVERY_PRICE);
+        when(mockRepository.save(any())).thenReturn(TestOrder.withDeliveryPrice());
+
+        final Order order = service.calculateDeliveryCost(ORDER_ID);
+
+        inOrder.verify(mockRepository).findById(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(any(Order.class));
+        inOrder.verify(mockDeliveryService).calculateDeliveryCost(TestOrderDto.withProductPrice());
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.withDeliveryPrice())));
+        assertThat(order, samePropertyValuesAs(TestOrder.withDeliveryPrice()));
+        assertLogs(logListener.getEvents(), "calculate_delivery_cost.json", getClass());
+    }
+
+    @Test
+    void whenCalculateTotalCostAndOrderNotExist_ThenThrowException() {
+        when(mockRepository.findById(any())).thenReturn(Optional.empty());
+
+        final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
+                () -> service.calculateTotalCost(ORDER_ID));
+
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
+    }
+
+    @Test
+    void whenCalculateTotalCostAndOrderExist_ThenMapOrderToDtoAndPassToPaymentServiceAndUpdateOrderAndReturnItAndLog()
+            throws Exception {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.withDeliveryPrice()));
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenAnswer(invocation -> {
+            assertThat(invocation.getArgument(0), samePropertyValuesAs(TestOrder.withDeliveryPrice()));
+            return TestOrderDto.withDeliveryPrice();
+        });
+        when(mockPaymentService.calculateTotalCost(any())).thenReturn(TOTAL_PRICE);
+        when(mockRepository.save(any())).thenReturn(TestOrder.withTotalPrice());
+
+        final Order order = service.calculateTotalCost(ORDER_ID);
+
+        inOrder.verify(mockRepository).findById(ORDER_ID);
+        inOrder.verify(mockOrderMapper).mapToDto(any(Order.class));
+        inOrder.verify(mockPaymentService).calculateTotalCost(TestOrderDto.withDeliveryPrice());
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.withTotalPrice())));
+        assertThat(order, samePropertyValuesAs(TestOrder.withTotalPrice()));
+        assertLogs(logListener.getEvents(), "calculate_total_cost.json", getClass());
     }
 
     @Test
@@ -169,22 +274,22 @@ class OrderServiceImplTest {
         when(mockRepository.findById(any())).thenReturn(Optional.empty());
 
         final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
-                () -> service.confirmAssembly(ORDER_ID_A));
+                () -> service.confirmAssembly(ORDER_ID));
 
-        verify(mockRepository).findById(ORDER_ID_A);
-        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
     }
 
     @Test
     void whenConfirmAssemblyAndOrderExist_ThenUpdateOrderStateAndLog() throws Exception {
-        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderANew()));
-        when(mockRepository.save(any())).thenReturn(getTestOrderAAssembled());
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.withPaymentAndDelivery()));
+        when(mockRepository.save(any())).thenReturn(TestOrder.assembled());
 
-        final Order order = service.confirmAssembly(ORDER_ID_A);
+        final Order order = service.confirmAssembly(ORDER_ID);
 
-        inOrder.verify(mockRepository).findById(ORDER_ID_A);
-        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderAAssembled())));
-        assertThat(order, samePropertyValuesAs(getTestOrderAAssembled()));
+        inOrder.verify(mockRepository).findById(ORDER_ID);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.assembled())));
+        assertThat(order, samePropertyValuesAs(TestOrder.assembled()));
         assertLogs(logListener.getEvents(), "confirm_assembly.json", getClass());
     }
 
@@ -193,22 +298,22 @@ class OrderServiceImplTest {
         when(mockRepository.findById(any())).thenReturn(Optional.empty());
 
         final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
-                () -> service.setAssemblyFailed(ORDER_ID_A));
+                () -> service.setAssemblyFailed(ORDER_ID));
 
-        verify(mockRepository).findById(ORDER_ID_A);
-        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
     }
 
     @Test
-    void whenSetAssemblyFailedAndOrderExist_ThenUpdateOrderStateAndLog() throws  Exception {
-        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderANew()));
-        when(mockRepository.save(any())).thenReturn(getTestOrderANotAssembled());
+    void whenSetAssemblyFailedAndOrderExist_ThenUpdateOrderStateAndLog() throws Exception {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.withPaymentAndDelivery()));
+        when(mockRepository.save(any())).thenReturn(TestOrder.withAssemblyFailed());
 
-        final Order order = service.setAssemblyFailed(ORDER_ID_A);
+        final Order order = service.setAssemblyFailed(ORDER_ID);
 
-        inOrder.verify(mockRepository).findById(ORDER_ID_A);
-        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderANotAssembled())));
-        assertThat(order, samePropertyValuesAs(getTestOrderANotAssembled()));
+        inOrder.verify(mockRepository).findById(ORDER_ID);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.withAssemblyFailed())));
+        assertThat(order, samePropertyValuesAs(TestOrder.withAssemblyFailed()));
         assertLogs(logListener.getEvents(), "set_assembly_failed.json", getClass());
     }
 
@@ -217,22 +322,22 @@ class OrderServiceImplTest {
         when(mockRepository.findById(any())).thenReturn(Optional.empty());
 
         final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
-                () -> service.confirmPayment(ORDER_ID_A));
+                () -> service.confirmPayment(ORDER_ID));
 
-        verify(mockRepository).findById(ORDER_ID_A);
-        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
     }
 
     @Test
     void whenConfirmPaymentAndOrderExist_ThenUpdateOrderStateAndLog() throws Exception {
-        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderAAssembled()));
-        when(mockRepository.save(any())).thenReturn(getTestOrderAPaid());
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.assembled()));
+        when(mockRepository.save(any())).thenReturn(TestOrder.paid());
 
-        final Order order = service.confirmPayment(ORDER_ID_A);
+        final Order order = service.confirmPayment(ORDER_ID);
 
-        inOrder.verify(mockRepository).findById(ORDER_ID_A);
-        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderAPaid())));
-        assertThat(order, samePropertyValuesAs(getTestOrderAPaid()));
+        inOrder.verify(mockRepository).findById(ORDER_ID);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.paid())));
+        assertThat(order, samePropertyValuesAs(TestOrder.paid()));
         assertLogs(logListener.getEvents(), "confirm_payment.json", getClass());
     }
 
@@ -241,22 +346,22 @@ class OrderServiceImplTest {
         when(mockRepository.findById(any())).thenReturn(Optional.empty());
 
         final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
-                () -> service.setPaymentFailed(ORDER_ID_A));
+                () -> service.setPaymentFailed(ORDER_ID));
 
-        verify(mockRepository).findById(ORDER_ID_A);
-        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
     }
 
     @Test
     void whenSetPaymentFailedAndOrderExist_ThenUpdateOrderStateAndLog() throws Exception {
-        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderAAssembled()));
-        when(mockRepository.save(any())).thenReturn(getTestOrderAUnpaid());
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.assembled()));
+        when(mockRepository.save(any())).thenReturn(TestOrder.withPaymentFailed());
 
-        final Order order = service.setPaymentFailed(ORDER_ID_A);
+        final Order order = service.setPaymentFailed(ORDER_ID);
 
-        inOrder.verify(mockRepository).findById(ORDER_ID_A);
-        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderAUnpaid())));
-        assertThat(order, samePropertyValuesAs(getTestOrderAUnpaid()));
+        inOrder.verify(mockRepository).findById(ORDER_ID);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.withPaymentFailed())));
+        assertThat(order, samePropertyValuesAs(TestOrder.withPaymentFailed()));
         assertLogs(logListener.getEvents(), "set_payment_failed.json", getClass());
     }
 
@@ -265,22 +370,22 @@ class OrderServiceImplTest {
         when(mockRepository.findById(any())).thenReturn(Optional.empty());
 
         final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
-                () -> service.confirmDelivery(ORDER_ID_A));
+                () -> service.confirmDelivery(ORDER_ID));
 
-        verify(mockRepository).findById(ORDER_ID_A);
-        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
     }
 
     @Test
     void whenConfirmDeliveryAndOrderExist_ThenUpdateOrderStateAndLog() throws Exception {
-        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderAAssembled()));
-        when(mockRepository.save(any())).thenReturn(getTestOrderADelivered());
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.paid()));
+        when(mockRepository.save(any())).thenReturn(TestOrder.delivered());
 
-        final Order order = service.confirmDelivery(ORDER_ID_A);
+        final Order order = service.confirmDelivery(ORDER_ID);
 
-        inOrder.verify(mockRepository).findById(ORDER_ID_A);
-        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderADelivered())));
-        assertThat(order, samePropertyValuesAs(getTestOrderADelivered()));
+        inOrder.verify(mockRepository).findById(ORDER_ID);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.delivered())));
+        assertThat(order, samePropertyValuesAs(TestOrder.delivered()));
         assertLogs(logListener.getEvents(), "confirm_delivery.json", getClass());
     }
 
@@ -289,22 +394,22 @@ class OrderServiceImplTest {
         when(mockRepository.findById(any())).thenReturn(Optional.empty());
 
         final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
-                () -> service.setDeliveryFailed(ORDER_ID_A));
+                () -> service.setDeliveryFailed(ORDER_ID));
 
-        verify(mockRepository).findById(ORDER_ID_A);
-        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
     }
 
     @Test
     void whenSetDeliveryFailedAndOrderExist_ThenUpdateOrderStateAndLog() throws Exception {
-        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderAAssembled()));
-        when(mockRepository.save(any())).thenReturn(getTestOrderANotDelivered());
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.paid()));
+        when(mockRepository.save(any())).thenReturn(TestOrder.withDeliveryFailed());
 
-        final Order order = service.setDeliveryFailed(ORDER_ID_A);
+        final Order order = service.setDeliveryFailed(ORDER_ID);
 
-        inOrder.verify(mockRepository).findById(ORDER_ID_A);
-        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderANotDelivered())));
-        assertThat(order, samePropertyValuesAs(getTestOrderANotDelivered()));
+        inOrder.verify(mockRepository).findById(ORDER_ID);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.withDeliveryFailed())));
+        assertThat(order, samePropertyValuesAs(TestOrder.withDeliveryFailed()));
         assertLogs(logListener.getEvents(), "set_delivery_failed.json", getClass());
     }
 
@@ -313,22 +418,22 @@ class OrderServiceImplTest {
         when(mockRepository.findById(any())).thenReturn(Optional.empty());
 
         final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
-                () -> service.completeOrder(ORDER_ID_A));
+                () -> service.completeOrder(ORDER_ID));
 
-        verify(mockRepository).findById(ORDER_ID_A);
-        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID_A + " does not exist"));
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
     }
 
     @Test
     void whenCompleteOrderAndOrderExist_ThenUpdateOrderStateAndLog() throws Exception {
-        when(mockRepository.findById(any())).thenReturn(Optional.of(getTestOrderADelivered()));
-        when(mockRepository.save(any())).thenReturn(getTestOrderA());
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.delivered()));
+        when(mockRepository.save(any())).thenReturn(TestOrder.completed());
 
-        final Order order = service.completeOrder(ORDER_ID_A);
+        final Order order = service.completeOrder(ORDER_ID);
 
-        inOrder.verify(mockRepository).findById(ORDER_ID_A);
-        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestOrderA())));
-        assertThat(order, samePropertyValuesAs(getTestOrderA()));
+        inOrder.verify(mockRepository).findById(ORDER_ID);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.completed())));
+        assertThat(order, samePropertyValuesAs(TestOrder.completed()));
         assertLogs(logListener.getEvents(), "complete_order.json", getClass());
     }
 }
