@@ -16,6 +16,7 @@ import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseExcep
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
 import ru.yandex.practicum.commerce.exception.SpecifiedProductAlreadyInWarehouseException;
+import ru.yandex.practicum.commerce.warehouse.mapper.BookingMapper;
 import ru.yandex.practicum.commerce.warehouse.mapper.ProductMapper;
 import ru.yandex.practicum.commerce.warehouse.service.AddressService;
 import ru.yandex.practicum.commerce.warehouse.service.ProductService;
@@ -40,7 +41,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.TEST_EXCEPTION_MESSAGE;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestAddProductToWarehouseRequest;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestAddressDtoA;
+import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestAssemblyProductsForOrderRequest;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestBookedProducts;
+import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestDeliveryParams;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestNewProductDto;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductA;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShoppingCart;
@@ -61,18 +64,21 @@ class WarehouseControllerIT {
     @MockBean
     private ProductMapper mockProductMapper;
 
+    @MockBean
+    private BookingMapper mockBookingMapper;
+
     @Autowired
     private MockMvc mvc;
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(mockProductService, mockAddressService, mockAddressService);
-        inOrder = Mockito.inOrder(mockProductService, mockAddressService, mockProductMapper);
+        Mockito.reset(mockProductService, mockAddressService, mockAddressService, mockBookingMapper);
+        inOrder = Mockito.inOrder(mockProductService, mockAddressService, mockProductMapper, mockBookingMapper);
     }
 
     @AfterEach
     void tearDown() {
-        Mockito.verifyNoMoreInteractions(mockProductService, mockAddressService, mockProductMapper);
+        Mockito.verifyNoMoreInteractions(mockProductService, mockAddressService, mockProductMapper, mockBookingMapper);
     }
 
     @Test
@@ -94,26 +100,6 @@ class WarehouseControllerIT {
     }
 
     @Test
-    void whenPostAtCheckEndpoint_ThenInvokeCheckProductsAvailabilityMethodAndProcessResponse() throws Exception {
-        final String requestBody = loadJson("check_products_availability_request.json", getClass());
-        final String responseBody = loadJson("check_products_availability_response.json", getClass());
-        when(mockProductService.checkProductsAvailability(any())).thenReturn(getTestBookedProducts());
-
-        mvc.perform(post(BASE_PATH + "/check")
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andDo(print())
-                .andExpectAll(
-                        status().isOk(),
-                        content().contentType(MediaType.APPLICATION_JSON),
-                        content().json(responseBody, true));
-
-        verify(mockProductService).checkProductsAvailability(getTestShoppingCart());
-    }
-
-    @Test
     void whenPostAtAddEndpoint_ThenInvokeIncreaseProductQuantityMethod() throws Exception {
         final String requestBody = loadJson("add_product_quantity.json", getClass());
         doNothing().when(mockProductService).increaseProductQuantity(any());
@@ -126,6 +112,50 @@ class WarehouseControllerIT {
                 .andExpect(status().isOk());
 
         verify(mockProductService).increaseProductQuantity(getTestAddProductToWarehouseRequest());
+    }
+
+    @Test
+    void whenPostAtCheckEndpoint_ThenInvokeCheckProductsAvailabilityMethodAndProcessResponse() throws Exception {
+        final String requestBody = loadJson("check_products_availability_request.json", getClass());
+        final String responseBody = loadJson("check_products_availability_response.json", getClass());
+        when(mockProductService.checkProductsAvailability(any())).thenReturn(getTestDeliveryParams());
+        when(mockBookingMapper.mapToDto(any())).thenReturn(getTestBookedProducts());
+
+        mvc.perform(post(BASE_PATH + "/check")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockProductService).checkProductsAvailability(getTestShoppingCart());
+        inOrder.verify(mockBookingMapper).mapToDto(getTestDeliveryParams());
+    }
+
+    @Test
+    void whenPostAtAssemblyEndpoint_ThenInvokeBookProductsMethodAndProcessResponse() throws Exception {
+        final String requestBody = loadJson("book_products_request.json", getClass());
+        final String responseBody = loadJson("book_products_response.json", getClass());
+        when(mockProductService.bookProducts(any())).thenReturn(getTestDeliveryParams());
+        when(mockBookingMapper.mapToDto(any())).thenReturn(getTestBookedProducts());
+
+        mvc.perform(post(BASE_PATH + "/assembly")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockProductService).bookProducts(getTestAssemblyProductsForOrderRequest());
+        inOrder.verify(mockBookingMapper).mapToDto(getTestDeliveryParams());
     }
 
     @Test

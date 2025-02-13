@@ -1,6 +1,7 @@
 package ru.yandex.practicum.commerce.dto.warehouse;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -20,5 +21,6 @@ public class NewProductInWarehouseRequest {
     private DimensionDto dimension;
 
     @NotNull
+    @Min(1)
     private BigDecimal weight;
 }

@@ -8,7 +8,6 @@ import ru.yandex.practicum.commerce.warehouse.model.Product;
 @Mapper(uses = DimensionMapper.class)
 public interface ProductMapper {
 
-    @Mapping(target = "totalQuantity", ignore = true)
-    @Mapping(target = "bookedQuantity", ignore = true)
+    @Mapping(target = "quantity", ignore = true)
     Product mapToEntity(NewProductInWarehouseRequest request);
 }

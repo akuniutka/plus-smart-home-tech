@@ -7,6 +7,7 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 import ru.yandex.practicum.commerce.dto.delivery.AddressDto;
 import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
+import ru.yandex.practicum.commerce.warehouse.mapper.BookingMapper;
 import ru.yandex.practicum.commerce.warehouse.mapper.ProductMapper;
 import ru.yandex.practicum.commerce.warehouse.service.AddressService;
 import ru.yandex.practicum.commerce.warehouse.service.ProductService;
@@ -21,7 +22,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestAddProductToWarehouseRequest;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestAddressDtoA;
+import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestAssemblyProductsForOrderRequest;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestBookedProducts;
+import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestDeliveryParams;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestNewProductDto;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductA;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShoppingCart;
@@ -33,6 +36,7 @@ class WarehouseControllerTest {
     private ProductService mockProductService;
     private AddressService mockAddressService;
     private ProductMapper mockProductMapper;
+    private BookingMapper mockBookingMapper;
     private InOrder inOrder;
 
     private WarehouseController controller;
@@ -42,16 +46,18 @@ class WarehouseControllerTest {
         mockProductService = Mockito.mock(ProductService.class);
         mockAddressService = Mockito.mock(AddressService.class);
         mockProductMapper = Mockito.mock(ProductMapper.class);
-        inOrder = Mockito.inOrder(mockProductService, mockAddressService, mockProductMapper);
+        mockBookingMapper = Mockito.mock(BookingMapper.class);
+        inOrder = Mockito.inOrder(mockProductService, mockAddressService, mockProductMapper, mockBookingMapper);
         logListener.startListen();
         logListener.reset();
-        controller = new WarehouseController(mockProductService, mockAddressService, mockProductMapper);
+        controller = new WarehouseController(mockProductService, mockAddressService, mockProductMapper,
+                mockBookingMapper);
     }
 
     @AfterEach
     void tearDown() {
         logListener.stopListen();
-        Mockito.verifyNoMoreInteractions(mockProductService, mockAddressService, mockProductMapper);
+        Mockito.verifyNoMoreInteractions(mockProductService, mockAddressService, mockProductMapper, mockBookingMapper);
     }
 
     @Test
@@ -67,18 +73,6 @@ class WarehouseControllerTest {
     }
 
     @Test
-    void whenCheckProductsAvailability_ThenPassShoppingCartToProductServiceAndReturnBookedProductsAvailabilityAndLog()
-            throws Exception {
-        when(mockProductService.checkProductsAvailability(any())).thenReturn(getTestBookedProducts());
-
-        final BookedProductsDto dto = controller.checkProductsAvailability(getTestShoppingCart());
-
-        verify(mockProductService).checkProductsAvailability(getTestShoppingCart());
-        assertThat(dto, equalTo(getTestBookedProducts()));
-        assertLogs(logListener.getEvents(), "check_products_availability.json", getClass());
-    }
-
-    @Test
     void whenIncreaseProductQuantity_ThenPassRequestToProductServiceAndLog() throws Exception {
         doNothing().when(mockProductService).increaseProductQuantity(any());
 
@@ -86,6 +80,34 @@ class WarehouseControllerTest {
 
         verify(mockProductService).increaseProductQuantity(getTestAddProductToWarehouseRequest());
         assertLogs(logListener.getEvents(), "add_product_quantity.json", getClass());
+    }
+
+    @Test
+    void whenCheckProductsAvailability_ThenPassShoppingCartToProductServiceAndMapResponseAndReturnItAndLog()
+            throws Exception {
+        when(mockProductService.checkProductsAvailability(any())).thenReturn(getTestDeliveryParams());
+        when(mockBookingMapper.mapToDto(any())).thenReturn(getTestBookedProducts());
+
+        final BookedProductsDto dto = controller.checkProductsAvailability(getTestShoppingCart());
+
+        inOrder.verify(mockProductService).checkProductsAvailability(getTestShoppingCart());
+        inOrder.verify(mockBookingMapper).mapToDto(getTestDeliveryParams());
+        assertThat(dto, equalTo(getTestBookedProducts()));
+        assertLogs(logListener.getEvents(), "check_products_availability.json", getClass());
+    }
+
+    @Test
+    void whenBookProducts_ThenPassAssemblyProductsForOrderRequestToProductServiceAndMapResponseAndReturnItAndLog()
+            throws Exception {
+        when(mockProductService.bookProducts(any())).thenReturn(getTestDeliveryParams());
+        when(mockBookingMapper.mapToDto(any())).thenReturn(getTestBookedProducts());
+
+        final BookedProductsDto dto = controller.bookProducts(getTestAssemblyProductsForOrderRequest());
+
+        inOrder.verify(mockProductService).bookProducts(getTestAssemblyProductsForOrderRequest());
+        inOrder.verify(mockBookingMapper).mapToDto(getTestDeliveryParams());
+        assertThat(dto, equalTo(getTestBookedProducts()));
+        assertLogs(logListener.getEvents(), "book_products.json", getClass());
     }
 
     @Test

@@ -6,21 +6,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.commerce.dto.warehouse.AddProductToWarehouseRequest;
-import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
 import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
+import ru.yandex.practicum.commerce.dto.warehouse.AddProductToWarehouseRequest;
+import ru.yandex.practicum.commerce.dto.warehouse.AssemblyProductsForOrderRequest;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
 import ru.yandex.practicum.commerce.exception.SpecifiedProductAlreadyInWarehouseException;
-import ru.yandex.practicum.commerce.warehouse.model.Dimension;
+import ru.yandex.practicum.commerce.warehouse.model.DeliveryParams;
+import ru.yandex.practicum.commerce.warehouse.model.OrderBooking;
 import ru.yandex.practicum.commerce.warehouse.model.Product;
+import ru.yandex.practicum.commerce.warehouse.repository.OrderBookingRepository;
 import ru.yandex.practicum.commerce.warehouse.repository.ProductRepository;
 import ru.yandex.practicum.commerce.warehouse.service.ProductService;
+import ru.yandex.practicum.commerce.warehouse.util.UUIDGenerator;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -32,8 +32,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
-    private static final int DIMENSION_SCALE = 3;
     private final ProductRepository productRepository;
+    private final OrderBookingRepository orderBookingRepository;
+    private final UUIDGenerator uuidGenerator;
 
     @Override
     public void addNewProduct(final Product product) {
@@ -49,55 +50,71 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Override
-    public BookedProductsDto checkProductsAvailability(final ShoppingCartDto shoppingCart) {
-        final Map<UUID, Product> products = getProductsByIds(shoppingCart.getProducts().keySet());
-        requireAllProductsExist(shoppingCart, products);
-        requireAllProductsSuffice(shoppingCart, products);
-
-        final BookedProductsDto bookedProducts = initBookedProductsDto();
-        shoppingCart.getProducts().forEach((productId, quantity) ->
-            addProductToBooked(products.get(productId), quantity, bookedProducts)
-        );
-        return bookedProducts;
-    }
-
-    @Transactional
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Override
     public void increaseProductQuantity(final AddProductToWarehouseRequest request) {
         Product product = productRepository.findById(request.getProductId()).orElseThrow(
                 () -> new NoSpecifiedProductInWarehouseException("Product with productId " + request.getProductId()
                         + " does not exist")
         );
-        product.setTotalQuantity(product.getTotalQuantity() + request.getQuantity());
+        product.setQuantity(product.getQuantity() + request.getQuantity());
         product = productRepository.save(product);
         log.info("Increased quantity of product in warehouse: productId = {}, new quantity = {}",
-                product.getProductId(), product.getTotalQuantity());
+                product.getProductId(), product.getQuantity());
         log.debug("Updated product in warehouse = {}", product);
     }
 
-    private Map<UUID, Product> getProductsByIds(final Set<UUID> productIds) {
+    @Transactional
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Override
+    public DeliveryParams checkProductsAvailability(final ShoppingCartDto shoppingCart) {
+        return bookProductsInternally(shoppingCart.getProducts(), BookingMode.DRY_RUN);
+    }
+
+    @Override
+    public DeliveryParams bookProducts(final AssemblyProductsForOrderRequest request) {
+        final DeliveryParams deliveryParams = bookProductsInternally(request.getProducts(), BookingMode.BOOK);
+        OrderBooking orderBooking = new OrderBooking();
+        orderBooking.setOrderBookingId(uuidGenerator.getNewUUID());
+        orderBooking.setProducts(request.getProducts());
+        orderBooking.setOrderId(request.getOrderId());
+        orderBooking = orderBookingRepository.save(orderBooking);
+        log.info("Booked products for order: orderId = {}, orderBookingId = {}", orderBooking.getOrderId(),
+                orderBooking.getOrderBookingId());
+        log.debug("OrderBooking = {}", orderBooking);
+        return deliveryParams;
+    }
+
+    private DeliveryParams bookProductsInternally(final Map<UUID, Long> products, final BookingMode bookingMode) {
+        final Map<UUID, Product> stocks = getStocks(products.keySet());
+        requireAllProductsExist(products, stocks);
+        requireAllProductsSuffice(products, stocks);
+        if (bookingMode == BookingMode.BOOK) {
+            products.forEach((productId, quantity) -> decreaseStock(stocks.get(productId), quantity));
+            productRepository.saveAll(stocks.values());
+        }
+        return products.entrySet().stream()
+                .map(entry -> DeliveryParams.fromProduct(stocks.get(entry.getKey())).multiply(entry.getValue()))
+                .reduce(DeliveryParams.empty(), DeliveryParams::sum);
+    }
+
+    private Map<UUID, Product> getStocks(final Set<UUID> productIds) {
         return productRepository.findAllById(productIds).stream()
                 .collect(Collectors.toMap(Product::getProductId, Function.identity()));
     }
 
-    private void requireAllProductsExist(final ShoppingCartDto shoppingCart, Map<UUID, Product> products) {
-        final Set<UUID> notFound = shoppingCart.getProducts().keySet().stream()
-                .filter(productId -> !products.containsKey(productId))
+    private void requireAllProductsExist(final Map<UUID, Long> products, Map<UUID, Product> stocks) {
+        final Set<UUID> notFound = products.keySet().stream()
+                .filter(productId -> !stocks.containsKey(productId))
                 .collect(Collectors.toSet());
         if (!notFound.isEmpty()) {
             throw new ProductInShoppingCartNotInWarehouse("Products not found in warehouse: " + toString(notFound));
         }
     }
 
-    private void requireAllProductsSuffice(final ShoppingCartDto shoppingCart, Map<UUID, Product> products) {
-        final Set<UUID> insufficient = new HashSet<>();
-        shoppingCart.getProducts().forEach((productId, quantity) -> {
-            Product product = products.get(productId);
-            if (quantity > product.getTotalQuantity() - product.getBookedQuantity()) {
-                insufficient.add(productId);
-            }
-        });
+    private void requireAllProductsSuffice(final Map<UUID, Long> products, Map<UUID, Product> stocks) {
+        final Set<UUID> insufficient = products.entrySet().stream()
+                .filter(entry -> entry.getValue() > stocks.get(entry.getKey()).getQuantity())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
         if (!insufficient.isEmpty()) {
             throw new ProductInShoppingCartLowQuantityInWarehouse("Insufficient stocks in warehouse: "
                     + toString(insufficient));
@@ -111,26 +128,12 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.joining(", "));
     }
 
-    private BookedProductsDto initBookedProductsDto() {
-        final BookedProductsDto dto = new BookedProductsDto();
-        dto.setDeliveryVolume(BigDecimal.valueOf(0L, DIMENSION_SCALE));
-        dto.setDeliveryWeight(BigDecimal.valueOf(0L, DIMENSION_SCALE));
-        dto.setFragile(false);
-        return dto;
+    private void decreaseStock(final Product product, final long subtrahend) {
+        product.setQuantity(product.getQuantity() - subtrahend);
     }
 
-    private void addProductToBooked(final Product product, final long quantity, final BookedProductsDto booked) {
-        final BigDecimal _quantity = BigDecimal.valueOf(quantity);
-        final Dimension dimension = product.getDimension();
-        booked.setDeliveryVolume(dimension.getWidth()
-                .multiply(dimension.getHeight())
-                .multiply(dimension.getDepth())
-                .multiply(_quantity)
-                .setScale(DIMENSION_SCALE, RoundingMode.HALF_UP)
-                .add(booked.getDeliveryVolume()));
-        booked.setDeliveryWeight(product.getWeight()
-                .multiply(_quantity)
-                .add(booked.getDeliveryWeight()));
-        booked.setFragile(booked.getFragile() || Boolean.TRUE.equals(product.getFragile()));
+    private enum BookingMode {
+        DRY_RUN,
+        BOOK
     }
 }
