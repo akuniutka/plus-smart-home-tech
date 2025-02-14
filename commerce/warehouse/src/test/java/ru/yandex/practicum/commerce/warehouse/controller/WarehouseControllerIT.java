@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.commerce.exception.ApiExceptions;
+import ru.yandex.practicum.commerce.exception.NoOrderBookingFoundException;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
@@ -46,6 +47,7 @@ import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestBook
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestDeliveryParams;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestNewProductDto;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductA;
+import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShippedToDeliveryRequest;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShoppingCart;
 import static ru.yandex.practicum.commerce.warehouse.util.TestUtils.loadJson;
 
@@ -159,6 +161,22 @@ class WarehouseControllerIT {
     }
 
     @Test
+    void whenPostAtShippedEndpoint_ThenInvokeShippedToDeliveryMethodAndResponseWith200OK() throws Exception {
+        final String requestBody = loadJson("shipped_to_delivery_request.json", getClass());
+        doNothing().when(mockProductService).shippedToDelivery(any());
+
+        mvc.perform(post(BASE_PATH + "/shipped")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(mockProductService).shippedToDelivery(getTestShippedToDeliveryRequest());
+    }
+
+    @Test
     void whenGetAtAddressEndpoint_ThenInvokerGetWarehouseAddressMethodAndProcessResponse() throws Exception {
         final String responseBody = loadJson("get_address_request.json", getClass());
         when(mockAddressService.getAddress()).thenReturn(getTestAddressDtoA());
@@ -264,5 +282,28 @@ class WarehouseControllerIT {
                         jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE)));
 
         verify(mockProductService).increaseProductQuantity(getTestAddProductToWarehouseRequest());
+    }
+
+    @Test
+    void whenNoOrderBookingFoundException_ThenInvokeControllerExceptionHandler() throws Exception {
+        final String requestBody = loadJson("shipped_to_delivery_request.json", getClass());
+        doThrow(new NoOrderBookingFoundException(TEST_EXCEPTION_MESSAGE))
+                .when(mockProductService).shippedToDelivery(any());
+
+        mvc.perform(post(BASE_PATH + "/shipped")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isBadRequest(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        header().string(ApiExceptions.API_EXCEPTION_HEADER,
+                                NoOrderBookingFoundException.class.getSimpleName()),
+                        jsonPath("$.httpStatus", equalTo(HttpStatus.BAD_REQUEST.name())),
+                        jsonPath("$.userMessage", equalTo(TEST_EXCEPTION_MESSAGE)));
+
+        verify(mockProductService).shippedToDelivery(getTestShippedToDeliveryRequest());
     }
 }

@@ -9,6 +9,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import ru.yandex.practicum.commerce.exception.NoOrderBookingFoundException;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
@@ -39,6 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.ORDER_BOOKING_ID;
+import static ru.yandex.practicum.commerce.warehouse.util.TestModels.ORDER_ID;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.PRODUCT_ID_A;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.PRODUCT_ID_B;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestAddProductToWarehouseRequest;
@@ -52,6 +54,7 @@ import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProd
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductB;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductBDecreased;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductBLow;
+import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShippedToDeliveryRequest;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShoppingCart;
 import static ru.yandex.practicum.commerce.warehouse.util.TestUtils.assertLogs;
 
@@ -228,5 +231,29 @@ class ProductServiceImplTest {
         inOrder.verify(mockOrderBookingRepository).save(argThat(samePropertyValuesAs(getTestOrderBookingNew())));
         assertThat(deliveryParams, equalTo(getTestDeliveryParams()));
         assertLogs(logListener.getEvents(), "book_products.json", getClass());
+    }
+
+    @Test
+    void whenShippedToDeliveryAndOrderBookingNotExist_ThenThrowException() {
+        when(mockOrderBookingRepository.findByOrderId(any())).thenReturn(Optional.empty());
+
+        final NoOrderBookingFoundException exception = assertThrows(NoOrderBookingFoundException.class,
+                () -> service.shippedToDelivery(getTestShippedToDeliveryRequest()));
+
+        verify(mockOrderBookingRepository).findByOrderId(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Booking for order " + ORDER_ID + " does not exist"));
+    }
+
+    @Test
+    void whenShippedToDeliveryAndOrderBookingExist_ThenAddDeliveryIdToOrderBookingAndLog() throws Exception {
+        when(mockOrderBookingRepository.findByOrderId(any())).thenReturn(Optional.of(getTestOrderBookingNew()));
+        when(mockOrderBookingRepository.save(any())).thenReturn(getTestOrderBookingWithDeliveryId());
+
+        service.shippedToDelivery(getTestShippedToDeliveryRequest());
+
+        inOrder.verify(mockOrderBookingRepository).findByOrderId(ORDER_ID);
+        inOrder.verify(mockOrderBookingRepository)
+                .save(argThat(samePropertyValuesAs(getTestOrderBookingWithDeliveryId())));
+        assertLogs(logListener.getEvents(), "shipped_to_delivery.json", getClass());
     }
 }

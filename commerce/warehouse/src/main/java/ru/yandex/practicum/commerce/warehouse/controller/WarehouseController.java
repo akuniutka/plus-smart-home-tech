@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.commerce.dto.delivery.ShippedToDeliveryRequest;
 import ru.yandex.practicum.commerce.dto.warehouse.AddProductToWarehouseRequest;
 import ru.yandex.practicum.commerce.dto.delivery.AddressDto;
 import ru.yandex.practicum.commerce.dto.warehouse.AssemblyProductsForOrderRequest;
@@ -73,6 +74,15 @@ public class WarehouseController {
         log.info("Responded with delivery parameters for order: orderId = {}", request.getOrderId());
         log.debug("Order delivery parameters = {}", deliveryParams);
         return dto;
+    }
+
+    @PostMapping("/shipped")
+    public void shippedToDelivery(@RequestBody @Valid final ShippedToDeliveryRequest request) {
+        log.info("Received request to mark order as picked by delivery service: orderId = {}, deliveryId = {}",
+                request.getOrderId(), request.getDeliveryId());
+        productService.shippedToDelivery(request);
+        log.info("Responded with 200 OK to mark order as picked by delivery service: orderId = {}, deliveryId = {}",
+                request.getOrderId(), request.getDeliveryId());
     }
 
     @GetMapping("/address")

@@ -27,7 +27,6 @@ public record DeliveryParams(BigDecimal deliveryWeight, BigDecimal deliveryVolum
     }
 
     public static DeliveryParams sum(final DeliveryParams a, final DeliveryParams b) {
-        System.out.println(a.deliveryWeight);
         return new DeliveryParams(
                 a.deliveryWeight.add(b.deliveryWeight),
                 a.deliveryVolume.add(b.deliveryVolume),
@@ -36,7 +35,6 @@ public record DeliveryParams(BigDecimal deliveryWeight, BigDecimal deliveryVolum
     }
 
     public DeliveryParams multiply(final long multiplicand) {
-        System.out.println(deliveryWeight);
         final BigDecimal multiplicand_ = BigDecimal.valueOf(multiplicand);
         return new DeliveryParams(
                 deliveryWeight().multiply(multiplicand_),

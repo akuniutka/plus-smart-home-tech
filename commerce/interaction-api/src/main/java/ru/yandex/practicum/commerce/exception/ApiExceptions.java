@@ -15,6 +15,7 @@ public final class ApiExceptions {
     private static Map<String, Class<? extends ApiException>> registerApiExceptions() {
         final Map<String, Class<? extends ApiException>> exceptions = new HashMap<>();
         exceptions.put("NoDeliveryFoundException", NoDeliveryFoundException.class);
+        exceptions.put("NoOrderBookingFoundException", NoOrderBookingFoundException.class);
         exceptions.put("NoOrderFoundException", NoOrderFoundException.class);
         exceptions.put("NoPaymentFoundException", NoPaymentFoundException.class);
         exceptions.put("NoProductsInShoppingCartException", NoProductsInShoppingCartException.class);

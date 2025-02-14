@@ -7,8 +7,10 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
+import ru.yandex.practicum.commerce.dto.delivery.ShippedToDeliveryRequest;
 import ru.yandex.practicum.commerce.dto.warehouse.AddProductToWarehouseRequest;
 import ru.yandex.practicum.commerce.dto.warehouse.AssemblyProductsForOrderRequest;
+import ru.yandex.practicum.commerce.exception.NoOrderBookingFoundException;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehouse;
@@ -69,6 +71,8 @@ public class ProductServiceImpl implements ProductService {
         return bookProductsInternally(shoppingCart.getProducts(), BookingMode.DRY_RUN);
     }
 
+    @Transactional
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Override
     public DeliveryParams bookProducts(final AssemblyProductsForOrderRequest request) {
         final DeliveryParams deliveryParams = bookProductsInternally(request.getProducts(), BookingMode.BOOK);
@@ -79,8 +83,20 @@ public class ProductServiceImpl implements ProductService {
         orderBooking = orderBookingRepository.save(orderBooking);
         log.info("Booked products for order: orderId = {}, orderBookingId = {}", orderBooking.getOrderId(),
                 orderBooking.getOrderBookingId());
-        log.debug("OrderBooking = {}", orderBooking);
+        log.debug("Created booking = {}", orderBooking);
         return deliveryParams;
+    }
+
+    @Override
+    public void shippedToDelivery(final ShippedToDeliveryRequest request) {
+        OrderBooking orderBooking = orderBookingRepository.findByOrderId(request.getOrderId()).orElseThrow(
+                () -> new NoOrderBookingFoundException("Booking for order " + request.getOrderId() + " does not exist")
+        );
+        orderBooking.setDeliveryId(request.getDeliveryId());
+        orderBooking = orderBookingRepository.save(orderBooking);
+        log.info("Passed order to delivery: orderId = {}, orderBookingId = {}", orderBooking.getOrderId(),
+                orderBooking.getOrderBookingId());
+        log.debug("Picked booking = {}", orderBooking);
     }
 
     private DeliveryParams bookProductsInternally(final Map<UUID, Long> products, final BookingMode bookingMode) {

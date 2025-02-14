@@ -27,6 +27,7 @@ import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestBook
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestDeliveryParams;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestNewProductDto;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductA;
+import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShippedToDeliveryRequest;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShoppingCart;
 import static ru.yandex.practicum.commerce.warehouse.util.TestUtils.assertLogs;
 
@@ -108,6 +109,16 @@ class WarehouseControllerTest {
         inOrder.verify(mockBookingMapper).mapToDto(getTestDeliveryParams());
         assertThat(dto, equalTo(getTestBookedProducts()));
         assertLogs(logListener.getEvents(), "book_products.json", getClass());
+    }
+
+    @Test
+    void whenShippedToDelivery_ThenPassShippedToDeliveryRequestToProductServiceAndLog() throws  Exception {
+        doNothing().when(mockProductService).shippedToDelivery(any());
+
+        controller.shippedToDelivery(getTestShippedToDeliveryRequest());
+
+        verify(mockProductService).shippedToDelivery(getTestShippedToDeliveryRequest());
+        assertLogs(logListener.getEvents(), "shipped_to_delivery.json", getClass());
     }
 
     @Test
