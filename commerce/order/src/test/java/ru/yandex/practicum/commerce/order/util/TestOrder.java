@@ -109,6 +109,12 @@ public final class TestOrder {
         return order;
     }
 
+    public static Order returned() {
+        final Order order = paid();
+        order.setState(OrderState.PRODUCT_RETURNED);
+        return order;
+    }
+
     public static Order completed() {
         final Order order = delivered();
         order.setState(OrderState.COMPLETED);

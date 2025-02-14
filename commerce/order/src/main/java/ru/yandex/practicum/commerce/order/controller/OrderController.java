@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 import ru.yandex.practicum.commerce.dto.order.CreateNewOrderRequest;
 import ru.yandex.practicum.commerce.dto.order.OrderDto;
+import ru.yandex.practicum.commerce.dto.order.ProductReturnRequest;
 import ru.yandex.practicum.commerce.dto.store.Pageable;
 import ru.yandex.practicum.commerce.order.mapper.AddressMapper;
 import ru.yandex.practicum.commerce.order.mapper.OrderMapper;
@@ -163,6 +164,17 @@ public class OrderController {
         final OrderDto dto = orderMapper.mapToDto(order);
         log.info("Responded with not delivered order: orderId = {}, deliveryId = {}", orderId, dto.getDeliveryId());
         log.debug("Not delivered order = {}", dto);
+        return dto;
+    }
+
+    @PostMapping("/return")
+    public OrderDto returnProducts(@RequestBody @Valid final ProductReturnRequest request) {
+        log.info("Received request to return order: orderId = {}", request.getOrderId());
+        log.debug("Return request = {}", request);
+        final Order order = orderService.returnProducts(request);
+        final OrderDto dto = orderMapper.mapToDto(order);
+        log.info("Responded with returned order: orderId = {}", dto.getOrderId());
+        log.debug("Returned order = {}", dto);
         return dto;
     }
 

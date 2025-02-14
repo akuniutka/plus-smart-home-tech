@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 import ru.yandex.practicum.commerce.dto.order.OrderDto;
 import ru.yandex.practicum.commerce.dto.order.OrderState;
+import ru.yandex.practicum.commerce.dto.order.ProductReturnRequest;
 import ru.yandex.practicum.commerce.exception.NoOrderFoundException;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.NotAuthorizedUserException;
@@ -165,6 +166,17 @@ public class OrderServiceImpl implements OrderService {
         order = repository.save(order);
         log.info("Saved delivery failure for order: orderId = {}, deliveryId = {}", orderId, order.getDeliveryId());
         log.debug("Order with delivery failed = {}", order);
+        return order;
+    }
+
+    @Override
+    public Order returnProducts(final ProductReturnRequest request) {
+        Order order = getOrderById(request.getOrderId());
+        warehouseService.returnProducts(request.getProducts());
+        order.setState(OrderState.PRODUCT_RETURNED);
+        order = repository.save(order);
+        log.info("Returned order: orderId = {}", order.getOrderId());
+        log.debug("Returned order = {}", order);
         return order;
     }
 

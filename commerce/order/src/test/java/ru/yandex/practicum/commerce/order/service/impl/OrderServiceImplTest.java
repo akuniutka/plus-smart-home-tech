@@ -22,6 +22,7 @@ import ru.yandex.practicum.commerce.order.util.TestAddress;
 import ru.yandex.practicum.commerce.order.util.TestBookedProductsDto;
 import ru.yandex.practicum.commerce.order.util.TestOrder;
 import ru.yandex.practicum.commerce.order.util.TestOrderDto;
+import ru.yandex.practicum.commerce.order.util.TestProductReturnRequest;
 import ru.yandex.practicum.commerce.order.util.TestShoppingCartDto;
 import ru.yandex.practicum.commerce.order.util.UUIDGenerator;
 
@@ -34,6 +35,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
@@ -411,6 +413,33 @@ class OrderServiceImplTest {
         inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.withDeliveryFailed())));
         assertThat(order, samePropertyValuesAs(TestOrder.withDeliveryFailed()));
         assertLogs(logListener.getEvents(), "set_delivery_failed.json", getClass());
+    }
+
+    @Test
+    void whenReturnProductsAndOrderNotExist_ThenThrowException() {
+        when(mockRepository.findById(any())).thenReturn(Optional.empty());
+
+        final NoOrderFoundException exception = assertThrows(NoOrderFoundException.class,
+                () -> service.returnProducts(TestProductReturnRequest.create()));
+
+        verify(mockRepository).findById(ORDER_ID);
+        assertThat(exception.getUserMessage(), equalTo("Order " + ORDER_ID + " does not exist"));
+    }
+
+    @Test
+    void whenReturnProductsAndOrderExist_ThenPassProductsToWarehouseServiceAndUpdateOrderAndReturnItAndLog()
+            throws Exception {
+        when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.paid()));
+        doNothing().when(mockWarehouseService).returnProducts(any());
+        when(mockRepository.save(any())).thenReturn(TestOrder.returned());
+
+        final Order order = service.returnProducts(TestProductReturnRequest.create());
+
+        inOrder.verify(mockRepository).findById(ORDER_ID);
+        inOrder.verify(mockWarehouseService).returnProducts(TestShoppingCartDto.PRODUCTS);
+        inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.returned())));
+        assertThat(order, samePropertyValuesAs(TestOrder.returned()));
+        assertLogs(logListener.getEvents(), "return_products.json", getClass());
     }
 
     @Test
