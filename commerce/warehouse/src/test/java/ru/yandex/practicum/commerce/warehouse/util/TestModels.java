@@ -1,5 +1,6 @@
 package ru.yandex.practicum.commerce.warehouse.util;
 
+import ru.yandex.practicum.commerce.dto.delivery.ShippedToDeliveryRequest;
 import ru.yandex.practicum.commerce.dto.warehouse.AddProductToWarehouseRequest;
 import ru.yandex.practicum.commerce.dto.delivery.AddressDto;
 import ru.yandex.practicum.commerce.dto.warehouse.AssemblyProductsForOrderRequest;
@@ -185,6 +186,13 @@ public final class TestModels {
         final OrderBooking orderBooking = getTestOrderBookingNew();
         orderBooking.setDeliveryId(DELIVERY_ID);
         return orderBooking;
+    }
+
+    public static ShippedToDeliveryRequest getTestShippedToDeliveryRequest() {
+        final ShippedToDeliveryRequest request = new ShippedToDeliveryRequest();
+        request.setOrderId(ORDER_ID);
+        request.setDeliveryId(DELIVERY_ID);
+        return request;
     }
 
     private static AddressDto getTestAddress(final String addressFiller) {
