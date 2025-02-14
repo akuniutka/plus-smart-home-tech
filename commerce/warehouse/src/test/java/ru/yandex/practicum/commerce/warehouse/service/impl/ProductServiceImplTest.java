@@ -54,6 +54,7 @@ import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProd
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductB;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductBDecreased;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductBLow;
+import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestReturnedProducts;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShippedToDeliveryRequest;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShoppingCart;
 import static ru.yandex.practicum.commerce.warehouse.util.TestUtils.assertLogs;
@@ -225,8 +226,8 @@ class ProductServiceImplTest {
         inOrder.verify(mockProductRepository).saveAll(productCollectionCaptor.capture());
         assertThat(productCollectionCaptor.getValue(), containsInAnyOrder(
                 samePropertyValuesAs(getTestProductADecreased()),
-                samePropertyValuesAs(getTestProductBDecreased()))
-        );
+                samePropertyValuesAs(getTestProductBDecreased())
+        ));
         inOrder.verify(mockUUIDGenerator).getNewUUID();
         inOrder.verify(mockOrderBookingRepository).save(argThat(samePropertyValuesAs(getTestOrderBookingNew())));
         assertThat(deliveryParams, equalTo(getTestDeliveryParams()));
@@ -255,5 +256,35 @@ class ProductServiceImplTest {
         inOrder.verify(mockOrderBookingRepository)
                 .save(argThat(samePropertyValuesAs(getTestOrderBookingWithDeliveryId())));
         assertLogs(logListener.getEvents(), "shipped_to_delivery.json", getClass());
+    }
+
+    @Test
+    void whenReturnProductsAndProductNotExist_ThenThrowException() {
+        when(mockProductRepository.findAllById(anySet())).thenReturn(List.of(getTestProductBDecreased()));
+
+        final ProductInShoppingCartNotInWarehouse exception = assertThrows(ProductInShoppingCartNotInWarehouse.class,
+                () -> service.returnProducts(getTestReturnedProducts()));
+
+        verify(mockProductRepository).findAllById(uuidSetCaptor.capture());
+        assertThat(uuidSetCaptor.getValue(), containsInAnyOrder(PRODUCT_ID_A, PRODUCT_ID_B));
+        assertThat(exception.getUserMessage(), equalTo("Products not found in warehouse: " + PRODUCT_ID_A));
+    }
+
+    @Test
+    void whenReturnProductsAndProductExist_ThenIncreaseStocksAndLog() throws Exception {
+        when(mockProductRepository.findAllById(anySet()))
+                .thenReturn(List.of(getTestProductADecreased(), getTestProductBDecreased()));
+        when(mockProductRepository.saveAll(anyCollection())).thenReturn(List.of(getTestProductA(), getTestProductB()));
+
+        service.returnProducts(getTestReturnedProducts());
+
+        inOrder.verify(mockProductRepository).findAllById(uuidSetCaptor.capture());
+        assertThat(uuidSetCaptor.getValue(), containsInAnyOrder(PRODUCT_ID_A, PRODUCT_ID_B));
+        inOrder.verify(mockProductRepository).saveAll(productCollectionCaptor.capture());
+        assertThat(productCollectionCaptor.getValue(), containsInAnyOrder(
+                samePropertyValuesAs(getTestProductA()),
+                samePropertyValuesAs(getTestProductB())
+        ));
+        assertLogs(logListener.getEvents(), "return_products.json", getClass());
     }
 }

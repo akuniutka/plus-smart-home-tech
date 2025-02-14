@@ -99,6 +99,19 @@ public class ProductServiceImpl implements ProductService {
         log.debug("Picked booking = {}", orderBooking);
     }
 
+    @Transactional
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Override
+    public void returnProducts(final Map<UUID, Long> products) {
+        final Map<UUID, Product> stocks = getStocks(products.keySet());
+        requireAllProductsExist(products, stocks);
+        products.forEach((productId, quantity) -> increaseStock(stocks.get(productId), quantity));
+        productRepository.saveAll(stocks.values());
+        log.info("Increased product quantities in warehouse due to order return: products = {}",
+                toString(products.keySet()));
+        log.debug("Returned products = {}", products);
+    }
+
     private DeliveryParams bookProductsInternally(final Map<UUID, Long> products, final BookingMode bookingMode) {
         final Map<UUID, Product> stocks = getStocks(products.keySet());
         requireAllProductsExist(products, stocks);
@@ -146,6 +159,10 @@ public class ProductServiceImpl implements ProductService {
 
     private void decreaseStock(final Product product, final long subtrahend) {
         product.setQuantity(product.getQuantity() - subtrahend);
+    }
+
+    private void increaseStock(final Product product, final long addend) {
+        product.setQuantity(product.getQuantity() + addend);
     }
 
     private enum BookingMode {
