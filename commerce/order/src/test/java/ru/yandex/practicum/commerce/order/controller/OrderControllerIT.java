@@ -26,6 +26,7 @@ import ru.yandex.practicum.commerce.order.util.TestAddressDto;
 import ru.yandex.practicum.commerce.order.util.TestOrder;
 import ru.yandex.practicum.commerce.order.util.TestOrderDto;
 import ru.yandex.practicum.commerce.order.util.TestPageable;
+import ru.yandex.practicum.commerce.order.util.TestProductReturnRequest;
 import ru.yandex.practicum.commerce.order.util.TestShoppingCartDto;
 
 import java.nio.charset.StandardCharsets;
@@ -349,6 +350,28 @@ class OrderControllerIT {
 
         inOrder.verify(mockOrderService).setDeliveryFailed(ORDER_ID);
         inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withDeliveryFailed()));
+    }
+
+    @Test
+    void whenPostAtReturnEndpoint_ThenInvokeReturnProductsMethodAndProcessResponse() throws Exception {
+        final String requestBody = loadJson("return_products_request.json", getClass());
+        final String responseBody = loadJson("return_products_response.json", getClass());
+        when(mockOrderService.returnProducts(any())).thenReturn(TestOrder.returned());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.returned());
+
+        mvc.perform(post(BASE_PATH + "/return")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(responseBody, true));
+
+        inOrder.verify(mockOrderService).returnProducts(TestProductReturnRequest.create());
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.returned()));
     }
 
     @Test

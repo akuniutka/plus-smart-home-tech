@@ -21,6 +21,7 @@ import ru.yandex.practicum.commerce.order.util.TestCreateNewOrderRequest;
 import ru.yandex.practicum.commerce.order.util.TestOrder;
 import ru.yandex.practicum.commerce.order.util.TestOrderDto;
 import ru.yandex.practicum.commerce.order.util.TestPageable;
+import ru.yandex.practicum.commerce.order.util.TestProductReturnRequest;
 import ru.yandex.practicum.commerce.order.util.TestShoppingCartDto;
 
 import java.util.List;
@@ -237,6 +238,20 @@ class OrderControllerTest {
         inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.withDeliveryFailed()));
         assertThat(dto, equalTo(TestOrderDto.withDeliveryFailed()));
         assertLogs(logListener.getEvents(), "set_delivery_failed.json", getClass());
+    }
+
+    @Test
+    void whenReturnProducts_ThenPassProductReturnRequestToServiceAndMapServiceResponseAndReturnItAndLog()
+            throws Exception {
+        when(mockOrderService.returnProducts(any())).thenReturn(TestOrder.returned());
+        when(mockOrderMapper.mapToDto(any(Order.class))).thenReturn(TestOrderDto.returned());
+
+        final OrderDto dto = controller.returnProducts(TestProductReturnRequest.create());
+
+        inOrder.verify(mockOrderService).returnProducts(TestProductReturnRequest.create());
+        inOrder.verify(mockOrderMapper).mapToDto(refEq(TestOrder.returned()));
+        assertThat(dto, equalTo(TestOrderDto.returned()));
+        assertLogs(logListener.getEvents(), "return_products.json", getClass());
     }
 
     @Test

@@ -1,0 +1,4431 @@
+{
+	"info": {
+		"_postman_id": "4770c19d-b237-4f56-8f24-482ab03c49b6",
+		"name": "(Sprint 22) Smart Home Technologies API Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27052193"
+	},
+	"item": [
+		{
+			"name": "shopping-store",
+			"item": [
+				{
+					"name": "add Product To Shop",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        product = rnd.getProduct();\r",
+									"        pm.collectionVariables.set(\"product\", product);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"\r",
+									"    pm.request.body.update({\r",
+									"        mode: 'raw',\r",
+									"        raw: JSON.stringify(product),\r",
+									"        options: { raw: { language: 'json' } }\r",
+									"    });\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200 или 201\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});\r",
+									"\r",
+									"const product = pm.collectionVariables.get(\"product\");\r",
+									"\r",
+									"\r",
+									"pm.test(\"Проверка полей объекта product\", function () {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson.productName).to.equal(product.productName);\r",
+									"    pm.expect(responseJson.description).to.equal(product.description);\r",
+									"    pm.expect(responseJson.imageSrc).to.equal(product.imageSrc);\r",
+									"    pm.expect(responseJson.quantityState).to.equal(product.quantityState);\r",
+									"    pm.expect(responseJson.productState).to.equal(product.productState);\r",
+									"    pm.expect(responseJson.productCategory).to.equal(product.productCategory);\r",
+									"    pm.expect(responseJson.price).to.equal(product.price);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/shopping-store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"shopping-store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.equal(200);\r",
+									"});\r",
+									"\r",
+									"const product = pm.collectionVariables.get(\"product\");\r",
+									"\r",
+									"\r",
+									"pm.test(\"Проверка полей объекта product\", function () {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson.productName).to.equal(product.productName);\r",
+									"    pm.expect(responseJson.description).to.equal(product.description);\r",
+									"    pm.expect(responseJson.imageSrc).to.equal(product.imageSrc);\r",
+									"    pm.expect(responseJson.quantityState).to.equal(product.quantityState);\r",
+									"    pm.expect(responseJson.productState).to.equal(product.productState);\r",
+									"    pm.expect(responseJson.rating).to.equal(product.rating);\r",
+									"    pm.expect(responseJson.productCategory).to.equal(product.productCategory);\r",
+									"    pm.expect(responseJson.price).to.equal(product.price);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        product = rnd.getProduct();\r",
+									"        product = await api.addProduct(product);\r",
+									"        pm.collectionVariables.set(\"product_id\", product.productId);\r",
+									"        pm.collectionVariables.set(\"product\", product);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/shopping-store/{{product_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"shopping-store",
+								"{{product_id}}"
+							]
+						},
+						"description": "Получить сведения по товару из БД."
+					},
+					"response": []
+				},
+				{
+					"name": "update Product",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        product = rnd.getProduct();\r",
+									"        product = await api.addProduct(product);\r",
+									"\r",
+									"        new_product = {\r",
+									"            productId: product.productId,\r",
+									"            productName: \"new_product_name\",\r",
+									"            description: \"new_product_description\",\r",
+									"            imageSrc: \"new/image/src\",\r",
+									"            quantityState: \"FEW\",\r",
+									"            productState: \"ACTIVE\",\r",
+									"            productCategory: \"CONTROL\",\r",
+									"            rating: 4.5,\r",
+									"            price: 12.34\r",
+									"        }\r",
+									"\r",
+									"        pm.collectionVariables.set(\"product\", new_product);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"\r",
+									"    pm.request.body.update({\r",
+									"        mode: 'raw',\r",
+									"        raw: JSON.stringify(new_product),\r",
+									"        options: { raw: { language: 'json' } }\r",
+									"    });\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200 или 201\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});\r",
+									"\r",
+									"const product = pm.collectionVariables.get(\"product\");\r",
+									"\r",
+									"\r",
+									"pm.test(\"Проверка полей объекта product\", function () {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson.productName).to.equal(product.productName);\r",
+									"    pm.expect(responseJson.description).to.equal(product.description);\r",
+									"    pm.expect(responseJson.imageSrc).to.equal(product.imageSrc);\r",
+									"    pm.expect(responseJson.productCategory).to.equal(product.productCategory);\r",
+									"    pm.expect(responseJson.price).to.equal(product.price);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/shopping-store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"shopping-store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "remove Product",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        product = rnd.getProduct();\r",
+									"        product.productState = \"ACTIVE\";\r",
+									"        product = await api.addProduct(product);\r",
+									"\r",
+									"        pm.collectionVariables.set(\"product_id\", product.productId);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"\r",
+									"    pm.request.body.update({\r",
+									"        mode: 'raw',\r",
+									"        raw: JSON.stringify(product.productId),\r",
+									"        options: { raw: { language: 'json' } }\r",
+									"    });\r",
+									"};\r",
+									"\r",
+									"\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200 или 203\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 203]);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"const req = {\r",
+									"    url: \"http://localhost:8080/shopping-store/\" + pm.collectionVariables.get(\"product_id\"),\r",
+									"    method: \"GET\",\r",
+									"};\r",
+									"\r",
+									"pm.sendRequest(req, (error, response) => {\r",
+									"    pm.test(\"Товар должен перейти в статус DEACTIVATE\", function(){\r",
+									"        pm.expect(response.json().productState).to.eql(\"DEACTIVATE\");\r",
+									"    });\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/shopping-store/removeProductFromStore",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"shopping-store",
+								"removeProductFromStore"
+							]
+						},
+						"description": "Удалить товар из ассортимента магазина. Функция для менеджерского состава."
+					},
+					"response": []
+				},
+				{
+					"name": "set Product Quantity State",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        product = rnd.getProduct();\r",
+									"        product.\r",
+									"        product.quantityState = \"ENDED\";\r",
+									"        product = await api.addProduct(product);\r",
+									"\r",
+									"        pm.collectionVariables.set(\"product_id\", product.productId);\r",
+									"        pm.collectionVariables.set(\"quantity_state\", [\"FEW\", \"ENOUGH\", \"MANY\"][Math.floor(Math.random() * 3)]);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200 или 201\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"const req = {\r",
+									"    url: \"http://localhost:8080/shopping-store/\" + pm.collectionVariables.get(\"product_id\"),\r",
+									"    method: \"GET\",\r",
+									"};\r",
+									"\r",
+									"pm.sendRequest(req, (error, response) => {\r",
+									"    pm.test(\"Проверка полей объекта product\", function(){\r",
+									"        pm.expect(response.json().quantityState).to.eql(pm.collectionVariables.get(\"quantity_state\"));\r",
+									"    });\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/shopping-store/quantityState?productId={{product_id}}&quantityState={{quantity_state}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"shopping-store",
+								"quantityState"
+							],
+							"query": [
+								{
+									"key": "productId",
+									"value": "{{product_id}}",
+									"description": "(Required) Запрос на изменение статуса товара в магазине, например: \"Закончился\", \"Мало\" и т.д."
+								},
+								{
+									"key": "quantityState",
+									"value": "{{quantity_state}}",
+									"description": "(Required) Запрос на изменение статуса товара в магазине, например: \"Закончился\", \"Мало\" и т.д."
+								}
+							]
+						},
+						"description": "Установка статуса по товару. API вызывается со стороны склада."
+					},
+					"response": []
+				},
+				{
+					"name": "get Products",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        product = {\r",
+									"            productName: \"00000000\",\r",
+									"            description: \"product_description\",\r",
+									"            imageSrc: \"product/image/src\",\r",
+									"            quantityState: \"FEW\",\r",
+									"            productState: \"ACTIVE\",\r",
+									"            productCategory: \"CONTROL\",\r",
+									"            rating: 4.5,\r",
+									"            price: 12.34\r",
+									"        };\r",
+									"        await api.addProduct(product);\r",
+									"        await api.addProduct(product);\r",
+									"        await api.addProduct(product);\r",
+									"        pm.collectionVariables.set(\"product\", product);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.equal(200);\r",
+									"});\r",
+									"\r",
+									"const product = pm.collectionVariables.get(\"product\");\r",
+									"\r",
+									"\r",
+									"pm.test(\"Проверка возвращаемых значений\", function () {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson[0].productName).to.equal(product.productName);\r",
+									"    pm.expect(responseJson[1].productName).to.equal(product.productName);\r",
+									"    pm.expect(responseJson[2].productName).to.equal(product.productName);\r",
+									"    //pm.expect(responseJson.sort.direction).to.equal(\"ASC\");\r",
+									"    //pm.expect(responseJson.sort.property).to.equal(\"productName\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/shopping-store?category=CONTROL&page=0&size=10&sort=productName",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"shopping-store"
+							],
+							"query": [
+								{
+									"key": "category",
+									"value": "CONTROL",
+									"description": "(Required) Тип товаров для возврата страницы: Управление, Датчики и т.д."
+								},
+								{
+									"key": "page",
+									"value": "0",
+									"description": "(Required) "
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"description": "(Required) "
+								},
+								{
+									"key": "sort",
+									"value": "productName",
+									"description": "(Required) "
+								}
+							]
+						},
+						"description": "Получение списка товаров по типу в пагинированном виде"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "shopping-cart",
+			"item": [
+				{
+					"name": "add Product To Shopping Cart",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"try {\r",
+									"    pm.collectionVariables.set(\"userName\", rnd.getWord(10));\r",
+									"    product1 = rnd.getProductForWarehouse();\r",
+									"    product2 = rnd.getProductForWarehouse();\r",
+									"    await api.addProductToWarehouse(product1);        \r",
+									"    await api.addProductToWarehouse(product2);\r",
+									"    \r",
+									"    productList = {\r",
+									"        [product1.productId]: Math.floor(Math.random() * 1000), // Случайное число до 1000\r",
+									"        [product2.productId]: Math.floor(Math.random() * 1000)  // Случайное число до 1000\r",
+									"    };\r",
+									"    \r",
+									"    pm.collectionVariables.set(\"productList\", productList); // Сохраняем productList, если нужно\r",
+									"} catch (err) {\r",
+									"    console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"}\r",
+									"\r",
+									"    pm.request.body.update({\r",
+									"        mode: 'raw',\r",
+									"        raw: JSON.stringify(productList),\r",
+									"        options: { raw: { language: 'json' } }\r",
+									"    });\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200 или 201\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});\r",
+									"\r",
+									"const productList = pm.collectionVariables.get(\"productList\"); \r",
+									"const products = pm.response.json().products;\r",
+									"\r",
+									"pm.test(\"Проверка наличия продуктов и валидности количества\", function () {\r",
+									"    let allKeysPresent = true;\r",
+									"    let valuesValid = true;\r",
+									"    for (key in productList) {\r",
+									"        if (!products.hasOwnProperty(key)) {\r",
+									"            allKeysPresent = false;\r",
+									"            break;\r",
+									"        }\r",
+									"        if (products[key] < productList[key]) {\r",
+									"            valuesValid = false;\r",
+									"        }\r",
+									"    }\r",
+									"\r",
+									"    pm.expect(allKeysPresent).to.be.true;\r",
+									"    pm.expect(valuesValid).to.be.true;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/shopping-cart?username={{userName}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"shopping-cart"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "{{userName}}",
+									"description": "(Required) "
+								}
+							]
+						},
+						"description": "Добавить товар в корзину."
+					},
+					"response": []
+				},
+				{
+					"name": "get Shopping Cart",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        userName = rnd.getWord(10);\r",
+									"        pm.collectionVariables.set(\"userName\", userName);\r",
+									"\r",
+									"        product1 = rnd.getProductForWarehouse();\r",
+									"        await api.addProductToWarehouse(product1);\r",
+									"        amount = Math.floor(Math.random() * 1000)\r",
+									"        product = {\r",
+									"            \"productId\": product1.productId,\r",
+									"            \"quantity\": amount + 2\r",
+									"        }\r",
+									"\r",
+									"        productList = {\r",
+									"            [product1.productId]: amount,\r",
+									"        };\r",
+									"\r",
+									"        await api.addQuantityOfProductsToWarehouse(product);\r",
+									"        \r",
+									"        pm.collectionVariables.set(\"productList\", productList);\r",
+									"        await api.addProductToShoppingCart(userName, productList)\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+									"});\r",
+									"\r",
+									"const productList = pm.collectionVariables.get(\"productList\"); \r",
+									"const products = pm.response.json().products;\r",
+									"\r",
+									"pm.test(\"Проверка наличия продуктов и валидности количества\", function () {\r",
+									"    let allKeysPresent = true;\r",
+									"    let valuesValid = true;\r",
+									"    for (key in productList) {\r",
+									"\r",
+									"        if (!products.hasOwnProperty(key)) {\r",
+									"            allKeysPresent = false;\r",
+									"            break;\r",
+									"        }\r",
+									"        if (products[key] != productList[key]) {\r",
+									"            valuesValid = false;\r",
+									"        }\r",
+									"    }\r",
+									"\r",
+									"    pm.expect(allKeysPresent).to.be.true;\r",
+									"    pm.expect(valuesValid).to.be.true;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/shopping-cart?username={{userName}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"shopping-cart"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "{{userName}}",
+									"description": "(Required) "
+								}
+							]
+						},
+						"description": "Получить актуальную корзину для авторизованного пользователя."
+					},
+					"response": []
+				},
+				{
+					"name": "change Product Quantity",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        userName = rnd.getWord(10);\r",
+									"        pm.collectionVariables.set(\"userName\", userName);\r",
+									"\r",
+									"        product1 = rnd.getProductForWarehouse();\r",
+									"        await api.addProductToWarehouse(product1);\r",
+									"        amount = Math.floor(Math.random() * 1000)\r",
+									"        product = {\r",
+									"            \"productId\": product1.productId,\r",
+									"            \"quantity\": amount + 2\r",
+									"        }\r",
+									"\r",
+									"        productList = {\r",
+									"            [product1.productId]: amount,\r",
+									"        };\r",
+									"\r",
+									"        await api.addQuantityOfProductsToWarehouse(product);\r",
+									"        \r",
+									"        pm.collectionVariables.set(\"productList\", productList);\r",
+									"        await api.addProductToShoppingCart(userName, productList)\r",
+									"        cart = await api.getShoppingCart(userName);\r",
+									"        pm.collectionVariables.set(\"cart\", cart)\r",
+									"        changeQuantity = {\r",
+									"            \"newQuantity\": amount + 1,\r",
+									"            \"productId\": product1.productId\r",
+									"        }\r",
+									"\r",
+									"        pm.request.body.update({\r",
+									"            mode: 'raw',\r",
+									"            raw: JSON.stringify(changeQuantity),\r",
+									"            options: { raw: { language: 'json' } }\r",
+									"        });\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);\r",
+									"});\r",
+									"\r",
+									"const cart = pm.collectionVariables.get(\"cart\"); \r",
+									"const newCart = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Проверка полей новой корзины\", function () {\r",
+									"\r",
+									"    pm.expect(newCart.shoppingCartId).to.equal(cart.shoppingCartId);\r",
+									"\r",
+									"    const productId = Object.keys(cart.products)[0];\r",
+									"    const expectedQuantity = cart.products[productId];\r",
+									"    const actualQuantity = newCart.products[productId];\r",
+									"\r",
+									"    pm.expect(actualQuantity).to.equal(expectedQuantity + 1);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/shopping-cart/change-quantity?username={{userName}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"shopping-cart",
+								"change-quantity"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "{{userName}}"
+								}
+							]
+						},
+						"description": "Изменить количество товаров в корзине."
+					},
+					"response": []
+				},
+				{
+					"name": "remove From Shopping Cart",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        userName = rnd.getWord(10);\r",
+									"        pm.collectionVariables.set(\"userName\", userName);\r",
+									"\r",
+									"        product1 = rnd.getProductForWarehouse();\r",
+									"        await api.addProductToWarehouse(product1);\r",
+									"        amount = Math.floor(Math.random() * 1000)\r",
+									"        product = {\r",
+									"            \"productId\": product1.productId,\r",
+									"            \"quantity\": amount + 2\r",
+									"        }\r",
+									"\r",
+									"        productList = {\r",
+									"            [product1.productId]: amount\r",
+									"        };\r",
+									"\r",
+									"        await api.addQuantityOfProductsToWarehouse(product);\r",
+									"        \r",
+									"        pm.collectionVariables.set(\"productList\", productList);\r",
+									"        await api.addProductToShoppingCart(userName, productList)\r",
+									"        cart = await api.getShoppingCart(userName);\r",
+									"        pm.collectionVariables.set(\"cart\", cart)\r",
+									"        changeQuantity = [product1.productId]\r",
+									"        \r",
+									"\r",
+									"        pm.request.body.update({\r",
+									"            mode: 'raw',\r",
+									"            raw: JSON.stringify(changeQuantity),\r",
+									"            options: { raw: { language: 'json' } }\r",
+									"        });\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);\r",
+									"});\r",
+									"\r",
+									"const cart = pm.collectionVariables.get(\"cart\"); \r",
+									"const newCart = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Проверка полей новой корзины\", function () {\r",
+									"\r",
+									"    pm.expect(newCart.shoppingCartId).to.equal(cart.shoppingCartId);\r",
+									"\r",
+									"    pm.expect(newCart.products).to.eql({});\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/shopping-cart/remove?username={{userName}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"shopping-cart",
+								"remove"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "{{userName}}"
+								}
+							]
+						},
+						"description": "Изменить состав товаров в корзине, т.е. удалить другие."
+					},
+					"response": []
+				},
+				{
+					"name": "deactivate Current Shopping Cart",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        userName = rnd.getWord(10);\r",
+									"        pm.collectionVariables.set(\"userName\", userName);\r",
+									"\r",
+									"        product1 = rnd.getProductForWarehouse();\r",
+									"        await api.addProductToWarehouse(product1);\r",
+									"\r",
+									"        amount = Math.floor(Math.random() * 1000)\r",
+									"        product = {\r",
+									"            \"productId\": product1.productId,\r",
+									"            \"quantity\": amount + 2\r",
+									"        }\r",
+									"\r",
+									"        await api.addQuantityOfProductsToWarehouse(product);\r",
+									"\r",
+									"        productList = {\r",
+									"            [product1.productId]: amount,\r",
+									"        };\r",
+									"        pm.collectionVariables.set(\"productList\", productList);\r",
+									"        await api.addProductToShoppingCart(userName, productList)\r",
+									"\r",
+									"        cart = await api.getShoppingCart(userName);\r",
+									"        pm.collectionVariables.set(\"cart\", cart)\r",
+									"\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201, 203, 204\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 203, 204]);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/shopping-cart?username={{userName}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"shopping-cart"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "{{userName}}",
+									"description": "(Required) "
+								}
+							]
+						},
+						"description": "Деактивация корзины товаров для пользователя."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "warehouse",
+			"item": [
+				{
+					"name": "get Warehouse Address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const expectedFields = [\r",
+									"    \"country\",\r",
+									"    \"city\",\r",
+									"    \"street\",\r",
+									"    \"house\",\r",
+									"    \"flat\"\r",
+									"];\r",
+									"\r",
+									"pm.test(\"Проверка наличия всех полей в ответе\", function () {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    \r",
+									"    expectedFields.forEach(field => {\r",
+									"        pm.expect(responseJson).to.have.property(field);\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/warehouse/address",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"warehouse",
+								"address"
+							]
+						},
+						"description": "Предоставить адрес склада для расчёта доставки."
+					},
+					"response": []
+				},
+				{
+					"name": "new Product In Warehouse",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        product = rnd.getProductForWarehouse();\r",
+									"        pm.collectionVariables.set(\"product\", product);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"\r",
+									"    pm.request.body.update({\r",
+									"        mode: 'raw',\r",
+									"        raw: JSON.stringify(product),\r",
+									"        options: { raw: { language: 'json' } }\r",
+									"    });\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200 или 201\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/warehouse",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"warehouse"
+							]
+						},
+						"description": "Добавить новый товар на склад."
+					},
+					"response": []
+				},
+				{
+					"name": "add Product To Warehouse",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        product = rnd.getProductForWarehouse();\r",
+									"        await api.addProductToWarehouse(product);\r",
+									"        product = {\r",
+									"            \"productId\": product.productId,\r",
+									"            \"quantity\": Number(pm.variables.replaceIn('{{$randomInt}}'))\r",
+									"        }\r",
+									"        pm.collectionVariables.set(\"product\", product);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"\r",
+									"    pm.request.body.update({\r",
+									"        mode: 'raw',\r",
+									"        raw: JSON.stringify(product),\r",
+									"        options: { raw: { language: 'json' } }\r",
+									"    });\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200 или 201\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/warehouse/add",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"warehouse",
+								"add"
+							]
+						},
+						"description": "Принять товар на склад."
+					},
+					"response": []
+				},
+				{
+					"name": "check products availability",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        deliveryWeight = (product1.weight * amount1 + product2.weight * amount2).toFixed(3);",
+									"        deliveryVolume = ((product1.dimension.width * product1.dimension.height * product1.dimension.depth).toFixed(3) * amount1 + (product2.dimension.width * product2.dimension.height * product2.dimension.depth).toFixed(3) * amount2).toFixed(3);",
+									"        deliveryFragile = product1.fragile || product2.fragile;",
+									"        pm.collectionVariables.set(\"deliveryWeight\", deliveryWeight);",
+									"        pm.collectionVariables.set(\"deliveryVolume\", deliveryVolume);",
+									"        pm.collectionVariables.set(\"deliveryFragile\", deliveryFragile);",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"",
+									"        pm.request.body.update({",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify(cart),",
+									"        options: { raw: { language: 'json' } }",
+									"    });",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const deliveryWeight = Number(pm.collectionVariables.get(\"deliveryWeight\"));",
+									"const deliveryVolume = Number(pm.collectionVariables.get(\"deliveryVolume\"));",
+									"const deliveryFragile = (pm.collectionVariables.get(\"deliveryFragile\") === 'true');",
+									"const target = pm.response.json();",
+									"",
+									"pm.test(\"Correct product cost\", function () {",
+									"    pm.expect(target).to.have.property('deliveryWeight');",
+									"    pm.expect(target).to.have.property('deliveryVolume');",
+									"    pm.expect(target).to.have.property('fragile');",
+									"    pm.expect(target.deliveryWeight).to.be.equal(deliveryWeight);",
+									"    pm.expect(target.deliveryVolume).to.be.equal(deliveryVolume);",
+									"    pm.expect(target.fragile).to.be.equal(deliveryFragile);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/warehouse/check",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"warehouse",
+								"check"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "assembly products for order",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        deliveryWeight = (product1.weight * amount1 + product2.weight * amount2).toFixed(3);",
+									"        deliveryVolume = ((product1.dimension.width * product1.dimension.height * product1.dimension.depth).toFixed(3) * amount1 + (product2.dimension.width * product2.dimension.height * product2.dimension.depth).toFixed(3) * amount2).toFixed(3);",
+									"        deliveryFragile = product1.fragile || product2.fragile;",
+									"        pm.collectionVariables.set(\"deliveryWeight\", deliveryWeight);",
+									"        pm.collectionVariables.set(\"deliveryVolume\", deliveryVolume);",
+									"        pm.collectionVariables.set(\"deliveryFragile\", deliveryFragile);",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"   ",
+									"        assemblyProductsForOrderRequest = {",
+									"            products: productList,",
+									"            orderId: order.orderId",
+									"        };",
+									"",
+									"",
+									"        pm.request.body.update({",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify(assemblyProductsForOrderRequest),",
+									"        options: { raw: { language: 'json' } }",
+									"    });",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const deliveryWeight = Number(pm.collectionVariables.get(\"deliveryWeight\"));",
+									"const deliveryVolume = Number(pm.collectionVariables.get(\"deliveryVolume\"));",
+									"const deliveryFragile = (pm.collectionVariables.get(\"deliveryFragile\") === 'true');",
+									"const target = pm.response.json();",
+									"",
+									"pm.test(\"Correct product cost\", function () {",
+									"    pm.expect(target).to.have.property('deliveryWeight');",
+									"    pm.expect(target).to.have.property('deliveryVolume');",
+									"    pm.expect(target).to.have.property('fragile');",
+									"    pm.expect(target.deliveryWeight).to.be.equal(deliveryWeight);",
+									"    pm.expect(target.deliveryVolume).to.be.equal(deliveryVolume);",
+									"    pm.expect(target.fragile).to.be.equal(deliveryFragile);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/warehouse/assembly",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"warehouse",
+								"assembly"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "return products",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"",
+									"        pm.request.body.update({",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify(productList),",
+									"        options: { raw: { language: 'json' } }",
+									"    });",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/warehouse/return",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"warehouse",
+								"return"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "order",
+			"item": [
+				{
+					"name": "create order",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"        // changeQuantity = {",
+									"        //     \"newQuantity\": amount + 1,",
+									"        //     \"productId\": product1.productId",
+									"        // }",
+									"        createNewOrderRequest = {",
+									"            \"shoppingCart\": cart,",
+									"            \"deliveryAddress\": {",
+									"                \"country\": \"NOLAND\",",
+									"                \"city\": \"STONE CITY\",",
+									"                \"street\": \"FIRST LANE\",",
+									"                \"house\": \"11\",",
+									"                \"flat\": \"2\"",
+									"            }",
+									"        }",
+									"",
+									"        pm.request.body.update({",
+									"            mode: 'raw',",
+									"            // raw: JSON.stringify(changeQuantity),",
+									"            raw: JSON.stringify(createNewOrderRequest),",
+									"            options: { raw: { language: 'json' } }",
+									"        });",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const cart = pm.collectionVariables.get(\"cart\"); ",
+									"// const newCart = pm.response.json();",
+									"const order = pm.response.json();",
+									"const productList = pm.collectionVariables.get(\"productList\"); ",
+									"const products = pm.response.json().products;",
+									"",
+									"pm.test(\"Проверка полей новой корзины\", function () {",
+									"",
+									"    // pm.expect(newCart.shoppingCartId).to.equal(cart.shoppingCartId);",
+									"    pm.expect(order.shoppingCartId).to.equal(cart.shoppingCartId);",
+									"",
+									"    // const productId = Object.keys(cart.products)[0];",
+									"    // const expectedQuantity = cart.products[productId];",
+									"    // const actualQuantity = newCart.products[productId];",
+									"",
+									"    // pm.expect(actualQuantity).to.equal(expectedQuantity + 1);",
+									"});",
+									"",
+									"pm.test(\"Проверка наличия продуктов и валидности количества\", function () {",
+									"    let allKeysPresent = true;",
+									"    let valuesValid = true;",
+									"    for (key in productList) {",
+									"        if (!products.hasOwnProperty(key)) {",
+									"            allKeysPresent = false;",
+									"            break;",
+									"        }",
+									"        if (products[key] < productList[key]) {",
+									"            valuesValid = false;",
+									"        }",
+									"    }",
+									"",
+									"    pm.expect(allKeysPresent).to.be.true;",
+									"    pm.expect(valuesValid).to.be.true;",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/order?username={{userName}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"order"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "{{userName}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get order by id",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"        pm.collectionVariables.set(\"orderId\", order.orderId);",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const order = pm.collectionVariables.get(\"order\");",
+									"const target = pm.response.json();",
+									"",
+									"pm.test(\"Order state should be ASSEMBLED\", function () {",
+									"    pm.expect(target).to.have.property('orderId');",
+									"    pm.expect(target).to.have.property('state');",
+									"    pm.expect(target.orderId).to.be.equal(order.orderId);",
+									"    pm.expect(target.state).to.be.equal(order.state);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/order/{{orderId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"order",
+								"{{orderId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "calculate product cost",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        productInStore1 = rnd.getProduct();",
+									"        productInStore1 = await api.addProduct(productInStore1);",
+									"        productInStore2 = rnd.getProduct();",
+									"        productInStore2 = await api.addProduct(productInStore2);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product1.productId = productInStore1.productId;",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        product2.productId = productInStore2.productId;",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        pm.collectionVariables.set(\"orderId\", order.orderId);",
+									"",
+									"        productPrice = Number((productInStore1.price * amount1 + productInStore2.price * amount2).toFixed(2));",
+									"        pm.collectionVariables.set(\"productPrice\", productPrice);",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const orderId = pm.collectionVariables.get(\"orderId\");",
+									"const productPrice = pm.collectionVariables.get(\"productPrice\");",
+									"const order = pm.response.json();",
+									"",
+									"pm.test(\"Correct product cost\", function () {",
+									"    pm.expect(order).to.have.property('orderId');",
+									"    pm.expect(order).to.have.property('productPrice');",
+									"    pm.expect(order.orderId).to.be.equal(order.orderId);",
+									"    pm.expect(order.productPrice).to.be.equal(productPrice);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/order/calculate/product",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"order",
+								"calculate",
+								"product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "confirm assembly",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"        pm.collectionVariables.set(\"orderId\", order.orderId);",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const order = pm.collectionVariables.get(\"order\");",
+									"const target = pm.response.json();",
+									"",
+									"pm.test(\"Order state should be ASSEMBLED\", function () {",
+									"    pm.expect(target).to.have.property('orderId');",
+									"    pm.expect(target).to.have.property('state');",
+									"    pm.expect(target.orderId).to.be.equal(order.orderId);",
+									"    pm.expect(target.state).to.be.equal('ASSEMBLED');",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/order/assembly",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"order",
+								"assembly"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "save assembly failure",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"        pm.collectionVariables.set(\"orderId\", order.orderId);",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const order = pm.collectionVariables.get(\"order\");",
+									"const target = pm.response.json();",
+									"",
+									"pm.test(\"Order state should be ASSEMBLY_FAILED\", function () {",
+									"    pm.expect(target).to.have.property('orderId');",
+									"    pm.expect(target).to.have.property('state');",
+									"    pm.expect(target.orderId).to.be.equal(order.orderId);",
+									"    pm.expect(target.state).to.be.equal('ASSEMBLY_FAILED');",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/order/assembly/failed",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"order",
+								"assembly",
+								"failed"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "return products",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"",
+									"        productReturnRequest = {",
+									"            orderId: order.orderId,",
+									"            products: productList",
+									"        };",
+									"",
+									"        pm.request.body.update({",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify(productReturnRequest),",
+									"        options: { raw: { language: 'json' } }",
+									"    });",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const order = pm.collectionVariables.get(\"order\");",
+									"const target = pm.response.json();",
+									"",
+									"pm.test(\"Order state should be PRODUCT_RETURNED\", function () {",
+									"    pm.expect(target).to.have.property('orderId');",
+									"    pm.expect(target).to.have.property('state');",
+									"    pm.expect(target.orderId).to.be.equal(order.orderId);",
+									"    pm.expect(target.state).to.be.equal('PRODUCT_RETURNED');",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/order/return",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"order",
+								"return"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "complete order",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"        pm.collectionVariables.set(\"orderId\", order.orderId);",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const order = pm.collectionVariables.get(\"order\");",
+									"const target = pm.response.json();",
+									"",
+									"pm.test(\"Order state should be ASSEMBLY_FAILED\", function () {",
+									"    pm.expect(target).to.have.property('orderId');",
+									"    pm.expect(target).to.have.property('state');",
+									"    pm.expect(target.orderId).to.be.equal(order.orderId);",
+									"    pm.expect(target.state).to.be.equal('COMPLETED');",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/order/completed",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"order",
+								"completed"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "delivery",
+			"item": [
+				{
+					"name": "plan delivery",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"        // changeQuantity = {",
+									"        //     \"newQuantity\": amount + 1,",
+									"        //     \"productId\": product1.productId",
+									"        // }",
+									"",
+									"        // createNewOrderRequest = {",
+									"        //     \"shoppingCart\": cart,",
+									"        //     \"deliveryAddress\": {",
+									"        //         \"country\": \"NOLAND\",",
+									"        //         \"city\": \"STONE CITY\",",
+									"        //         \"street\": \"FIRST LANE\",",
+									"        //         \"house\": \"11\",",
+									"        //         \"flat\": \"2\"",
+									"        //     }",
+									"        // }",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"",
+									"        delivery = rnd.getDelivery(order.orderId);",
+									"        pm.collectionVariables.set(\"delivery\", delivery);",
+									"",
+									"        pm.request.body.update({",
+									"            mode: 'raw',",
+									"            // raw: JSON.stringify(changeQuantity),",
+									"            raw: JSON.stringify(delivery),",
+									"            options: { raw: { language: 'json' } }",
+									"        });",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const cart = pm.collectionVariables.get(\"cart\"); ",
+									"// const newCart = pm.response.json();",
+									"const order = pm.response.json();",
+									"const productList = pm.collectionVariables.get(\"productList\"); ",
+									"const products = pm.response.json().products;",
+									"",
+									"// pm.test(\"Проверка полей новой корзины\", function () {",
+									"",
+									"    // pm.expect(newCart.shoppingCartId).to.equal(cart.shoppingCartId);",
+									"    // pm.expect(order.shoppingCartId).to.equal(cart.shoppingCartId);",
+									"",
+									"    // const productId = Object.keys(cart.products)[0];",
+									"    // const expectedQuantity = cart.products[productId];",
+									"    // const actualQuantity = newCart.products[productId];",
+									"",
+									"    // pm.expect(actualQuantity).to.equal(expectedQuantity + 1);",
+									"// });",
+									"",
+									"// pm.test(\"Проверка наличия продуктов и валидности количества\", function () {",
+									"//     let allKeysPresent = true;",
+									"//     let valuesValid = true;",
+									"//     for (key in productList) {",
+									"//         if (!products.hasOwnProperty(key)) {",
+									"//             allKeysPresent = false;",
+									"//             break;",
+									"//         }",
+									"//         if (products[key] < productList[key]) {",
+									"//             valuesValid = false;",
+									"//         }",
+									"//     }",
+									"",
+									"//     pm.expect(allKeysPresent).to.be.true;",
+									"//     pm.expect(valuesValid).to.be.true;",
+									"// });",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/delivery",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"delivery"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "pick delivery",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"        pm.collectionVariables.set(\"orderId\", order.orderId);",
+									"",
+									"        assemblyProductsForOrderRequest = {",
+									"            products: productList,",
+									"            orderId: order.orderId",
+									"        };",
+									"",
+									"        await api.assemblyOrder(assemblyProductsForOrderRequest);",
+									"",
+									"        delivery = rnd.getDelivery(order.orderId);",
+									"        delivery = await api.planDelivery(delivery);",
+									"        pm.collectionVariables.set(\"delivery\", delivery);",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const api = new API(pm);",
+									"const orderId = pm.collectionVariables.get(\"orderId\");",
+									"const order = await api.getOrder(orderId);",
+									"",
+									"pm.test(\"Order state should be ASSEMBLED\", function () {",
+									"    pm.expect(order).to.have.property('orderId');",
+									"    pm.expect(order).to.have.property('state');",
+									"    pm.expect(order.orderId).to.be.equal(order.orderId);",
+									"    pm.expect(order.state).to.be.equal('ASSEMBLED');",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/delivery/picked",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"delivery",
+								"picked"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "confirm delivery",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"        pm.collectionVariables.set(\"orderId\", order.orderId);",
+									"",
+									"        delivery = rnd.getDelivery(order.orderId);",
+									"        delivery = await api.planDelivery(delivery);",
+									"        pm.collectionVariables.set(\"delivery\", delivery);",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const api = new API(pm);",
+									"const orderId = pm.collectionVariables.get(\"orderId\");",
+									"const order = await api.getOrder(orderId);",
+									"",
+									"pm.test(\"Order state should be DELIVERED\", function () {",
+									"    pm.expect(order).to.have.property('orderId');",
+									"    pm.expect(order).to.have.property('state');",
+									"    pm.expect(order.orderId).to.be.equal(order.orderId);",
+									"    pm.expect(order.state).to.be.equal('DELIVERED');",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/delivery/successful",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"delivery",
+								"successful"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "decline delivery",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"        pm.collectionVariables.set(\"orderId\", order.orderId);",
+									"",
+									"        delivery = rnd.getDelivery(order.orderId);",
+									"        delivery = await api.planDelivery(delivery);",
+									"        pm.collectionVariables.set(\"delivery\", delivery);",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const api = new API(pm);",
+									"const orderId = pm.collectionVariables.get(\"orderId\");",
+									"const order = await api.getOrder(orderId);",
+									"",
+									"pm.test(\"Order state should be DELIVERY_FAILED\", function () {",
+									"    pm.expect(order).to.have.property('orderId');",
+									"    pm.expect(order).to.have.property('state');",
+									"    pm.expect(order.orderId).to.be.equal(order.orderId);",
+									"    pm.expect(order.state).to.be.equal('DELIVERY_FAILED');",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/delivery/failed",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"delivery",
+								"failed"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "payment",
+			"item": [
+				{
+					"name": "create payment",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        order.totalPrice = 54.37;",
+									"        order.deliveryPrice = 32.40;",
+									"        order.productPrice = 19.97;",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"        pm.collectionVariables.set(\"productPrice\", order.productPrice);",
+									"        pm.collectionVariables.set(\"totalPrice\", order.totalPrice);",
+									"        pm.collectionVariables.set(\"deliveryPrice\", order.deliveryPrice);",
+									"",
+									"        pm.request.body.update({",
+									"            mode: 'raw',",
+									"            raw: JSON.stringify(order),",
+									"            options: { raw: { language: 'json' } }",
+									"        });",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const target = pm.response.json();",
+									"const totalPrice = pm.collectionVariables.get(\"totalPrice\");",
+									"const productPrice = pm.collectionVariables.get(\"productPrice\");",
+									"const deliveryPrice = pm.collectionVariables.get(\"deliveryPrice\");",
+									"const taxValue = totalPrice - deliveryPrice - productPrice;",
+									"",
+									"pm.test(\"Категория должна содержать поля: id, name\", function () {",
+									"    pm.expect(target).to.have.property('paymentId');",
+									"    pm.expect(target).to.have.property('totalPayment');",
+									"    pm.expect(target).to.have.property('deliveryTotal');",
+									"    pm.expect(target).to.have.property('feeTotal');",
+									"    pm.expect(target.totalPayment).to.be.equal(totalPrice);",
+									"    pm.expect(target.deliveryTotal).to.be.equal(deliveryPrice);",
+									"    pm.expect(target.feeTotal).to.be.equal(taxValue);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/payment",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"payment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "calculate product cost",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        productInStore1 = rnd.getProduct();",
+									"        productInStore1 = await api.addProduct(productInStore1);",
+									"        productInStore2 = rnd.getProduct();",
+									"        productInStore2 = await api.addProduct(productInStore2);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product1.productId = productInStore1.productId;",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        product2.productId = productInStore2.productId;",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"",
+									"        productPrice = Number((productInStore1.price * amount1 + productInStore2.price * amount2).toFixed(2));",
+									"        pm.collectionVariables.set(\"productPrice\", productPrice);",
+									"",
+									"        pm.request.body.update({",
+									"            mode: 'raw',",
+									"            raw: JSON.stringify(order),",
+									"            options: { raw: { language: 'json' } }",
+									"        });",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"pm.test(\"Correct product cost\", function () {",
+									"    productPrice = pm.collectionVariables.get(\"productPrice\");",
+									"    pm.expect(pm.response.json()).to.be.equal(productPrice);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/payment/productCost",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"payment",
+								"productCost"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "calculate total cost",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        order.productPrice = Number((Math.random() * (1000 - 7) + 7).toFixed(2));",
+									"        order.deliveryPrice = Number((Math.random() * (1000 - 7) + 7).toFixed(2));",
+									"        taxValue = Number((order.productPrice * 0.1).toFixed(2));",
+									"        totalPrice = Number((order.productPrice + taxValue + order.deliveryPrice).toFixed(2));",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"        pm.collectionVariables.set(\"totalPrice\", totalPrice);",
+									"",
+									"        pm.request.body.update({",
+									"            mode: 'raw',",
+									"            raw: JSON.stringify(order),",
+									"            options: { raw: { language: 'json' } }",
+									"        });",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"pm.test(\"Correct total cost\", function () {",
+									"    totalPrice = pm.collectionVariables.get(\"totalPrice\");",
+									"    pm.expect(pm.response.json()).to.be.equal(totalPrice);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/payment/totalCost",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"payment",
+								"totalCost"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "confirm payment",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        order.totalPrice = 54.37;",
+									"        order.deliveryPrice = 32.40;",
+									"        order.productPrice = 19.97;",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"        pm.collectionVariables.set(\"orderId\", order.orderId);",
+									"",
+									"        payment = await api.addPayment(order);",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const api = new API(pm);",
+									"const orderId = pm.collectionVariables.get(\"orderId\");",
+									"const order = await api.getOrder(orderId);",
+									"",
+									"pm.test(\"Order state should be PAID\", function () {",
+									"    pm.expect(order).to.have.property('orderId');",
+									"    pm.expect(order).to.have.property('state');",
+									"    pm.expect(order.orderId).to.be.equal(order.orderId);",
+									"    pm.expect(order.state).to.be.equal('PAID');",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/payment/refund",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"payment",
+								"refund"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "decline payment",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
+									"",
+									"    try {",
+									"        userName = rnd.getWord(10);",
+									"        pm.collectionVariables.set(\"userName\", userName);",
+									"",
+									"        product1 = rnd.getProductForWarehouse();",
+									"        product2 = rnd.getProductForWarehouse();",
+									"        await api.addProductToWarehouse(product1);",
+									"        await api.addProductToWarehouse(product2);",
+									"        amount1 = Math.floor(Math.random() * 1000)",
+									"        amount2 = Math.floor(Math.random() * 1000)",
+									"",
+									"        productList = {",
+									"            [product1.productId]: amount1,",
+									"            [product2.productId]: amount2",
+									"        };",
+									"        pm.collectionVariables.set(\"productList\", productList);",
+									"        ",
+									"        product1 = {",
+									"            \"productId\": product1.productId,",
+									"            \"quantity\": amount1 + 2",
+									"        }",
+									"        product2 = {",
+									"            \"productId\": product2.productId,",
+									"            \"quantity\": amount2 + 2",
+									"        }",
+									"        await api.addQuantityOfProductsToWarehouse(product1);",
+									"        await api.addQuantityOfProductsToWarehouse(product2);",
+									"        ",
+									"        await api.addProductToShoppingCart(userName, productList)",
+									"        cart = await api.getShoppingCart(userName);",
+									"        pm.collectionVariables.set(\"cart\", cart)",
+									"",
+									"        createNewOrderRequest = rnd.getNewOrderRequest(cart);",
+									"        order = await api.addOrder(userName, createNewOrderRequest);",
+									"        order.totalPrice = 54.37;",
+									"        order.deliveryPrice = 32.40;",
+									"        order.productPrice = 19.97;",
+									"        pm.collectionVariables.set(\"order\", order);",
+									"        pm.collectionVariables.set(\"orderId\", order.orderId);",
+									"",
+									"        payment = await api.addPayment(order);",
+									"",
+									"    } catch(err) {",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);",
+									"    }",
+									"",
+									"};",
+									"",
+									"const interval = setInterval(() => {}, 1000);",
+									"",
+									"setTimeout(async () => ",
+									"    {",
+									"        try {",
+									"            await main();",
+									"        } catch (e) {",
+									"            console.error(e);",
+									"        } finally {",
+									"            clearInterval(interval);",
+									"        }",
+									"    },  ",
+									"    100 ",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Код ответа 200, 201 или 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									"",
+									"const api = new API(pm);",
+									"const orderId = pm.collectionVariables.get(\"orderId\");",
+									"const order = await api.getOrder(orderId);",
+									"",
+									"pm.test(\"Order state should be PAYMENT_FAILED\", function () {",
+									"    pm.expect(order).to.have.property('orderId');",
+									"    pm.expect(order).to.have.property('state');",
+									"    pm.expect(order.orderId).to.be.equal(order.orderId);",
+									"    pm.expect(order.state).to.be.equal('PAYMENT_FAILED');",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{orderId}}\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/payment/failed",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"payment",
+								"failed"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"API = class {\r",
+					"    constructor(postman, verbose = false, baseUrl = \"http://localhost:8080\") {\r",
+					"        this.baseUrl = baseUrl;\r",
+					"        this.pm = postman;\r",
+					"        this._verbose = verbose;\r",
+					"    }\r",
+					"\r",
+					"    async assemblyOrder(assemblyProductsForOrderRequest, verbose=null) {\r",
+					"        return this.post(\"/warehouse/assembly\", assemblyProductsForOrderRequest, \"Ошибка сборки заказа: \", verbose);\r",
+					"    }\r",
+					"\r",
+					"    async planDelivery(delivery, verbose=null) {\r",
+					"        return this.put(\"/delivery\", delivery, \"Ошибка создания доставки: \", verbose);\r",
+					"    }\r",
+					"\r",
+					"    async addPayment(order, verbose=null) {\r",
+					"        return this.post(\"/payment\", order, \"Ошибка создания платежа: \", verbose);\r",
+					"    }\r",
+					"\r",
+					"    async getOrder(orderId, verbose=null) {\r",
+					"        return this.get(\"/order/\" + orderId, null, \"Ошибка получения заказа: \", verbose);\r",
+					"    }\r",
+					"\r",
+					"    async addOrder(username, createNewOrderRequest, verbose=null) {\r",
+					"        return this.put(\"/order?username=\" + username, createNewOrderRequest, \"Ошибка создания заказа: \", verbose);\r",
+					"    }\r",
+					"    \r",
+					"    async getShoppingCart(username, verbose=null) {\r",
+					"        return this.get(\"/shopping-cart?username=\" + username, \"Ошибка при получении корзины пользователя: \", verbose);\r",
+					"    }\r",
+					"\r",
+					"    async addQuantityOfProductsToWarehouse(productList, verbose=null) {\r",
+					"        return this.post(\"/warehouse/add\", productList, \"Ошибка при увеличении количества продуктов на складе: \", verbose);\r",
+					"    }\r",
+					"\r",
+					"    async addProductToShoppingCart(username, productList, verbose=null) {\r",
+					"        return this.put(\"/shopping-cart?username=\" + username, productList, \"Ошибка при добавлении продуктов в корзину: \", verbose);\r",
+					"    }\r",
+					"\r",
+					"    async addProductToWarehouse(product, verbose=null) {\r",
+					"        return this.put(\"/warehouse\", product, \"Ошибка при добавлении нового продукта на склад: \", verbose);\r",
+					"    }\r",
+					"\r",
+					"    async addProduct(product, verbose=null) {\r",
+					"        return this.post(\"/shopping-store\", product, \"Ошибка при добавлении нового продукта: \", verbose);\r",
+					"    }\r",
+					"\r",
+					"    async post(path, body, errorText = \"Ошибка при выполнении post-запроса: \", verbose=null) {\r",
+					"        return this.sendRequest(\"POST\", path, body, errorText, verbose);\r",
+					"    }\r",
+					"\r",
+					"    async patch(path, body = null, errorText = \"Ошибка при выполнении patch-запроса: \", verbose=null) {\r",
+					"        return this.sendRequest(\"PATCH\", path, body, errorText, verbose);\r",
+					"    }\r",
+					"\r",
+					"    async put(path, body = null, errorText = \"Ошибка при выполнении put-запроса: \", verbose=null) {\r",
+					"        return this.sendRequest(\"PUT\", path, body, errorText, verbose);\r",
+					"    }\r",
+					"\r",
+					"    async get(path, body = null, errorText = \"Ошибка при выполнении get-запроса: \", verbose=null) {\r",
+					"        return this.sendRequest(\"GET\", path, body, errorText, verbose);\r",
+					"    }\r",
+					"    async sendRequest(method, path, body=null, errorText = \"Ошибка при выполнении запроса: \", verbose=null) {\r",
+					"        return new Promise((resolve, reject) => {\r",
+					"            verbose = verbose == null ? this._verbose : verbose;\r",
+					"            var url;\r",
+					"\r",
+					"            url = pm.collectionVariables.get(\"baseUrl\") + pm.collectionVariables.get(\"base-port\")\r",
+					"            const request = {\r",
+					"                url: url + path,\r",
+					"                method: method,\r",
+					"                body: body == null ? \"\" : JSON.stringify(body),\r",
+					"                header: { \"Content-Type\": \"application/json\" },\r",
+					"            };\r",
+					"            if(verbose) {\r",
+					"                console.log(\"Отправляю запрос: \", request);\r",
+					"            }\r",
+					"\r",
+					"            try {\r",
+					"                this.pm.sendRequest(request, (error, response) => {\r",
+					"                    if(error || (response.code >= 400 && response.code <= 599)) {\r",
+					"                        let err = error ? error : JSON.stringify(response.json());\r",
+					"                        console.error(\"При выполнении запроса к серверу возникла ошика.\\n\", err,\r",
+					"                             \"\\nДля отладки проблемы повторите такой же запрос к вашей программе \" + \r",
+					"                             \"на локальном компьютере. Данные запроса:\\n\", JSON.stringify(request));\r",
+					"\r",
+					"                        reject(new Error(errorText + err));\r",
+					"                    }\r",
+					"                    if(verbose) {\r",
+					"                        console.log(\"Результат обработки запроса: код состояния - \", response.code, \", тело: \", response.json());\r",
+					"                    }\r",
+					"                    if (response.stream.length === 0){\r",
+					"                        resolve(\"\");\r",
+					"                    }else{\r",
+					"                        resolve(response.json());\r",
+					"                    }\r",
+					"                });\r",
+					"                \r",
+					"            } catch(err) {\r",
+					"                if(verbose) {\r",
+					"                    console.error(errorText, err);\r",
+					"                }\r",
+					"                return Promise.reject(err);\r",
+					"            }\r",
+					"        });\r",
+					"    }\r",
+					"};\r",
+					"\r",
+					"RandomUtils = class {\r",
+					"    constructor() {}\r",
+					"\r",
+					"\r",
+					"    getWord(length = 1) {\r",
+					"        let result = '';\r",
+					"        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';\r",
+					"        const charactersLength = characters.length;\r",
+					"        let counter = 0;\r",
+					"        while (counter < length) {\r",
+					"            result += characters.charAt(Math.floor(Math.random() * charactersLength));\r",
+					"            counter += 1;\r",
+					"        }\r",
+					"        return result;\r",
+					"    }\r",
+					"\r",
+					"    getProduct() {\r",
+					"        return {\r",
+					"            productName: this.getWord(15),\r",
+					"            description: this.getWord(50),\r",
+					"            imageSrc: this.getWord(5) + '/' + this.getWord(5) + '/' + this.getWord(5),\r",
+					"            quantityState: [\"ENDED\", \"FEW\", \"ENOUGH\", \"MANY\"][Math.floor(Math.random() * 4)],\r",
+					"            productState: [\"ACTIVE\", \"DEACTIVATE\"][Math.floor(Math.random() * 2)],\r",
+					"            productCategory: [\"LIGHTING\", \"CONTROL\", \"SENSORS\"][Math.floor(Math.random() * 3)],\r",
+					"            price: Number((Math.random() * (1000 - 7) + 7).toFixed(2))\r",
+					"        }\r",
+					"    }\r",
+					"    \r",
+					"    getProductForWarehouse() {\r",
+					"        return {\r",
+					"            \"dimension\": {\r",
+					"                \"depth\": (Math.random() * (1000 - 7) + 7).toFixed(2),\r",
+					"                \"height\": (Math.random() * (1000 - 7) + 7).toFixed(2),\r",
+					"                \"width\": (Math.random() * (1000 - 7) + 7).toFixed(2)\r",
+					"            },\r",
+					"            \"productId\": pm.variables.replaceIn('{{$guid}}'),\r",
+					"            \"weight\": (Math.random() * (1000 - 7) + 7).toFixed(2),\r",
+					"            \"fragile\": pm.variables.replaceIn('{{$randomBoolean}}')\r",
+					"            }\r",
+					"    }\r",
+					"\r",
+					"    getNewOrderRequest(shoppingCart) {\r",
+					"        return {\r",
+					"            shoppingCart: shoppingCart,\r",
+					"            deliveryAddress: {\r",
+					"                country: \"NOLAND\",\r",
+					"                city: \"STONE CITY\",\r",
+					"                street: \"FIRST LANE\",\r",
+					"                house: \"11\",\r",
+					"                flat: \"2\"\r",
+					"            }\r",
+					"        }\r",
+					"    }\r",
+					"\r",
+					"    getDelivery(orderId) {\r",
+					"        return {\r",
+					"            fromAddress: {\r",
+					"                country: \"ADDRESS_1\",\r",
+					"                city: \"ADDRESS_1\",\r",
+					"                street: \"ADDRESS_1\",\r",
+					"                house: \"ADDRESS_1\",\r",
+					"                flat: \"ADDRESS_1\"\r",
+					"            },\r",
+					"            toAddress: {\r",
+					"                country: \"NOLAND\",\r",
+					"                city: \"STONE CITY\",\r",
+					"                street: \"FIRST LANE\",\r",
+					"                house: \"15\",\r",
+					"                flat: \"42\"\r",
+					"            },\r",
+					"            orderId: orderId,\r",
+					"            deliveryState: \"CREATED\"\r",
+					"        }\r",
+					"    }\r",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:"
+		},
+		{
+			"key": "shopping-cart-port",
+			"value": "12345"
+		},
+		{
+			"key": "shopping-store-port",
+			"value": "12345"
+		},
+		{
+			"key": "warehouse-port",
+			"value": "12345"
+		},
+		{
+			"key": "product",
+			"value": ""
+		},
+		{
+			"key": "product_id",
+			"value": ""
+		},
+		{
+			"key": "quantity_state",
+			"value": "FEW"
+		},
+		{
+			"key": "product1",
+			"value": ""
+		},
+		{
+			"key": "product2",
+			"value": ""
+		},
+		{
+			"key": "productList",
+			"value": ""
+		},
+		{
+			"key": "userName",
+			"value": "alice"
+		},
+		{
+			"key": "shoppingCart",
+			"value": ""
+		},
+		{
+			"key": "cart",
+			"value": ""
+		},
+		{
+			"key": "base-port",
+			"value": "8080",
+			"type": "string"
+		},
+		{
+			"key": "order",
+			"value": ""
+		},
+		{
+			"key": "delivery",
+			"value": ""
+		},
+		{
+			"key": "totalPrice",
+			"value": ""
+		},
+		{
+			"key": "productPrice",
+			"value": ""
+		},
+		{
+			"key": "deliveryPrice",
+			"value": ""
+		},
+		{
+			"key": "orderId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "deliveryWeight",
+			"value": ""
+		},
+		{
+			"key": "deliveryVolume",
+			"value": ""
+		},
+		{
+			"key": "deliveryFragile",
+			"value": ""
+		}
+	]
+}

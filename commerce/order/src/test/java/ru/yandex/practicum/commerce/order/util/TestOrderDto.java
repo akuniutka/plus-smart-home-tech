@@ -106,6 +106,12 @@ public final class TestOrderDto {
         return dto;
     }
 
+    public static OrderDto returned() {
+        final OrderDto dto = paid();
+        dto.setState(OrderState.PRODUCT_RETURNED);
+        return dto;
+    }
+
     public static OrderDto completed() {
         final OrderDto dto = delivered();
         dto.setState(OrderState.COMPLETED);
