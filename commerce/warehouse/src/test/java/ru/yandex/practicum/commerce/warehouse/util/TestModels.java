@@ -195,6 +195,13 @@ public final class TestModels {
         return request;
     }
 
+    public static Map<UUID, Long> getTestReturnedProducts() {
+        return Map.of(
+                PRODUCT_ID_A, SHOPPING_CART_PRODUCT_QUANTITY_A,
+                PRODUCT_ID_B, SHOPPING_CART_PRODUCT_QUANTITY_B
+        );
+    }
+
     private static AddressDto getTestAddress(final String addressFiller) {
         final AddressDto address = new AddressDto();
         address.setCountry(addressFiller);

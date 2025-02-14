@@ -7,6 +7,9 @@ import ru.yandex.practicum.commerce.dto.warehouse.AssemblyProductsForOrderReques
 import ru.yandex.practicum.commerce.warehouse.model.DeliveryParams;
 import ru.yandex.practicum.commerce.warehouse.model.Product;
 
+import java.util.Map;
+import java.util.UUID;
+
 public interface ProductService {
 
     void addNewProduct(Product product);
@@ -18,4 +21,6 @@ public interface ProductService {
     DeliveryParams bookProducts(AssemblyProductsForOrderRequest request);
 
     void shippedToDelivery(ShippedToDeliveryRequest request);
+
+    void returnProducts(Map<UUID, Long> products);
 }

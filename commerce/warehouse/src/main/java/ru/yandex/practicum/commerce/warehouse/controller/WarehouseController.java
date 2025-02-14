@@ -23,6 +23,9 @@ import ru.yandex.practicum.commerce.warehouse.model.Product;
 import ru.yandex.practicum.commerce.warehouse.service.AddressService;
 import ru.yandex.practicum.commerce.warehouse.service.ProductService;
 
+import java.util.Map;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/warehouse")
 @RequiredArgsConstructor
@@ -83,6 +86,14 @@ public class WarehouseController {
         productService.shippedToDelivery(request);
         log.info("Responded with 200 OK to mark order as picked by delivery service: orderId = {}, deliveryId = {}",
                 request.getOrderId(), request.getDeliveryId());
+    }
+
+    @PostMapping("/return")
+    public void returnProducts(@RequestBody final Map<UUID, Long> products) {
+        log.info("Received request to return products to warehouse");
+        log.debug("Returned products = {}", products);
+        productService.returnProducts(products);
+        log.info("Responded with 200 OK to return products to warehouse");
     }
 
     @GetMapping("/address")

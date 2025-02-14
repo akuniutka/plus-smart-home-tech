@@ -47,6 +47,7 @@ import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestBook
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestDeliveryParams;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestNewProductDto;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestProductA;
+import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestReturnedProducts;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShippedToDeliveryRequest;
 import static ru.yandex.practicum.commerce.warehouse.util.TestModels.getTestShoppingCart;
 import static ru.yandex.practicum.commerce.warehouse.util.TestUtils.loadJson;
@@ -161,12 +162,11 @@ class WarehouseControllerIT {
     }
 
     @Test
-    void whenPostAtShippedEndpoint_ThenInvokeShippedToDeliveryMethodAndResponseWith200OK() throws Exception {
+    void whenPostAtShippedEndpoint_ThenInvokeShippedToDeliveryMethodAndRespondWith200OK() throws Exception {
         final String requestBody = loadJson("shipped_to_delivery_request.json", getClass());
         doNothing().when(mockProductService).shippedToDelivery(any());
 
         mvc.perform(post(BASE_PATH + "/shipped")
-                        .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -174,6 +174,21 @@ class WarehouseControllerIT {
                 .andExpect(status().isOk());
 
         verify(mockProductService).shippedToDelivery(getTestShippedToDeliveryRequest());
+    }
+
+    @Test
+    void whenPostAtReturnEndpoint_ThenInvokeReturnProductsMethodAndRespondWith200OK() throws Exception {
+        final String requestBody = loadJson("return_products_request.json", getClass());
+        doNothing().when(mockProductService).returnProducts(any());
+
+        mvc.perform(post(BASE_PATH + "/return")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(mockProductService).returnProducts(getTestReturnedProducts());
     }
 
     @Test

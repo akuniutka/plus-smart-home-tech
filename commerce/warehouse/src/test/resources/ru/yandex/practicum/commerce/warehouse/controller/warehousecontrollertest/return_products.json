@@ -1,0 +1,10 @@
+[
+  {
+    "level": "INFO",
+    "message": "Received request to return products to warehouse"
+  },
+  {
+    "level": "INFO",
+    "message": "Responded with 200 OK to return products to warehouse"
+  }
+]
