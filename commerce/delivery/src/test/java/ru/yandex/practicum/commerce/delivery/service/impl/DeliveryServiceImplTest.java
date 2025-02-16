@@ -11,8 +11,8 @@ import org.mockito.Mockito;
 import ru.yandex.practicum.commerce.delivery.model.Delivery;
 import ru.yandex.practicum.commerce.delivery.repository.DeliveryRepository;
 import ru.yandex.practicum.commerce.delivery.service.DeliveryService;
-import ru.yandex.practicum.commerce.delivery.service.OrderService;
-import ru.yandex.practicum.commerce.delivery.service.WarehouseService;
+import ru.yandex.practicum.commerce.delivery.client.OrderClient;
+import ru.yandex.practicum.commerce.delivery.client.WarehouseClient;
 import ru.yandex.practicum.commerce.delivery.util.LogListener;
 import ru.yandex.practicum.commerce.delivery.util.UUIDGenerator;
 import ru.yandex.practicum.commerce.dto.order.OrderDto;
@@ -51,8 +51,8 @@ import static ru.yandex.practicum.commerce.delivery.util.TestUtils.assertLogs;
 class DeliveryServiceImplTest {
 
     private static final LogListener logListener = new LogListener(DeliveryServiceImpl.class);
-    private OrderService mockOrderService;
-    private WarehouseService mockWarehouseService;
+    private OrderClient mockOrderClient;
+    private WarehouseClient mockWarehouseClient;
     private DeliveryRepository mockRepository;
     private UUIDGenerator mockUUIDGenerator;
     private InOrder inOrder;
@@ -83,20 +83,20 @@ class DeliveryServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        mockOrderService = Mockito.mock(OrderService.class);
-        mockWarehouseService = Mockito.mock(WarehouseService.class);
+        mockOrderClient = Mockito.mock(OrderClient.class);
+        mockWarehouseClient = Mockito.mock(WarehouseClient.class);
         mockRepository = Mockito.mock(DeliveryRepository.class);
         mockUUIDGenerator = Mockito.mock(UUIDGenerator.class);
-        inOrder = Mockito.inOrder(mockOrderService, mockWarehouseService, mockRepository, mockUUIDGenerator);
+        inOrder = Mockito.inOrder(mockOrderClient, mockWarehouseClient, mockRepository, mockUUIDGenerator);
         logListener.startListen();
         logListener.reset();
-        service = new DeliveryServiceImpl(mockOrderService, mockWarehouseService, mockRepository, mockUUIDGenerator);
+        service = new DeliveryServiceImpl(mockOrderClient, mockWarehouseClient, mockRepository, mockUUIDGenerator);
     }
 
     @AfterEach
     void tearDown() {
         logListener.stopListen();
-        Mockito.verifyNoMoreInteractions(mockOrderService, mockWarehouseService, mockRepository, mockUUIDGenerator);
+        Mockito.verifyNoMoreInteractions(mockOrderClient, mockWarehouseClient, mockRepository, mockUUIDGenerator);
     }
 
     @Test
@@ -142,15 +142,15 @@ class DeliveryServiceImplTest {
             throws Exception {
         when(mockRepository.findByOrderId(any())).thenReturn(Optional.of(getTestDelivery()));
         when(mockRepository.save(any())).thenReturn(getTestDeliveryPicked());
-        doNothing().when(mockWarehouseService).shippedToDelivery(any());
-        when(mockOrderService.assembled(any())).thenReturn(getTestOrderDtoAssembled());
+        doNothing().when(mockWarehouseClient).shippedToDelivery(any());
+        when(mockOrderClient.confirmAssembly(any())).thenReturn(getTestOrderDtoAssembled());
 
         service.pickDelivery(ORDER_ID_A);
 
         inOrder.verify(mockRepository).findByOrderId(ORDER_ID_A);
         inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestDeliveryPicked())));
-        inOrder.verify(mockWarehouseService).shippedToDelivery(getTestShippedToDeliveryRequest());
-        inOrder.verify(mockOrderService).assembled(ORDER_ID_A);
+        inOrder.verify(mockWarehouseClient).shippedToDelivery(getTestShippedToDeliveryRequest());
+        inOrder.verify(mockOrderClient).confirmAssembly(ORDER_ID_A);
         assertLogs(logListener.getEvents(), "pick_delivery.json", getClass());
     }
 
@@ -170,13 +170,13 @@ class DeliveryServiceImplTest {
             Exception {
         when(mockRepository.findByOrderId(any())).thenReturn(Optional.of(getTestDeliveryPicked()));
         when(mockRepository.save(any())).thenReturn(getTestDeliveryConfirmed());
-        when(mockOrderService.delivery(any())).thenReturn(getTestOrderDtoDelivered());
+        when(mockOrderClient.confirmDelivery(any())).thenReturn(getTestOrderDtoDelivered());
 
         service.confirmDelivery(ORDER_ID_A);
 
         inOrder.verify(mockRepository).findByOrderId(ORDER_ID_A);
         inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestDeliveryConfirmed())));
-        inOrder.verify(mockOrderService).delivery(ORDER_ID_A);
+        inOrder.verify(mockOrderClient).confirmDelivery(ORDER_ID_A);
         assertLogs(logListener.getEvents(), "confirm_delivery.json", getClass());
     }
 
@@ -196,13 +196,13 @@ class DeliveryServiceImplTest {
             throws Exception {
         when(mockRepository.findByOrderId(any())).thenReturn(Optional.of(getTestDeliveryPicked()));
         when(mockRepository.save(any())).thenReturn(getTestDeliveryFailed());
-        when(mockOrderService.deliveryFailed(any())).thenReturn(getTestOrderDtoNotDelivered());
+        when(mockOrderClient.setDeliveryFailed(any())).thenReturn(getTestOrderDtoNotDelivered());
 
         service.signalDeliveryFailure(ORDER_ID_A);
 
         inOrder.verify(mockRepository).findByOrderId(ORDER_ID_A);
         inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestDeliveryFailed())));
-        inOrder.verify(mockOrderService).deliveryFailed(ORDER_ID_A);
+        inOrder.verify(mockOrderClient).setDeliveryFailed(ORDER_ID_A);
         assertLogs(logListener.getEvents(), "signal_delivery_failure.json", getClass());
     }
 

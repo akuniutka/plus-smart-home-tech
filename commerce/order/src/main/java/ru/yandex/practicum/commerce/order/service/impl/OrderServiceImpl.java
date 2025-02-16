@@ -17,10 +17,10 @@ import ru.yandex.practicum.commerce.order.mapper.OrderMapper;
 import ru.yandex.practicum.commerce.order.model.Address;
 import ru.yandex.practicum.commerce.order.model.Order;
 import ru.yandex.practicum.commerce.order.repository.OrderRepository;
-import ru.yandex.practicum.commerce.order.service.DeliveryService;
+import ru.yandex.practicum.commerce.order.client.DeliveryClient;
 import ru.yandex.practicum.commerce.order.service.OrderService;
-import ru.yandex.practicum.commerce.order.service.PaymentService;
-import ru.yandex.practicum.commerce.order.service.WarehouseService;
+import ru.yandex.practicum.commerce.order.client.PaymentClient;
+import ru.yandex.practicum.commerce.order.client.WarehouseClient;
 import ru.yandex.practicum.commerce.order.util.UUIDGenerator;
 
 import java.math.BigDecimal;
@@ -32,9 +32,9 @@ import java.util.UUID;
 @Slf4j
 public class OrderServiceImpl implements OrderService {
 
-    private final WarehouseService warehouseService;
-    private final PaymentService paymentService;
-    private final DeliveryService deliveryService;
+    private final WarehouseClient warehouseService;
+    private final PaymentClient paymentClient;
+    private final DeliveryClient deliveryClient;
     private final OrderRepository repository;
     private final OrderMapper orderMapper;
     private final UUIDGenerator uuidGenerator;
@@ -74,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
     public Order calculateProductCost(final UUID orderId) {
         Order order = getOrderById(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
-        final BigDecimal productPrice = paymentService.calculateProductCost(dto);
+        final BigDecimal productPrice = paymentClient.calculateProductCost(dto);
         order.setProductPrice(productPrice);
         order = repository.save(order);
         log.info("Calculated product price for order: orderId = {}, productPrice = {}", order.getOrderId(),
@@ -87,7 +87,7 @@ public class OrderServiceImpl implements OrderService {
     public Order calculateDeliveryCost(final UUID orderId) {
         Order order = getOrderById(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
-        final BigDecimal deliveryPrice = deliveryService.calculateDeliveryCost(dto);
+        final BigDecimal deliveryPrice = deliveryClient.calculateDeliveryCost(dto);
         order.setDeliveryPrice(deliveryPrice);
         order = repository.save(order);
         log.info("Calculated delivery price for order: orderId = {}, deliveryPrice = {}", order.getOrderId(),
@@ -100,7 +100,7 @@ public class OrderServiceImpl implements OrderService {
     public Order calculateTotalCost(final UUID orderId) {
         Order order = getOrderById(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
-        final BigDecimal totalPrice = paymentService.calculateTotalCost(dto);
+        final BigDecimal totalPrice = paymentClient.calculateTotalCost(dto);
         order.setTotalPrice(totalPrice);
         order = repository.save(order);
         log.info("Calculated total price for order: orderId = {}, totalPrice = {}", order.getOrderId(),

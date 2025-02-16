@@ -12,9 +12,9 @@ import ru.yandex.practicum.commerce.exception.ProductNotFoundException;
 import ru.yandex.practicum.commerce.payment.model.Payment;
 import ru.yandex.practicum.commerce.payment.model.PaymentState;
 import ru.yandex.practicum.commerce.payment.repository.PaymentRepository;
-import ru.yandex.practicum.commerce.payment.service.OrderService;
+import ru.yandex.practicum.commerce.payment.client.OrderClient;
 import ru.yandex.practicum.commerce.payment.service.PaymentService;
-import ru.yandex.practicum.commerce.payment.service.ProductService;
+import ru.yandex.practicum.commerce.payment.client.ShoppingStoreClient;
 import ru.yandex.practicum.commerce.payment.util.UUIDGenerator;
 
 import java.math.BigDecimal;
@@ -30,8 +30,8 @@ public class PaymentServiceImpl implements PaymentService {
     private static final int COST_SCALE = 2;
     private static final BigDecimal TAX_RATE = BigDecimal.valueOf(10L, COST_SCALE);
 
-    private final ProductService productService;
-    private final OrderService orderService;
+    private final ShoppingStoreClient shoppingStoreClient;
+    private final OrderClient orderClient;
     private final PaymentRepository repository;
     private final UUIDGenerator uuidGenerator;
 
@@ -69,7 +69,7 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = getPaymentByOrderId(orderId);
         payment.setState(PaymentState.SUCCESS);
         payment = repository.save(payment);
-        orderService.paymentSuccess(orderId);
+        orderClient.confirmPayment(orderId);
         log.info("Received payment: orderId = {}, paymentId = {}", orderId, payment.getPaymentId());
         log.debug("Successful payment = {}", payment);
     }
@@ -79,7 +79,7 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = getPaymentByOrderId(orderId);
         payment.setState(PaymentState.FAILED);
         payment = repository.save(payment);
-        orderService.paymentFailed(orderId);
+        orderClient.setPaymentFailed(orderId);
         log.info("Failed to receive payment: orderId = {}, paymentId = {}", orderId, payment.getPaymentId());
         log.debug("Failed payment = {}", payment);
     }
@@ -118,7 +118,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private ProductDto getProductById(final UUID productId) {
         try {
-            return productService.getProduct(productId);
+            return shoppingStoreClient.getProductById(productId);
         } catch (ProductNotFoundException e) {
             throw new NotEnoughInfoInOrderToCalculateException("Price not found for product " + productId);
         }

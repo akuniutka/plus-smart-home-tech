@@ -1,21 +1,17 @@
 package ru.yandex.practicum.commerce.warehouse.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.commerce.client.WarehouseOperations;
+import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
+import ru.yandex.practicum.commerce.dto.delivery.AddressDto;
 import ru.yandex.practicum.commerce.dto.delivery.ShippedToDeliveryRequest;
 import ru.yandex.practicum.commerce.dto.warehouse.AddProductToWarehouseRequest;
-import ru.yandex.practicum.commerce.dto.delivery.AddressDto;
 import ru.yandex.practicum.commerce.dto.warehouse.AssemblyProductsForOrderRequest;
 import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
 import ru.yandex.practicum.commerce.dto.warehouse.NewProductInWarehouseRequest;
-import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 import ru.yandex.practicum.commerce.warehouse.mapper.BookingMapper;
 import ru.yandex.practicum.commerce.warehouse.mapper.ProductMapper;
 import ru.yandex.practicum.commerce.warehouse.model.DeliveryParams;
@@ -30,15 +26,15 @@ import java.util.UUID;
 @RequestMapping("/api/v1/warehouse")
 @RequiredArgsConstructor
 @Slf4j
-public class WarehouseController {
+public class WarehouseController implements WarehouseOperations {
 
     private final ProductService productService;
     private final AddressService addressService;
     private final ProductMapper productMapper;
     private final BookingMapper bookingMapper;
 
-    @PutMapping
-    public void addNewProduct(@RequestBody @Valid final NewProductInWarehouseRequest request) {
+    @Override
+    public void addNewProduct(final NewProductInWarehouseRequest request) {
         log.info("Received request to add new product: productId = {}", request.getProductId());
         log.debug("Add new product request = {}", request);
         final Product product = productMapper.mapToEntity(request);
@@ -46,8 +42,8 @@ public class WarehouseController {
         log.info("Responded with 200 OK to add new product request: productId = {}", request.getProductId());
     }
 
-    @PostMapping("/add")
-    public void increaseProductQuantity(@RequestBody @Valid final AddProductToWarehouseRequest request) {
+    @Override
+    public void increaseProductQuantity(final AddProductToWarehouseRequest request) {
         log.info("Received request to increase product quantity: productId = {}, quantity to add = {}",
                 request.getProductId(), request.getQuantity());
         productService.increaseProductQuantity(request);
@@ -55,8 +51,8 @@ public class WarehouseController {
                 request.getProductId(), request.getQuantity());
     }
 
-    @PostMapping("/check")
-    public BookedProductsDto checkProductsAvailability(@RequestBody @Valid final ShoppingCartDto shoppingCart) {
+    @Override
+    public BookedProductsDto checkProductsAvailability(final ShoppingCartDto shoppingCart) {
         log.info("Received request to check products availability for shopping cart: shoppingCartId = {}",
                 shoppingCart.getShoppingCartId());
         log.debug("Shopping cart = {}", shoppingCart);
@@ -68,8 +64,8 @@ public class WarehouseController {
         return dto;
     }
 
-    @PostMapping("/assembly")
-    public BookedProductsDto bookProducts(@RequestBody @Valid final AssemblyProductsForOrderRequest request) {
+    @Override
+    public BookedProductsDto bookProducts(final AssemblyProductsForOrderRequest request) {
         log.info("Received request to book products for order: orderId = {}", request.getOrderId());
         log.debug("Booking request = {}", request);
         final DeliveryParams deliveryParams = productService.bookProducts(request);
@@ -79,8 +75,8 @@ public class WarehouseController {
         return dto;
     }
 
-    @PostMapping("/shipped")
-    public void shippedToDelivery(@RequestBody @Valid final ShippedToDeliveryRequest request) {
+    @Override
+    public void shippedToDelivery(final ShippedToDeliveryRequest request) {
         log.info("Received request to mark order as picked by delivery service: orderId = {}, deliveryId = {}",
                 request.getOrderId(), request.getDeliveryId());
         productService.shippedToDelivery(request);
@@ -88,15 +84,15 @@ public class WarehouseController {
                 request.getOrderId(), request.getDeliveryId());
     }
 
-    @PostMapping("/return")
-    public void returnProducts(@RequestBody final Map<UUID, Long> products) {
+    @Override
+    public void returnProducts(final Map<UUID, Long> products) {
         log.info("Received request to return products to warehouse");
         log.debug("Returned products = {}", products);
         productService.returnProducts(products);
         log.info("Responded with 200 OK to return products to warehouse");
     }
 
-    @GetMapping("/address")
+    @Override
     public AddressDto getWarehouseAddress() {
         log.info("Received request for warehouse address");
         final AddressDto address = addressService.getAddress();

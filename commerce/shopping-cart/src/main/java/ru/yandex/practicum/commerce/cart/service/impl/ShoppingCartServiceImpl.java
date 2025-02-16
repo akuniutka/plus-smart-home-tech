@@ -8,7 +8,7 @@ import ru.yandex.practicum.commerce.cart.model.ShoppingCart;
 import ru.yandex.practicum.commerce.cart.model.ShoppingCartState;
 import ru.yandex.practicum.commerce.cart.repository.ShoppingCartRepository;
 import ru.yandex.practicum.commerce.cart.service.ShoppingCartService;
-import ru.yandex.practicum.commerce.cart.service.WarehouseService;
+import ru.yandex.practicum.commerce.cart.client.WarehouseClient;
 import ru.yandex.practicum.commerce.cart.util.UUIDGenerator;
 import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ShoppingCartServiceImpl implements ShoppingCartService {
 
-    private final WarehouseService warehouseService;
+    private final WarehouseClient warehouseClient;
     private final ShoppingCartMapper shoppingCartMapper;
     private final ShoppingCartRepository repository;
     private final UUIDGenerator uuidGenerator;
@@ -107,7 +107,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         requireShoppingCartNotDeactivated(shoppingCart);
         final ShoppingCartDto shoppingCartDto = shoppingCartMapper.mapToDto(shoppingCart);
 
-        final BookedProductsDto bookedProductsDto = warehouseService.checkProductsAvailability(shoppingCartDto);
+        final BookedProductsDto bookedProductsDto = warehouseClient.checkProductsAvailability(shoppingCartDto);
         log.info("Booked products in warehouse: shoppingCartId = {}, deliveryVolume = {}, deliveryWeight = {}, "
                         + "fragile = {}", shoppingCart.getShoppingCartId(), bookedProductsDto.getDeliveryVolume(),
                 bookedProductsDto.getDeliveryWeight(), bookedProductsDto.getFragile());
