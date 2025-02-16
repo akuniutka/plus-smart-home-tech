@@ -13,10 +13,10 @@ import ru.yandex.practicum.commerce.exception.ProductInShoppingCartNotInWarehous
 import ru.yandex.practicum.commerce.order.mapper.OrderMapper;
 import ru.yandex.practicum.commerce.order.model.Order;
 import ru.yandex.practicum.commerce.order.repository.OrderRepository;
-import ru.yandex.practicum.commerce.order.service.DeliveryService;
+import ru.yandex.practicum.commerce.order.client.DeliveryClient;
 import ru.yandex.practicum.commerce.order.service.OrderService;
-import ru.yandex.practicum.commerce.order.service.PaymentService;
-import ru.yandex.practicum.commerce.order.service.WarehouseService;
+import ru.yandex.practicum.commerce.order.client.PaymentClient;
+import ru.yandex.practicum.commerce.order.client.WarehouseClient;
 import ru.yandex.practicum.commerce.order.util.LogListener;
 import ru.yandex.practicum.commerce.order.util.TestAddress;
 import ru.yandex.practicum.commerce.order.util.TestBookedProductsDto;
@@ -52,9 +52,9 @@ class OrderServiceImplTest {
 
     private static final LogListener logListener = new LogListener(OrderServiceImpl.class);
     private static final String WRONG_USERNAME = "";
-    private WarehouseService mockWarehouseService;
-    private PaymentService mockPaymentService;
-    private DeliveryService mockDeliveryService;
+    private WarehouseClient mockWarehouseClient;
+    private PaymentClient mockPaymentClient;
+    private DeliveryClient mockDeliveryClient;
     private OrderRepository mockRepository;
     private OrderMapper mockOrderMapper;
     private UUIDGenerator mockUUIDGenerator;
@@ -64,24 +64,24 @@ class OrderServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        mockWarehouseService = Mockito.mock(WarehouseService.class);
-        mockPaymentService = Mockito.mock(PaymentService.class);
-        mockDeliveryService = Mockito.mock(DeliveryService.class);
+        mockWarehouseClient = Mockito.mock(WarehouseClient.class);
+        mockPaymentClient = Mockito.mock(PaymentClient.class);
+        mockDeliveryClient = Mockito.mock(DeliveryClient.class);
         mockRepository = Mockito.mock(OrderRepository.class);
         mockOrderMapper = Mockito.mock(OrderMapper.class);
         mockUUIDGenerator = Mockito.mock(UUIDGenerator.class);
-        inOrder = Mockito.inOrder(mockWarehouseService, mockPaymentService, mockDeliveryService, mockRepository,
+        inOrder = Mockito.inOrder(mockWarehouseClient, mockPaymentClient, mockDeliveryClient, mockRepository,
                 mockOrderMapper, mockUUIDGenerator);
         logListener.startListen();
         logListener.reset();
-        service = new OrderServiceImpl(mockWarehouseService, mockPaymentService, mockDeliveryService, mockRepository,
+        service = new OrderServiceImpl(mockWarehouseClient, mockPaymentClient, mockDeliveryClient, mockRepository,
                 mockOrderMapper, mockUUIDGenerator);
     }
 
     @AfterEach
     void tearDown() {
         logListener.stopListen();
-        Mockito.verifyNoMoreInteractions(mockWarehouseService, mockPaymentService, mockDeliveryService, mockRepository,
+        Mockito.verifyNoMoreInteractions(mockWarehouseClient, mockPaymentClient, mockDeliveryClient, mockRepository,
                 mockOrderMapper, mockUUIDGenerator);
     }
 
@@ -96,37 +96,37 @@ class OrderServiceImplTest {
 
     @Test
     void whenAddNewOrderAndProductNotInWarehouse_ThenThrowException() {
-        when(mockWarehouseService.checkProductsAvailability(any()))
+        when(mockWarehouseClient.checkProductsAvailability(any()))
                 .thenThrow(new ProductInShoppingCartNotInWarehouse(TEST_EXCEPTION_MESSAGE));
 
         final NoSpecifiedProductInWarehouseException e = assertThrows(NoSpecifiedProductInWarehouseException.class,
                 () -> service.addNewOrder(USERNAME, TestShoppingCartDto.create(), TestAddress.create()));
 
-        verify(mockWarehouseService).checkProductsAvailability(TestShoppingCartDto.create());
+        verify(mockWarehouseClient).checkProductsAvailability(TestShoppingCartDto.create());
         assertThat(e.getUserMessage(), equalTo(TEST_EXCEPTION_MESSAGE));
     }
 
     @Test
     void whenAddNewOrderAndProductLowInWarehouse_ThenThrowException() {
-        when(mockWarehouseService.checkProductsAvailability(any()))
+        when(mockWarehouseClient.checkProductsAvailability(any()))
                 .thenThrow(new ProductInShoppingCartLowQuantityInWarehouse(TEST_EXCEPTION_MESSAGE));
 
         final NoSpecifiedProductInWarehouseException e = assertThrows(NoSpecifiedProductInWarehouseException.class,
                 () -> service.addNewOrder(USERNAME, TestShoppingCartDto.create(), TestAddress.create()));
 
-        verify(mockWarehouseService).checkProductsAvailability(TestShoppingCartDto.create());
+        verify(mockWarehouseClient).checkProductsAvailability(TestShoppingCartDto.create());
         assertThat(e.getUserMessage(), equalTo(TEST_EXCEPTION_MESSAGE));
     }
 
     @Test
     void whenAddNewOrderAndCorrectUsername_ThenCreateOrderAndSaveItToRepositoryAndReturnItAndLog() throws Exception {
-        when(mockWarehouseService.checkProductsAvailability(any())).thenReturn(TestBookedProductsDto.create());
+        when(mockWarehouseClient.checkProductsAvailability(any())).thenReturn(TestBookedProductsDto.create());
         when(mockUUIDGenerator.getNewUUID()).thenReturn(ORDER_ID);
         when(mockRepository.save(any())).thenReturn(TestOrder.create());
 
         final Order order = service.addNewOrder(USERNAME, TestShoppingCartDto.create(), TestAddress.create());
 
-        inOrder.verify(mockWarehouseService).checkProductsAvailability(TestShoppingCartDto.create());
+        inOrder.verify(mockWarehouseClient).checkProductsAvailability(TestShoppingCartDto.create());
         inOrder.verify(mockUUIDGenerator).getNewUUID();
         inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.create())));
         assertThat(order, samePropertyValuesAs(TestOrder.create()));
@@ -187,21 +187,21 @@ class OrderServiceImplTest {
     }
 
     @Test
-    void whenCalculateProductCostAnOrderExist_ThenMapOrderToDtoAndPassToPaymentServiceAndUpdateOrderAndReturnItAndLog()
+    void whenCalculateProductCostAnOrderExist_ThenMapOrderToDtoAndPassToPaymentClientAndUpdateOrderAndReturnItAndLog()
             throws Exception {
         when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.withDeliveryParams()));
         when(mockOrderMapper.mapToDto(any(Order.class))).thenAnswer(invocation -> {
             assertThat(invocation.getArgument(0), samePropertyValuesAs(TestOrder.withDeliveryParams()));
             return TestOrderDto.withDeliveryParams();
         });
-        when(mockPaymentService.calculateProductCost(any())).thenReturn(PRODUCT_PRICE);
+        when(mockPaymentClient.calculateProductCost(any())).thenReturn(PRODUCT_PRICE);
         when(mockRepository.save(any())).thenReturn(TestOrder.withProductPrice());
 
         final Order order = service.calculateProductCost(ORDER_ID);
 
         inOrder.verify(mockRepository).findById(ORDER_ID);
         inOrder.verify(mockOrderMapper).mapToDto(any(Order.class));
-        inOrder.verify(mockPaymentService).calculateProductCost(TestOrderDto.withDeliveryParams());
+        inOrder.verify(mockPaymentClient).calculateProductCost(TestOrderDto.withDeliveryParams());
         inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.withProductPrice())));
         assertThat(order, samePropertyValuesAs(TestOrder.withProductPrice()));
         assertLogs(logListener.getEvents(), "calculate_product_cost.json", getClass());
@@ -219,21 +219,21 @@ class OrderServiceImplTest {
     }
 
     @Test
-    void whenCalculateDeliveryCostAndOrderExist_ThenMapOrderToDtoAndPassToDeliveryServiceAndUpdateOrderAndReturnAndLog()
+    void whenCalculateDeliveryCostAndOrderExist_ThenMapOrderToDtoAndPassToDeliveryClientAndUpdateOrderAndReturnAndLog()
             throws Exception {
         when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.withProductPrice()));
         when(mockOrderMapper.mapToDto(any(Order.class))).thenAnswer(invocation -> {
             assertThat(invocation.getArgument(0), samePropertyValuesAs(TestOrder.withProductPrice()));
             return TestOrderDto.withProductPrice();
         });
-        when(mockDeliveryService.calculateDeliveryCost(any())).thenReturn(DELIVERY_PRICE);
+        when(mockDeliveryClient.calculateDeliveryCost(any())).thenReturn(DELIVERY_PRICE);
         when(mockRepository.save(any())).thenReturn(TestOrder.withDeliveryPrice());
 
         final Order order = service.calculateDeliveryCost(ORDER_ID);
 
         inOrder.verify(mockRepository).findById(ORDER_ID);
         inOrder.verify(mockOrderMapper).mapToDto(any(Order.class));
-        inOrder.verify(mockDeliveryService).calculateDeliveryCost(TestOrderDto.withProductPrice());
+        inOrder.verify(mockDeliveryClient).calculateDeliveryCost(TestOrderDto.withProductPrice());
         inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.withDeliveryPrice())));
         assertThat(order, samePropertyValuesAs(TestOrder.withDeliveryPrice()));
         assertLogs(logListener.getEvents(), "calculate_delivery_cost.json", getClass());
@@ -251,21 +251,21 @@ class OrderServiceImplTest {
     }
 
     @Test
-    void whenCalculateTotalCostAndOrderExist_ThenMapOrderToDtoAndPassToPaymentServiceAndUpdateOrderAndReturnItAndLog()
+    void whenCalculateTotalCostAndOrderExist_ThenMapOrderToDtoAndPassToPaymentClientAndUpdateOrderAndReturnItAndLog()
             throws Exception {
         when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.withDeliveryPrice()));
         when(mockOrderMapper.mapToDto(any(Order.class))).thenAnswer(invocation -> {
             assertThat(invocation.getArgument(0), samePropertyValuesAs(TestOrder.withDeliveryPrice()));
             return TestOrderDto.withDeliveryPrice();
         });
-        when(mockPaymentService.calculateTotalCost(any())).thenReturn(TOTAL_PRICE);
+        when(mockPaymentClient.calculateTotalCost(any())).thenReturn(TOTAL_PRICE);
         when(mockRepository.save(any())).thenReturn(TestOrder.withTotalPrice());
 
         final Order order = service.calculateTotalCost(ORDER_ID);
 
         inOrder.verify(mockRepository).findById(ORDER_ID);
         inOrder.verify(mockOrderMapper).mapToDto(any(Order.class));
-        inOrder.verify(mockPaymentService).calculateTotalCost(TestOrderDto.withDeliveryPrice());
+        inOrder.verify(mockPaymentClient).calculateTotalCost(TestOrderDto.withDeliveryPrice());
         inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.withTotalPrice())));
         assertThat(order, samePropertyValuesAs(TestOrder.withTotalPrice()));
         assertLogs(logListener.getEvents(), "calculate_total_cost.json", getClass());
@@ -427,16 +427,16 @@ class OrderServiceImplTest {
     }
 
     @Test
-    void whenReturnProductsAndOrderExist_ThenPassProductsToWarehouseServiceAndUpdateOrderAndReturnItAndLog()
+    void whenReturnProductsAndOrderExist_ThenPassProductsToWarehouseClientAndUpdateOrderAndReturnItAndLog()
             throws Exception {
         when(mockRepository.findById(any())).thenReturn(Optional.of(TestOrder.paid()));
-        doNothing().when(mockWarehouseService).returnProducts(any());
+        doNothing().when(mockWarehouseClient).returnProducts(any());
         when(mockRepository.save(any())).thenReturn(TestOrder.returned());
 
         final Order order = service.returnProducts(TestProductReturnRequest.create());
 
         inOrder.verify(mockRepository).findById(ORDER_ID);
-        inOrder.verify(mockWarehouseService).returnProducts(TestShoppingCartDto.PRODUCTS);
+        inOrder.verify(mockWarehouseClient).returnProducts(TestShoppingCartDto.PRODUCTS);
         inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(TestOrder.returned())));
         assertThat(order, samePropertyValuesAs(TestOrder.returned()));
         assertLogs(logListener.getEvents(), "return_products.json", getClass());

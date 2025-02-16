@@ -1,18 +1,12 @@
 package ru.yandex.practicum.commerce.order.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.commerce.client.OrderOperations;
 import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 import ru.yandex.practicum.commerce.dto.order.CreateNewOrderRequest;
 import ru.yandex.practicum.commerce.dto.order.OrderDto;
@@ -31,15 +25,14 @@ import java.util.UUID;
 @RequestMapping("/api/v1/order")
 @RequiredArgsConstructor
 @Slf4j
-public class OrderController {
+public class OrderController implements OrderOperations {
 
     private final OrderService orderService;
     private final OrderMapper orderMapper;
     private final AddressMapper addressMapper;
 
-    @PutMapping
-    public OrderDto createOrder(@RequestParam final String username,
-            @RequestBody @Valid final CreateNewOrderRequest request) {
+    @Override
+    public OrderDto createOrder(final String username, final CreateNewOrderRequest request) {
         log.info("Received request to create order: username = {}, shoppingCartId = {}", username,
                 request.getShoppingCart().getShoppingCartId());
         log.debug("Create new order request = {}", request);
@@ -53,8 +46,8 @@ public class OrderController {
         return dto;
     }
 
-    @GetMapping("/{orderId}")
-    public OrderDto getOrderById(@PathVariable final UUID orderId) {
+    @Override
+    public OrderDto getOrderById(final UUID orderId) {
         log.info("Received request for order: orderId = {}", orderId);
         final Order order = orderService.getOrderById(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
@@ -63,8 +56,8 @@ public class OrderController {
         return dto;
     }
 
-    @GetMapping
-    public List<OrderDto> getOrdersByUsername(@RequestParam final String username, final Pageable pageable) {
+    @Override
+    public List<OrderDto> getOrdersByUsername(final String username, final Pageable pageable) {
         log.info("Received request to get user's orders: username = {}", username);
         log.debug("Requested page = {}, page size = {}, sort by {}", pageable.getPage(), pageable.getSize(),
                 pageable.getSort());
@@ -76,8 +69,8 @@ public class OrderController {
         return dtos;
     }
 
-    @PostMapping("/calculate/product")
-    public OrderDto calculateProductCost(@RequestBody final UUID orderId) {
+    @Override
+    public OrderDto calculateProductCost(final UUID orderId) {
         log.info("Received request to calculate order product cost: orderId = {}", orderId);
         final Order order = orderService.calculateProductCost(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
@@ -86,8 +79,8 @@ public class OrderController {
         return dto;
     }
 
-    @PostMapping("/calculate/delivery")
-    public OrderDto calculateDeliveryCost(@RequestBody final UUID orderId) {
+    @Override
+    public OrderDto calculateDeliveryCost(final UUID orderId) {
         log.info("Received request to calculate order delivery cost: orderId = {}", orderId);
         final Order order = orderService.calculateDeliveryCost(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
@@ -96,8 +89,8 @@ public class OrderController {
         return dto;
     }
 
-    @PostMapping("/calculate/total")
-    public OrderDto calculateTotalCost(@RequestBody final UUID orderId) {
+    @Override
+    public OrderDto calculateTotalCost(final UUID orderId) {
         log.info("Received request to calculate order total cost: orderId = {}", orderId);
         final Order order = orderService.calculateTotalCost(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
@@ -106,8 +99,8 @@ public class OrderController {
         return dto;
     }
 
-    @PostMapping("/assembly")
-    public OrderDto confirmAssembly(@RequestBody final UUID orderId) {
+    @Override
+    public OrderDto confirmAssembly(final UUID orderId) {
         log.info("Received request to mark order as successfully assembled: orderId = {}", orderId);
         final Order order = orderService.confirmAssembly(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
@@ -116,8 +109,8 @@ public class OrderController {
         return dto;
     }
 
-    @PostMapping("/assembly/failed")
-    public OrderDto setAssemblyFailed(@RequestBody final UUID orderId) {
+    @Override
+    public OrderDto setAssemblyFailed(final UUID orderId) {
         log.info("Received request to save assembly failure for order: orderId = {}", orderId);
         final Order order = orderService.setAssemblyFailed(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
@@ -126,8 +119,8 @@ public class OrderController {
         return dto;
     }
 
-    @PostMapping("/payment")
-    public OrderDto confirmPayment(@RequestBody final UUID orderId) {
+    @Override
+    public OrderDto confirmPayment(final UUID orderId) {
         log.info("Received request to mark order as successfully paid: orderId = {}", orderId);
         final Order order = orderService.confirmPayment(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
@@ -136,8 +129,8 @@ public class OrderController {
         return dto;
     }
 
-    @PostMapping("/payment/failed")
-    public OrderDto setPaymentFailed(@RequestBody final UUID orderId) {
+    @Override
+    public OrderDto setPaymentFailed(final UUID orderId) {
         log.info("Received request to save payment failure for order: orderId = {}", orderId);
         final Order order = orderService.setPaymentFailed(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
@@ -146,8 +139,8 @@ public class OrderController {
         return dto;
     }
 
-    @PostMapping("/delivery")
-    public OrderDto confirmDelivery(@RequestBody final UUID orderId) {
+    @Override
+    public OrderDto confirmDelivery(final UUID orderId) {
         log.info("Received request to mark order as successfully delivered: orderId = {}", orderId);
         final Order order = orderService.confirmDelivery(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
@@ -157,8 +150,8 @@ public class OrderController {
         return dto;
     }
 
-    @PostMapping("/delivery/failed")
-    public OrderDto setDeliveryFailed(@RequestBody final UUID orderId) {
+    @Override
+    public OrderDto setDeliveryFailed(final UUID orderId) {
         log.info("Received request to save delivery failure for order: orderId = {}", orderId);
         final Order order = orderService.setDeliveryFailed(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);
@@ -167,8 +160,8 @@ public class OrderController {
         return dto;
     }
 
-    @PostMapping("/return")
-    public OrderDto returnProducts(@RequestBody @Valid final ProductReturnRequest request) {
+    @Override
+    public OrderDto returnProducts(final ProductReturnRequest request) {
         log.info("Received request to return order: orderId = {}", request.getOrderId());
         log.debug("Return request = {}", request);
         final Order order = orderService.returnProducts(request);
@@ -178,8 +171,8 @@ public class OrderController {
         return dto;
     }
 
-    @PostMapping("/completed")
-    public OrderDto completeOrder(@RequestBody final UUID orderId) {
+    @Override
+    public OrderDto completeOrder(final UUID orderId) {
         log.info("Received request to complete order: orderId = {}", orderId);
         final Order order = orderService.completeOrder(orderId);
         final OrderDto dto = orderMapper.mapToDto(order);

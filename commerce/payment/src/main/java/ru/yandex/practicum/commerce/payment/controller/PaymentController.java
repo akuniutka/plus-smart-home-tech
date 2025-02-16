@@ -1,12 +1,10 @@
 package ru.yandex.practicum.commerce.payment.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.commerce.client.PaymentOperations;
 import ru.yandex.practicum.commerce.dto.order.OrderDto;
 import ru.yandex.practicum.commerce.dto.payment.PaymentDto;
 import ru.yandex.practicum.commerce.payment.mapper.PaymentMapper;
@@ -20,13 +18,13 @@ import java.util.UUID;
 @RequestMapping("/api/v1/payment")
 @RequiredArgsConstructor
 @Slf4j
-public class PaymentController {
+public class PaymentController implements PaymentOperations {
 
     private final PaymentService paymentService;
     private final PaymentMapper paymentMapper;
 
-    @PostMapping
-    public PaymentDto createPayment(@RequestBody @Valid final OrderDto order) {
+    @Override
+    public PaymentDto createPayment(final OrderDto order) {
         log.info("Received request to create new payment: orderId = {}", order.getOrderId());
         log.debug("Order for new payment = {}", order);
         final Payment payment = paymentService.createPayment(order);
@@ -37,8 +35,8 @@ public class PaymentController {
         return dto;
     }
 
-    @PostMapping("/productCost")
-    public BigDecimal calculateProductCost(@RequestBody @Valid final OrderDto order) {
+    @Override
+    public BigDecimal calculateProductCost(final OrderDto order) {
         log.info("Received request to calculate products cost: orderId = {}", order.getOrderId());
         log.debug("Order to calculate products cost = {}", order);
         final BigDecimal productCost = paymentService.calculateProductCost(order);
@@ -46,8 +44,8 @@ public class PaymentController {
         return productCost;
     }
 
-    @PostMapping("/totalCost")
-    public BigDecimal calculateTotalCost(@RequestBody @Valid final OrderDto order) {
+    @Override
+    public BigDecimal calculateTotalCost(final OrderDto order) {
         log.info("Received request to calculate total order cost: orderId = {}", order.getOrderId());
         log.debug("Order to calculate total cost = {}", order);
         final BigDecimal totalCost = paymentService.calculateTotalCost(order);
@@ -55,15 +53,15 @@ public class PaymentController {
         return totalCost;
     }
 
-    @PostMapping("/refund")
-    void confirmPayment(@RequestBody final UUID orderId) {
+    @Override
+    public void confirmPayment(final UUID orderId) {
         log.info("Received request to set payment as successful: orderId = {}", orderId);
         paymentService.confirmPayment(orderId);
         log.info("Responded with 200 OK to set payment as successful: orderId = {}", orderId);
     }
 
-    @PostMapping("/failed")
-    public void signalPaymentFailure(@RequestBody final UUID orderId) {
+    @Override
+    public void signalPaymentFailure(final UUID orderId) {
         log.info("Received request to set payment as failed: orderId = {}", orderId);
         paymentService.signalPaymentFailure(orderId);
         log.info("Responded with 200 OK to set payment as failed: orderId = {}", orderId);

@@ -13,9 +13,9 @@ import ru.yandex.practicum.commerce.exception.OrderPaymentAlreadyExistsException
 import ru.yandex.practicum.commerce.exception.ProductNotFoundException;
 import ru.yandex.practicum.commerce.payment.model.Payment;
 import ru.yandex.practicum.commerce.payment.repository.PaymentRepository;
-import ru.yandex.practicum.commerce.payment.service.OrderService;
+import ru.yandex.practicum.commerce.payment.client.OrderClient;
 import ru.yandex.practicum.commerce.payment.service.PaymentService;
-import ru.yandex.practicum.commerce.payment.service.ProductService;
+import ru.yandex.practicum.commerce.payment.client.ShoppingStoreClient;
 import ru.yandex.practicum.commerce.payment.util.LogListener;
 import ru.yandex.practicum.commerce.payment.util.UUIDGenerator;
 
@@ -56,8 +56,8 @@ import static ru.yandex.practicum.commerce.payment.util.TestUtils.assertLogs;
 class PaymentServiceImplTest {
 
     private static final LogListener logListener = new LogListener(PaymentServiceImpl.class);
-    private ProductService mockProductService;
-    private OrderService mockOrderService;
+    private ShoppingStoreClient mockShoppingStoreClient;
+    private OrderClient mockOrderClient;
     private PaymentRepository mockRepository;
     private UUIDGenerator mockUUIDGenerator;
     private InOrder inOrder;
@@ -66,20 +66,20 @@ class PaymentServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        mockProductService = Mockito.mock(ProductService.class);
-        mockOrderService = Mockito.mock(OrderService.class);
+        mockShoppingStoreClient = Mockito.mock(ShoppingStoreClient.class);
+        mockOrderClient = Mockito.mock(OrderClient.class);
         mockRepository = Mockito.mock(PaymentRepository.class);
         mockUUIDGenerator = Mockito.mock(UUIDGenerator.class);
-        inOrder = Mockito.inOrder(mockProductService, mockOrderService, mockRepository, mockUUIDGenerator);
+        inOrder = Mockito.inOrder(mockShoppingStoreClient, mockOrderClient, mockRepository, mockUUIDGenerator);
         logListener.startListen();
         logListener.reset();
-        service = new PaymentServiceImpl(mockProductService, mockOrderService, mockRepository, mockUUIDGenerator);
+        service = new PaymentServiceImpl(mockShoppingStoreClient, mockOrderClient, mockRepository, mockUUIDGenerator);
     }
 
     @AfterEach
     void tearDown() {
         logListener.stopListen();
-        Mockito.verifyNoMoreInteractions(mockProductService, mockOrderService, mockRepository, mockUUIDGenerator);
+        Mockito.verifyNoMoreInteractions(mockShoppingStoreClient, mockOrderClient, mockRepository, mockUUIDGenerator);
     }
 
     @Test
@@ -111,7 +111,7 @@ class PaymentServiceImplTest {
     @Test
     void whenCalculateProductCostAndProductNotFound_ThenThrowException() {
         final ArgumentCaptor<UUID> productIdCaptor = ArgumentCaptor.forClass(UUID.class);
-        when(mockProductService.getProduct(any()))
+        when(mockShoppingStoreClient.getProductById(any()))
                 .thenReturn(getTestProductDtoA())
                 .thenThrow(new ProductNotFoundException(TEST_EXCEPTION_MESSAGE));
 
@@ -119,20 +119,20 @@ class PaymentServiceImplTest {
                 NotEnoughInfoInOrderToCalculateException.class,
                 () -> service.calculateProductCost(getTestOrderDtoWithoutCosts()));
 
-        verify(mockProductService, times(2)).getProduct(productIdCaptor.capture());
+        verify(mockShoppingStoreClient, times(2)).getProductById(productIdCaptor.capture());
         assertThat(productIdCaptor.getAllValues(), containsInAnyOrder(PRODUCT_ID_A, PRODUCT_ID_B));
         assertThat(exception.getUserMessage(), equalTo("Price not found for product " + productIdCaptor.getValue()));
     }
 
     @Test
     void whenCalculateProductCostAndAllProductsExist_ThenReturnCorrectTotalProductCost() {
-        when(mockProductService.getProduct(PRODUCT_ID_A)).thenReturn(getTestProductDtoA());
-        when(mockProductService.getProduct(PRODUCT_ID_B)).thenReturn(getTestProductDtoB());
+        when(mockShoppingStoreClient.getProductById(PRODUCT_ID_A)).thenReturn(getTestProductDtoA());
+        when(mockShoppingStoreClient.getProductById(PRODUCT_ID_B)).thenReturn(getTestProductDtoB());
 
         final BigDecimal productCost = service.calculateProductCost(getTestOrderDtoWithoutCosts());
 
-        verify(mockProductService).getProduct(PRODUCT_ID_A);
-        verify(mockProductService).getProduct(PRODUCT_ID_B);
+        verify(mockShoppingStoreClient).getProductById(PRODUCT_ID_A);
+        verify(mockShoppingStoreClient).getProductById(PRODUCT_ID_B);
         assertThat(productCost, equalTo(PRODUCT_COST));
     }
 
@@ -183,13 +183,13 @@ class PaymentServiceImplTest {
     void whenConfirmPaymentAndPaymentForOrderExist_ThenUpdatePaymentStateAndUpdateOrderStateAndLog() throws Exception {
         when(mockRepository.findByOrderId(any())).thenReturn(Optional.of(getTestPayment()));
         when(mockRepository.save(any())).thenReturn(getTestPaymentSuccessful());
-        when(mockOrderService.paymentSuccess(any())).thenReturn(getTestOrderDtoPaid());
+        when(mockOrderClient.confirmPayment(any())).thenReturn(getTestOrderDtoPaid());
 
         service.confirmPayment(ORDER_ID_A);
 
         inOrder.verify(mockRepository).findByOrderId(ORDER_ID_A);
         inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestPaymentSuccessful())));
-        inOrder.verify(mockOrderService).paymentSuccess(ORDER_ID_A);
+        inOrder.verify(mockOrderClient).confirmPayment(ORDER_ID_A);
         assertLogs(logListener.getEvents(), "confirm_payment.json", getClass());
     }
 
@@ -209,13 +209,13 @@ class PaymentServiceImplTest {
             throws Exception {
         when(mockRepository.findByOrderId(any())).thenReturn(Optional.of(getTestPayment()));
         when(mockRepository.save(any())).thenReturn(getTestPaymentFailed());
-        when(mockOrderService.paymentFailed(any())).thenReturn(getTestOrderDtoNotPaid());
+        when(mockOrderClient.setPaymentFailed(any())).thenReturn(getTestOrderDtoNotPaid());
 
         service.signalPaymentFailure(ORDER_ID_A);
 
         inOrder.verify(mockRepository).findByOrderId(ORDER_ID_A);
         inOrder.verify(mockRepository).save(argThat(samePropertyValuesAs(getTestPaymentFailed())));
-        inOrder.verify(mockOrderService).paymentFailed(ORDER_ID_A);
+        inOrder.verify(mockOrderClient).setPaymentFailed(ORDER_ID_A);
         assertLogs(logListener.getEvents(), "signal_payment_failure.json", getClass());
     }
 }

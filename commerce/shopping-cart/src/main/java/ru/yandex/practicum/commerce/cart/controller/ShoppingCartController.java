@@ -1,22 +1,16 @@
 package ru.yandex.practicum.commerce.cart.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.commerce.cart.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.commerce.cart.model.ShoppingCart;
 import ru.yandex.practicum.commerce.cart.service.ShoppingCartService;
+import ru.yandex.practicum.commerce.client.ShoppingCartOperations;
+import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
 import ru.yandex.practicum.commerce.dto.warehouse.ChangeProductQuantityRequest;
-import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
 
 import java.util.Map;
 import java.util.Set;
@@ -26,13 +20,13 @@ import java.util.UUID;
 @RequestMapping("/api/v1/shopping-cart")
 @RequiredArgsConstructor
 @Slf4j
-public class ShoppingCartController {
+public class ShoppingCartController implements ShoppingCartOperations {
 
     private final ShoppingCartService shoppingCartService;
     private final ShoppingCartMapper shoppingCartMapper;
 
-    @GetMapping
-    public ShoppingCartDto getShoppingCartByUsername(@RequestParam final String username) {
+    @Override
+    public ShoppingCartDto getShoppingCartByUsername(final String username) {
         log.info("Received request for shopping cart by username: username = {}", username);
         final ShoppingCart shoppingCart = shoppingCartService.getShoppingCartByUsername(username);
         final ShoppingCartDto dto = shoppingCartMapper.mapToDto(shoppingCart);
@@ -42,9 +36,8 @@ public class ShoppingCartController {
         return dto;
     }
 
-    @PutMapping
-    public ShoppingCartDto addProductsToShoppingCart(@RequestParam final String username,
-            @RequestBody final Map<UUID, Long> products) {
+    @Override
+    public ShoppingCartDto addProductsToShoppingCart(final String username, final Map<UUID, Long> products) {
         log.info("Received request to put products to shopping cart: username = {}", username);
         final ShoppingCart shoppingCart = shoppingCartService.addProductsToShoppingCart(username, products);
         final ShoppingCartDto dto = shoppingCartMapper.mapToDto(shoppingCart);
@@ -54,16 +47,15 @@ public class ShoppingCartController {
         return dto;
     }
 
-    @DeleteMapping
-    public void deactivateShoppingCartByUsername(@RequestParam final String username) {
+    @Override
+    public void deactivateShoppingCartByUsername(final String username) {
         log.info("Received request to deactivate shopping cart: username = {}", username);
         shoppingCartService.deactivateShoppingCart(username);
         log.info("Responded with 200 OK to deactivate shopping cart request: username = {}", username);
     }
 
-    @PostMapping("/remove")
-    public ShoppingCartDto deleteProductsFromShoppingCart(@RequestParam final String username,
-            @RequestBody final Set<UUID> products) {
+    @Override
+    public ShoppingCartDto deleteProductsFromShoppingCart(final String username, final Set<UUID> products) {
         log.info("Received request to delete products from shopping cart: username = {}", username);
         final ShoppingCart shoppingCart = shoppingCartService.deleteProductsFromShoppingCart(username, products);
         final ShoppingCartDto dto = shoppingCartMapper.mapToDto(shoppingCart);
@@ -73,9 +65,8 @@ public class ShoppingCartController {
         return dto;
     }
 
-    @PostMapping("/change-quantity")
-    public ShoppingCartDto changeProductQuantity(@RequestParam final String username,
-            @RequestBody @Valid final ChangeProductQuantityRequest request) {
+    @Override
+    public ShoppingCartDto changeProductQuantity(final String username, final ChangeProductQuantityRequest request) {
         log.info("Received request to change product quantity in shopping cart: username = {}, productId = {}",
                 username, request.getProductId());
         log.debug("Change product quantity request = {}", request);
@@ -87,8 +78,8 @@ public class ShoppingCartController {
         return dto;
     }
 
-    @PostMapping("/booking")
-    public BookedProductsDto bookProductsInWarehouse(@RequestParam final String username) {
+    @Override
+    public BookedProductsDto bookProductsInWarehouse(final String username) {
         log.info("Received request to book products in warehouse: username = {}", username);
         final BookedProductsDto dto = shoppingCartService.bookProductsInWarehouse(username);
         log.info("Responded with booking parameters: username = {}, deliveryVolume = {}, deliveryWeight = {}, fragile "

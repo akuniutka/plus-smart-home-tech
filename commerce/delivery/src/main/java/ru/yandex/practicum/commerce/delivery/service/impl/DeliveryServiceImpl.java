@@ -7,8 +7,8 @@ import ru.yandex.practicum.commerce.delivery.model.Address;
 import ru.yandex.practicum.commerce.delivery.model.Delivery;
 import ru.yandex.practicum.commerce.delivery.repository.DeliveryRepository;
 import ru.yandex.practicum.commerce.delivery.service.DeliveryService;
-import ru.yandex.practicum.commerce.delivery.service.OrderService;
-import ru.yandex.practicum.commerce.delivery.service.WarehouseService;
+import ru.yandex.practicum.commerce.delivery.client.OrderClient;
+import ru.yandex.practicum.commerce.delivery.client.WarehouseClient;
 import ru.yandex.practicum.commerce.delivery.util.UUIDGenerator;
 import ru.yandex.practicum.commerce.dto.delivery.DeliveryState;
 import ru.yandex.practicum.commerce.dto.delivery.ShippedToDeliveryRequest;
@@ -33,8 +33,8 @@ public class DeliveryServiceImpl implements DeliveryService {
     private static final BigDecimal VOLUME_COEFFICIENT = BigDecimal.valueOf(20L, COST_SCALE);
     private static final BigDecimal DESTINATION_COEFFICIENT = BigDecimal.valueOf(20L, COST_SCALE);
 
-    private final OrderService orderService;
-    private final WarehouseService warehouseService;
+    private final OrderClient orderClient;
+    private final WarehouseClient warehouseClient;
     private final DeliveryRepository repository;
     private final UUIDGenerator uuidGenerator;
 
@@ -55,8 +55,8 @@ public class DeliveryServiceImpl implements DeliveryService {
         delivery.setDeliveryState(DeliveryState.IN_PROGRESS);
         delivery = repository.save(delivery);
         final ShippedToDeliveryRequest request = createShippedToDeliveryRequest(orderId, delivery.getDeliveryId());
-        warehouseService.shippedToDelivery(request);
-        orderService.assembled(orderId);
+        warehouseClient.shippedToDelivery(request);
+        orderClient.confirmAssembly(orderId);
         log.info("Picked delivery: orderId = {}, deliveryId = {}", orderId, delivery.getDeliveryId());
         log.debug("Picked delivery = {}", delivery);
     }
@@ -66,7 +66,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery delivery = getDeliveryByOrderId(orderId);
         delivery.setDeliveryState(DeliveryState.DELIVERED);
         delivery = repository.save(delivery);
-        orderService.delivery(orderId);
+        orderClient.confirmDelivery(orderId);
         log.info("Delivered order: orderId = {}, deliveryId = {}", orderId, delivery.getDeliveryId());
         log.debug("Successful delivery = {}", delivery);
     }
@@ -76,7 +76,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery delivery = getDeliveryByOrderId(orderId);
         delivery.setDeliveryState(DeliveryState.FAILED);
         delivery = repository.save(delivery);
-        orderService.deliveryFailed(orderId);
+        orderClient.setDeliveryFailed(orderId);
         log.info("Failed to deliver order: orderId = {}, deliveryId = {}", orderId, delivery.getDeliveryId());
         log.debug("Failed delivery = {}", delivery);
     }

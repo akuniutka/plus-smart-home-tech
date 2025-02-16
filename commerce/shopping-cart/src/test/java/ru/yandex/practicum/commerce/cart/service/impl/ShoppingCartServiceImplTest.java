@@ -9,7 +9,7 @@ import ru.yandex.practicum.commerce.cart.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.commerce.cart.model.ShoppingCart;
 import ru.yandex.practicum.commerce.cart.repository.ShoppingCartRepository;
 import ru.yandex.practicum.commerce.cart.service.ShoppingCartService;
-import ru.yandex.practicum.commerce.cart.service.WarehouseService;
+import ru.yandex.practicum.commerce.cart.client.WarehouseClient;
 import ru.yandex.practicum.commerce.cart.util.LogListener;
 import ru.yandex.practicum.commerce.cart.util.UUIDGenerator;
 import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
@@ -49,7 +49,7 @@ import static ru.yandex.practicum.commerce.cart.util.TestUtils.assertLogs;
 class ShoppingCartServiceImplTest {
 
     private static final LogListener logListener = new LogListener(ShoppingCartServiceImpl.class);
-    private WarehouseService mockWarehouseService;
+    private WarehouseClient mockWarehouseClient;
     private ShoppingCartMapper mockMapper;
     private ShoppingCartRepository mockRepository;
     private UUIDGenerator mockUUIDGenerator;
@@ -59,20 +59,20 @@ class ShoppingCartServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        mockWarehouseService = Mockito.mock(WarehouseService.class);
+        mockWarehouseClient = Mockito.mock(WarehouseClient.class);
         mockMapper = Mockito.mock(ShoppingCartMapper.class);
         mockRepository = Mockito.mock(ShoppingCartRepository.class);
         mockUUIDGenerator = Mockito.mock(UUIDGenerator.class);
-        inOrder = Mockito.inOrder(mockWarehouseService, mockMapper, mockRepository, mockUUIDGenerator);
+        inOrder = Mockito.inOrder(mockWarehouseClient, mockMapper, mockRepository, mockUUIDGenerator);
         logListener.startListen();
         logListener.reset();
-        service = new ShoppingCartServiceImpl(mockWarehouseService, mockMapper, mockRepository, mockUUIDGenerator);
+        service = new ShoppingCartServiceImpl(mockWarehouseClient, mockMapper, mockRepository, mockUUIDGenerator);
     }
 
     @AfterEach
     void tearDown() {
         logListener.stopListen();
-        Mockito.verifyNoMoreInteractions(mockWarehouseService, mockMapper, mockRepository, mockUUIDGenerator);
+        Mockito.verifyNoMoreInteractions(mockWarehouseClient, mockMapper, mockRepository, mockUUIDGenerator);
     }
 
     @Test
@@ -368,16 +368,16 @@ class ShoppingCartServiceImplTest {
     }
 
     @Test
-    void whenBookProductsInWarehouse_ThenMapToDtoAndPassToWarehouseServiceAndReturnResponseAndLog() throws Exception {
+    void whenBookProductsInWarehouse_ThenMapToDtoAndPassToWarehouseClientAndReturnResponseAndLog() throws Exception {
         when(mockRepository.findByUsername(any())).thenReturn(Optional.of(getTestFullShoppingCart()));
         when(mockMapper.mapToDto(any())).thenReturn(getTestFullShoppingCartDto());
-        when(mockWarehouseService.checkProductsAvailability(any())).thenReturn(getTestBookedProductsDto());
+        when(mockWarehouseClient.checkProductsAvailability(any())).thenReturn(getTestBookedProductsDto());
 
         final BookedProductsDto dto = service.bookProductsInWarehouse(USERNAME_A);
 
         inOrder.verify(mockRepository).findByUsername(USERNAME_A);
         inOrder.verify(mockMapper).mapToDto(argThat(samePropertyValuesAs(getTestFullShoppingCart())));
-        inOrder.verify(mockWarehouseService).checkProductsAvailability(getTestFullShoppingCartDto());
+        inOrder.verify(mockWarehouseClient).checkProductsAvailability(getTestFullShoppingCartDto());
         assertThat(dto, equalTo(getTestBookedProductsDto()));
         assertLogs(logListener.getEvents(), "book_products.json", getClass());
     }
