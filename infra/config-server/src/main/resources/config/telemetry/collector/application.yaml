@@ -1,12 +1,14 @@
 grpc:
   server:
     port: 0
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      value-serializer: ru.yandex.practicum.kafka.telemetry.serialization.GeneralAvroSerializer
 kafka:
   topics:
     hubs: telemetry.hubs.v1
     sensors: telemetry.sensors.v1
-  sender:
-    properties:
-      bootstrap.servers: localhost:9092
 logging.level:
   org.apache.kafka: WARN

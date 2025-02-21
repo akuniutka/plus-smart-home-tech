@@ -1,10 +1,14 @@
 package ru.yandex.practicum.telemetry.collector.service.impl;
 
+import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import ru.yandex.practicum.kafka.telemetry.client.KafkaSender;
+import org.mockito.MockitoAnnotations;
+import org.springframework.kafka.core.KafkaTemplate;
 import ru.yandex.practicum.kafka.telemetry.event.LightSensorAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.telemetry.collector.configuration.KafkaTopics;
@@ -22,29 +26,35 @@ class SensorEventServiceImplTest {
     private static final String SENSOR_ID = "test.light.sensor.1";
     private static final int LINK_QUALITY = 95;
     private static final int LUMINOSITY = 60;
-    private KafkaSender kafkaSender;
+    private AutoCloseable openMocks;
+
+    @Mock
+    private KafkaTemplate<String, SpecificRecordBase> mockKafkaTemplate;
+
     private SensorEventService service;
 
     @BeforeEach
     void setUp() {
+        openMocks = MockitoAnnotations.openMocks(this);
+        final KafkaTopics kafkaTopics = new KafkaTopics(null, SENSOR_EVENT_TOPIC);
         logListener.startListen();
         logListener.reset();
-        final KafkaTopics kafkaTopics = new KafkaTopics(null, SENSOR_EVENT_TOPIC);
-        kafkaSender = Mockito.mock(KafkaSender.class);
-        service = new SensorEventServiceImpl(kafkaTopics, kafkaSender);
+        service = new SensorEventServiceImpl(kafkaTopics, mockKafkaTemplate);
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown() throws Exception {
         logListener.stopListen();
-        Mockito.verifyNoMoreInteractions(kafkaSender);
+        Mockito.verifyNoMoreInteractions(mockKafkaTemplate);
+        openMocks.close();
     }
 
     @Test
     void whenAddToProcessingQueue_ThenCallKafkaSenderWithTopicHubTimestampEventAndLog() throws Exception {
+
         service.addToProcessingQueue(getTestSensorEventAvro());
 
-        Mockito.verify(kafkaSender).send(SENSOR_EVENT_TOPIC, HUB_ID, TIMESTAMP, getTestSensorEventAvro());
+        Mockito.verify(mockKafkaTemplate).send(getTestProducerRecord());
         assertLogs(logListener.getEvents(), "add_to_processing_queue.json", getClass());
     }
 
@@ -58,5 +68,15 @@ class SensorEventServiceImplTest {
                         .setLuminosity(LUMINOSITY)
                         .build())
                 .build();
+    }
+
+    private ProducerRecord<String, SpecificRecordBase> getTestProducerRecord() {
+        return new ProducerRecord<>(
+                SENSOR_EVENT_TOPIC,
+                null,
+                TIMESTAMP.toEpochMilli(),
+                HUB_ID,
+                getTestSensorEventAvro()
+        );
     }
 }

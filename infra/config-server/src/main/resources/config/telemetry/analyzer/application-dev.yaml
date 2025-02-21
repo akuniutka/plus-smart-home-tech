@@ -8,5 +8,13 @@ spring:
         format_sql: false
   sql.init.mode: always
 logging.level:
-  ru.yandex.practicum.telemetry.analyzer.handler.snapshot: INFO
+  ru:
+    yandex:
+      practicum:
+        telemetry:
+          analyzer:
+            handler:
+              snapshot: INFO
+            dispatcher:
+              impl: INFO
   org.hibernate.orm.jdbc.bind: INFO
