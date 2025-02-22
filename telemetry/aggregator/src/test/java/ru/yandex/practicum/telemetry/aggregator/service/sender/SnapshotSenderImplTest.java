@@ -1,61 +1,77 @@
 package ru.yandex.practicum.telemetry.aggregator.service.sender;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import ru.yandex.practicum.kafka.telemetry.client.KafkaSender;
+import org.mockito.MockitoAnnotations;
+import org.springframework.kafka.core.KafkaTemplate;
 import ru.yandex.practicum.kafka.telemetry.event.SensorSnapshotAvro;
 import ru.yandex.practicum.telemetry.aggregator.configuration.KafkaTopics;
 import ru.yandex.practicum.telemetry.aggregator.service.SnapshotSender;
 import ru.yandex.practicum.telemetry.aggregator.util.LogListener;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.mockito.ArgumentMatchers.eq;
+import static ru.yandex.practicum.telemetry.aggregator.util.TestModels.ANOTHER_SENSOR_ID;
 import static ru.yandex.practicum.telemetry.aggregator.util.TestModels.HUB_ID;
-import static ru.yandex.practicum.telemetry.aggregator.util.TestModels.TIMESTAMP;
+import static ru.yandex.practicum.telemetry.aggregator.util.TestModels.NEW_TEMPERATURE_C;
+import static ru.yandex.practicum.telemetry.aggregator.util.TestModels.NEW_TIMESTAMP;
+import static ru.yandex.practicum.telemetry.aggregator.util.TestModels.getTestEvent;
+import static ru.yandex.practicum.telemetry.aggregator.util.TestModels.getTestSnapshot;
 import static ru.yandex.practicum.telemetry.aggregator.util.TestUtils.assertLogs;
 
 class SnapshotSenderImplTest {
 
     private static final LogListener logListener = new LogListener(SnapshotSenderImpl.class);
     private static final String SNAPSHOT_TOPIC = "test.snapshots";
-    private KafkaSender mockKafkaSender;
-    private SensorSnapshotAvro mockSnapshot;
-    private ArgumentCaptor<SensorSnapshotAvro> snapshotCaptor;
+    private AutoCloseable openMocks;
+
+    @Mock
+    private KafkaTemplate<String, SensorSnapshotAvro> mockKafkaTemplate;
 
     private SnapshotSender snapshotSender;
 
     @BeforeEach
     void setUp() {
+        openMocks = MockitoAnnotations.openMocks(this);
         final KafkaTopics kafkaTopics = new KafkaTopics(SNAPSHOT_TOPIC);
-        mockKafkaSender = Mockito.mock(KafkaSender.class);
-        mockSnapshot = Mockito.mock(SensorSnapshotAvro.class);
-        snapshotCaptor = ArgumentCaptor.forClass(SensorSnapshotAvro.class);
         logListener.startListen();
         logListener.reset();
-        snapshotSender = new SnapshotSenderImpl(kafkaTopics, mockKafkaSender);
+        snapshotSender = new SnapshotSenderImpl(kafkaTopics, mockKafkaTemplate);
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown() throws Exception {
         logListener.stopListen();
-        Mockito.verifyNoMoreInteractions(mockKafkaSender, mockSnapshot);
+        Mockito.verifyNoMoreInteractions(mockKafkaTemplate);
+        openMocks.close();
     }
 
     @Test
     void whenSend_ThenPassSnapshotWithParametersAndLog() throws Exception {
-        Mockito.when(mockSnapshot.getHubId()).thenReturn(HUB_ID);
-        Mockito.when(mockSnapshot.getTimestamp()).thenReturn(TIMESTAMP);
 
-        snapshotSender.send(mockSnapshot);
+        snapshotSender.send(getTestSensorSnapshot());
 
-        Mockito.verify(mockSnapshot, Mockito.times(2)).getHubId();
-        Mockito.verify(mockSnapshot, Mockito.times(2)).getTimestamp();
-        Mockito.verify(mockKafkaSender).send(eq(SNAPSHOT_TOPIC), eq(HUB_ID), eq(TIMESTAMP), snapshotCaptor.capture());
-        assertThat(snapshotCaptor.getValue(), sameInstance(mockSnapshot));
+        Mockito.verify(mockKafkaTemplate).send(getTestProducerRecord());
         assertLogs(logListener.getEvents(), "send.json", getClass());
+    }
+
+    private SensorSnapshotAvro getTestSensorSnapshot() {
+        return getTestSnapshot(
+                HUB_ID,
+                getTestEvent(NEW_TIMESTAMP, NEW_TEMPERATURE_C),
+                getTestEvent(ANOTHER_SENSOR_ID)
+        );
+    }
+
+    private ProducerRecord<String, SensorSnapshotAvro> getTestProducerRecord() {
+        return new ProducerRecord<>(
+                SNAPSHOT_TOPIC,
+                null,
+                NEW_TIMESTAMP.toEpochMilli(),
+                HUB_ID,
+                getTestSensorSnapshot()
+        );
     }
 }
