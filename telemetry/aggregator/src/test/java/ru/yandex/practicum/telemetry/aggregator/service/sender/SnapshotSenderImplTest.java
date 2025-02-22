@@ -35,7 +35,7 @@ class SnapshotSenderImplTest {
     @BeforeEach
     void setUp() {
         openMocks = MockitoAnnotations.openMocks(this);
-        final KafkaTopics kafkaTopics = new KafkaTopics(SNAPSHOT_TOPIC);
+        final KafkaTopics kafkaTopics = new KafkaTopics(SNAPSHOT_TOPIC, null);
         logListener.startListen();
         logListener.reset();
         snapshotSender = new SnapshotSenderImpl(kafkaTopics, mockKafkaTemplate);

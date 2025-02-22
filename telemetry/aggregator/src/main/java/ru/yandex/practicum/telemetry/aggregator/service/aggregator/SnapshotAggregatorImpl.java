@@ -2,6 +2,7 @@ package ru.yandex.practicum.telemetry.aggregator.service.aggregator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorSnapshotAvro;
@@ -29,6 +30,7 @@ public class SnapshotAggregatorImpl implements SnapshotAggregator {
     }
 
     @Override
+    @KafkaListener(topics = "${kafka.topics.sensors}")
     public void aggregate(final SensorEventAvro event) {
         log.info("Received event: hubId = {}, sensorId = {}, timestamp = {}", event.getHubId(), event.getId(),
                 event.getTimestamp());

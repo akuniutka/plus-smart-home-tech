@@ -1,20 +1,18 @@
 spring:
   main.banner-mode: OFF
   cloud.config.enabled: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      value-serializer: ru.yandex.practicum.kafka.telemetry.serialization.GeneralAvroSerializer
+    consumer:
+      value-deserializer: ru.yandex.practicum.telemetry.aggregator.serialization.SensorEventDeserializer
+      group-id: telemetry.aggregators
+      auto-offset-reset: earliest
 kafka:
   topics:
     snapshots: telemetry.snapshots.v1
-  event-listener:
-    topics:
-      - telemetry.sensors.v1
-    properties:
-      bootstrap.servers: localhost:9092
-      group.id: telemetry.aggregators
-      auto.offset.reset: earliest
-      enable.auto.commit: false
-  sender:
-    properties:
-      bootstrap.servers: localhost:9092
+    sensors: telemetry.sensors.v1
 eureka.client.enabled: false
 logging.level:
   org.apache.kafka: WARN
