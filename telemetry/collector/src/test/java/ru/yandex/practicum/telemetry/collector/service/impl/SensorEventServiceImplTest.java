@@ -1,6 +1,5 @@
 package ru.yandex.practicum.telemetry.collector.service.impl;
 
-import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +28,7 @@ class SensorEventServiceImplTest {
     private AutoCloseable openMocks;
 
     @Mock
-    private KafkaTemplate<String, SpecificRecordBase> mockKafkaTemplate;
+    private KafkaTemplate<String, SensorEventAvro> mockKafkaTemplate;
 
     private SensorEventService service;
 
@@ -70,7 +69,7 @@ class SensorEventServiceImplTest {
                 .build();
     }
 
-    private ProducerRecord<String, SpecificRecordBase> getTestProducerRecord() {
+    private ProducerRecord<String, SensorEventAvro> getTestProducerRecord() {
         return new ProducerRecord<>(
                 SENSOR_EVENT_TOPIC,
                 null,

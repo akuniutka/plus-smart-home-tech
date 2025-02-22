@@ -1,6 +1,5 @@
 package ru.yandex.practicum.telemetry.collector.service.impl;
 
-import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +15,11 @@ public class HubEventServiceImpl implements HubEventService {
     private static final Logger log = LoggerFactory.getLogger(HubEventServiceImpl.class);
     private static final Integer PARTITION_NOT_SET = null;
     private final String topic;
-    private final KafkaTemplate<String, SpecificRecordBase> kafkaTemplate;
+    private final KafkaTemplate<String, HubEventAvro> kafkaTemplate;
 
     public HubEventServiceImpl(
             final KafkaTopics kafkaTopics,
-            final KafkaTemplate<String, SpecificRecordBase> kafkaTemplate
+            final KafkaTemplate<String, HubEventAvro> kafkaTemplate
     ) {
         this.topic = kafkaTopics.hubs();
         this.kafkaTemplate = kafkaTemplate;
@@ -28,7 +27,7 @@ public class HubEventServiceImpl implements HubEventService {
 
     @Override
     public void addToProcessingQueue(final HubEventAvro event) {
-        final ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
+        final ProducerRecord<String, HubEventAvro> record = new ProducerRecord<>(
                 topic,
                 PARTITION_NOT_SET,
                 event.getTimestamp().toEpochMilli(),
