@@ -4,12 +4,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.utility.DockerImageName;
 import ru.yandex.practicum.grpc.telemetry.event.ActionTypeProto;
 import ru.yandex.practicum.grpc.telemetry.event.ConditionOperationProto;
 import ru.yandex.practicum.grpc.telemetry.event.ConditionTypeProto;
@@ -22,11 +16,11 @@ import ru.yandex.practicum.telemetry.collector.mapper.ConditionMapper;
 import ru.yandex.practicum.telemetry.collector.mapper.ConditionMapperFactory;
 import ru.yandex.practicum.telemetry.collector.mapper.ConditionTypeMapper;
 import ru.yandex.practicum.telemetry.collector.mapper.DeviceTypeMapper;
+import ru.yandex.practicum.telemetry.collector.mapper.HubEventMapper;
 import ru.yandex.practicum.telemetry.collector.mapper.HubEventMapperFactory;
 import ru.yandex.practicum.telemetry.collector.mapper.OperationMapper;
-import ru.yandex.practicum.telemetry.collector.mapper.SensorEventMapperFactory;
-import ru.yandex.practicum.telemetry.collector.mapper.HubEventMapper;
 import ru.yandex.practicum.telemetry.collector.mapper.SensorEventMapper;
+import ru.yandex.practicum.telemetry.collector.mapper.SensorEventMapperFactory;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -34,11 +28,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @SpringBootTest
-@Testcontainers
 public class CollectorAppIT {
-
-    @Container
-    static final KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.2"));
 
     @Autowired
     private HubEventMapperFactory hubEventMapperFactory;
@@ -60,11 +50,6 @@ public class CollectorAppIT {
 
     @Autowired
     private ActionTypeMapper actionTypeMapper;
-
-    @DynamicPropertySource
-    static void overrideProperties(final DynamicPropertyRegistry registry) {
-        registry.add("kafka.sender.properties.bootstrap.servers", kafka::getBootstrapServers);
-    }
 
     @ParameterizedTest
     @MethodSource("ru.yandex.practicum.telemetry.collector.util.TestModels#getPossibleHubEventPayloadTypes")
